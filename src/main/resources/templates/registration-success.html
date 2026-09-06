@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Account created · Project 11</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="page">
+    <header class="site-header"><a class="brand" th:href="@{/}"><span class="brand-mark" aria-hidden="true">11</span> Project 11</a></header>
+    <main class="message-layout">
+        <section class="form-card message-card" aria-labelledby="success-title">
+            <span class="success-icon" aria-hidden="true">✓</span>
+            <span class="eyebrow">You’re all set</span>
+            <h1 id="success-title">Account created.</h1>
+            <p>Your registration has been saved. Thanks for being here.</p>
+            <p class="card-copy">You can now sign in with your email address and password.</p>
+            <a class="button" th:href="@{/signin}">Sign in <span aria-hidden="true">↗</span></a>
+        </section>
+    </main>
+    <footer class="site-footer"><span>Project 11</span><span>Good things start small.</span></footer>
+</div>
+</body>
+</html>

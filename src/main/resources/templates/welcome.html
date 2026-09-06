@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Welcome · Project 11</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="page">
+    <header class="site-header">
+        <a class="brand" th:href="@{/}"><span class="brand-mark" aria-hidden="true">11</span> Project 11</a>
+        <form th:action="@{/logout}" method="post">
+            <button class="header-link" type="submit">Sign out <span aria-hidden="true">↗</span></button>
+        </form>
+    </header>
+    <main class="welcome-layout">
+        <h1>Welcome.</h1>
+        <!-- Add your application's content here. -->
+    </main>
+</div>
+</body>
+</html>
