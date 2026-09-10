@@ -155,7 +155,7 @@ sudo journalctl -u project11 -n 100 --no-pager
 ```
 
 Keep `/var/lib/project11` intact. Rolling back code may also require a compatible database backup after schema changes.
-`CREATE TABLE IF NOT EXISTS` does not migrate an existing schema; apply deliberate migrations before depending on new columns.
+Hibernate uses `ddl-auto=update` to apply supported schema changes at startup. Back up before upgrading: renames, data transformations, and changes to existing constraints may require deliberate migrations.
 
 ## Access and troubleshooting
 

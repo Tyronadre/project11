@@ -23,7 +23,10 @@ public class SecurityConfig {
                 .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                 .requestMatchers(HttpMethod.GET, "/", "/signin", "/register", "/register/success", "/css/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/register").permitAll()
-                .requestMatchers(HttpMethod.GET, "/welcome").authenticated()
+                .requestMatchers(HttpMethod.GET, "/welcome", "/calendar").authenticated()
+                // DashboardService re-checks the persisted admin flag for every edit.
+                // This also makes promotions/demotions effective without a new login.
+                .requestMatchers(HttpMethod.POST, "/users/*/tally", "/users/*/admin").authenticated()
                 .anyRequest().denyAll())
                 .formLogin(form -> form
                         .loginPage("/signin")

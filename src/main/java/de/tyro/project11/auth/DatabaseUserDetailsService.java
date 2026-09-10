@@ -27,9 +27,10 @@ public class DatabaseUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Invalid email or password."));
         // Spring Security verifies the submitted password with our BCrypt encoder.
         // Keep the JPA entity out of the HTTP session.
+        String role = user.isAdmin() ? "ADMIN" : "USER";
         return User.withUsername(user.getEmail())
                 .password(user.getPasswordHash())
-                .roles("USER")
+                .roles(role)
                 .build();
     }
 }

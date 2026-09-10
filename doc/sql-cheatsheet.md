@@ -59,7 +59,7 @@ ORDER BY ordinal_position;
 H2 normally stores unquoted identifiers in uppercase in metadata. SQL keywords and unquoted table/column identifiers are case-insensitive.
 String data comparisons are a separate matter; the app lowercases email before storage.
 
-Application schema (`src/main/resources/schema.sql`):
+Equivalent SQL for the schema generated from `AppUser` (for reference; do not maintain a separate schema script):
 
 ```sql
 CREATE TABLE IF NOT EXISTS app_users (
@@ -68,6 +68,9 @@ CREATE TABLE IF NOT EXISTS app_users (
     email VARCHAR(254) NOT NULL,
     password_hash VARCHAR(100) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_admin BOOLEAN NOT NULL DEFAULT FALSE,
+    tally_count INTEGER NOT NULL DEFAULT 0,
+    CONSTRAINT ck_app_users_tally_nonnegative CHECK (tally_count >= 0),
     CONSTRAINT uk_app_users_email UNIQUE (email)
 );
 ```
@@ -312,8 +315,8 @@ The JPA service catches `DataIntegrityViolationException`, recognizes the named 
 
 ## Schema changes
 
-Editing `schema.sql` does not update an existing table because it uses CREATE IF NOT EXISTS.
-Back up first, then apply an explicit change and update the schema definition for new installations too.
+Edit entity mappings and restart: Hibernate uses `ddl-auto=update` to create missing tables and apply supported schema changes.
+Back up first. Automatic updates do not infer renames or data transformations and may not alter existing constraints. Use a deliberate migration for those changes, and keep entity mappings consistent.
 
 Practice example:
 
@@ -325,7 +328,7 @@ ALTER TABLE practice_notes ALTER COLUMN description SET NOT NULL;
 ```
 
 For a real application, keep numbered migration files and record which have run, preferably using a migration tool such as Flyway or Liquibase.
-Do not mix multiple competing schema managers. This starter uses `schema.sql` to create tables and Hibernate `ddl-auto=validate` to check entity mappings; Hibernate does not generate or update the schema.
+Do not mix multiple competing schema managers. This learning project uses Hibernate `ddl-auto=update` and disables SQL initialization scripts. If adopting Flyway or Liquibase, switch Hibernate to `ddl-auto=validate` so migrations own schema changes.
 When switching to PostgreSQL/MariaDB, add its JDBC driver, configure its URL/credentials, and adapt/test identity, timestamp, and migration SQL.
 Changing DB_URL alone does not copy existing H2 data into the new database.
 

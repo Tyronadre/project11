@@ -5,9 +5,11 @@ The examples are local and self-contained; reference links are optional reading 
 
 ## Find what you need
 
+- **Understand the planned activity tracker:** [Project outline and implementation order](project-outline.md).
 - **Start or package the app:** [Spring Boot commands](spring-boot-cheatsheet.md#everyday-commands).
 - **Understand where code belongs:** [Project map](spring-boot-cheatsheet.md#project-map).
 - **Use entities, JPA repositories, relationships, and DTOs:** [JPA essentials](spring-boot-cheatsheet.md#entities-repositories-and-transactions).
+- **Add data owned by the signed-in user:** [User-owned data and pages](user-owned-data.md).
 - **Add a page or endpoint:** [Controllers](spring-boot-cheatsheet.md#controllers-and-http).
 - **Bind a form and display errors:** [Thymeleaf forms](frontend-cheatsheet.md#forms-and-validation).
 - **Understand sign-in, sessions, and logout:** [Authentication forms](frontend-cheatsheet.md#sign-in-and-sign-out).

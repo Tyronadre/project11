@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="|${calendar.monthLabel} · Calendar · Project 11|">Calendar · Project 11</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="dashboard-body">
+<div class="page dashboard-page">
+    <header class="site-header dashboard-header">
+        <a class="brand" th:href="@{/}"><span class="brand-mark" aria-hidden="true">11</span> Project 11</a>
+        <nav class="page-nav" aria-label="Main navigation">
+            <a th:href="@{/welcome}">Marks</a>
+            <a th:href="@{/calendar}" aria-current="page">Calendar</a>
+        </nav>
+        <div class="header-account">
+            <form th:action="@{/logout}" method="post">
+                <button class="header-link" type="submit">Sign out <span aria-hidden="true">↗</span></button>
+            </form>
+        </div>
+    </header>
+
+    <main class="calendar-layout">
+        <section class="calendar-intro" aria-labelledby="calendar-title">
+            <div>
+                <p class="eyebrow"><span class="status-dot"></span> Good plans. Better company.</p>
+                <h1 id="calendar-title">The group calendar.</h1>
+                <p>What we're doing, and who's away. All in one place.</p>
+            </div>
+            <p class="timezone-note"><span aria-hidden="true">◷</span> Berlin time <span>CET / CEST</span></p>
+        </section>
+
+        <section class="calendar-panel" aria-labelledby="month-heading">
+            <div class="calendar-toolbar">
+                <div class="calendar-month-heading">
+                    <p class="section-kicker">Our shared schedule</p>
+                    <h2 id="month-heading" th:text="${calendar.monthLabel}">September 2026</h2>
+                </div>
+                <nav class="month-navigation" aria-label="Calendar months">
+                    <a class="calendar-control" th:if="${calendar.previousMonth != null}"
+                       th:href="@{/calendar(month=${calendar.previousMonth},show=${calendar.filter})}"
+                       aria-label="Previous month">←</a>
+                    <a class="calendar-control" th:href="@{/calendar(month=${calendar.todayMonth},show=${calendar.filter})}">Today</a>
+                    <a class="calendar-control" th:if="${calendar.nextMonth != null}"
+                       th:href="@{/calendar(month=${calendar.nextMonth},show=${calendar.filter})}"
+                       aria-label="Next month">→</a>
+                </nav>
+            </div>
+
+            <div class="calendar-options">
+                <nav class="calendar-filters" aria-label="Show calendar entries">
+                    <a th:href="@{/calendar(month=${calendar.month},show='ALL')}"
+                       th:attr="aria-current=${calendar.filter.name() == 'ALL' ? 'true' : null}">Everything</a>
+                    <a th:href="@{/calendar(month=${calendar.month},show='ACTIVITIES')}"
+                       th:attr="aria-current=${calendar.filter.name() == 'ACTIVITIES' ? 'true' : null}">
+                        <span class="legend-dot legend-dot--activity" aria-hidden="true"></span>Activities
+                        <span class="filter-count" th:text="${calendar.activityCount}">0</span>
+                    </a>
+                    <a th:href="@{/calendar(month=${calendar.month},show='HOLIDAYS')}"
+                       th:attr="aria-current=${calendar.filter.name() == 'HOLIDAYS' ? 'true' : null}">
+                        <span class="legend-dot legend-dot--holiday" aria-hidden="true"></span>Holidays
+                        <span class="filter-count" th:text="${calendar.holidayCount}">0</span>
+                    </a>
+                </nav>
+                <form class="month-picker" th:action="@{/calendar}" method="get">
+                    <input type="hidden" name="show" th:value="${calendar.filter}">
+                    <label for="month">Jump to</label>
+                    <input id="month" type="month" name="month" th:value="${calendar.month}"
+                           min="0001-01" max="9999-12" required>
+                    <button class="calendar-control" type="submit">Go</button>
+                </form>
+            </div>
+
+            <p class="calendar-mobile-hint">Scroll sideways for the full week, or <a href="#month-agenda">read the agenda below</a>.</p>
+            <div class="calendar-scroll" tabindex="0" role="region" aria-label="Monthly calendar, scroll horizontally on small screens">
+                <table class="month-grid">
+                    <caption class="visually-hidden" th:text="|${calendar.monthLabel}. All activity times are in Europe/Berlin. Holidays include both dates.|">Monthly calendar</caption>
+                    <thead>
+                    <tr>
+                        <th scope="col">Mon</th><th scope="col">Tue</th><th scope="col">Wed</th>
+                        <th scope="col">Thu</th><th scope="col">Fri</th><th scope="col">Sat</th><th scope="col">Sun</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="week : ${#numbers.sequence(0, calendar.days.size() / 7 - 1)}">
+                        <td class="calendar-day" th:each="day : ${calendar.days.subList(week * 7, week * 7 + 7)}"
+                            th:classappend="${(!day.inMonth ? ' calendar-day--outside' : '') + (day.today ? ' calendar-day--today' : '')}">
+                            <time class="day-number" th:datetime="${day.date}" th:attr="aria-current=${day.today ? 'date' : null}">
+                                <span class="visually-hidden" th:if="${day.today}">Today, </span>
+                                <span th:text="${day.number}">1</span>
+                            </time>
+                            <div class="day-entries">
+                                <a class="calendar-entry" th:each="entry : ${day.entries}"
+                                   th:classappend="| calendar-entry--${entry.kind}|" th:href="|#${entry.key}|">
+                                    <span class="entry-kind" th:text="${entry.kind == 'activity' ? 'Activity' : 'Holiday'}">Activity</span>
+                                    <strong th:text="${entry.title}">An activity</strong>
+                                    <span class="entry-summary" th:text="${entry.summary}">18:00 · Alex</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="calendar-caption">
+                <span>Monday starts the week. Plans bring us together.</span>
+                <span>All times: Europe/Berlin</span>
+            </div>
+        </section>
+
+        <section id="month-agenda" class="month-agenda" aria-labelledby="agenda-heading">
+            <div class="section-heading">
+                <div>
+                    <p class="section-kicker">The details</p>
+                    <h2 id="agenda-heading">This month's agenda</h2>
+                </div>
+                <p class="agenda-count" th:text="|${calendar.entries.size()} ${calendar.entries.size() == 1 ? 'entry' : 'entries'} shown|">0 entries shown</p>
+            </div>
+            <div class="calendar-empty" th:if="${calendar.entries.isEmpty()}">
+                <span aria-hidden="true">◌</span>
+                <h3 th:text="${calendar.filter.name() == 'ACTIVITIES' ? 'No activities this month.' : (calendar.filter.name() == 'HOLIDAYS' ? 'No holidays this month.' : 'A little room for plans.')} ">A little room for plans.</h3>
+                <p>Activities and submitted holidays will appear here. Try another month or filter to explore the calendar.</p>
+            </div>
+            <div class="agenda-list" th:unless="${calendar.entries.isEmpty()}">
+                <article class="agenda-entry" th:each="entry : ${calendar.entries}" th:id="${entry.key}"
+                         th:classappend="| agenda-entry--${entry.kind}|" tabindex="-1">
+                    <div class="agenda-entry-label">
+                        <span class="entry-kind" th:text="${entry.kind == 'activity' ? 'Activity' : 'Holiday'}">Activity</span>
+                        <span th:text="${entry.owner}">Alex Morgan</span>
+                    </div>
+                    <div class="agenda-entry-content">
+                        <h3 th:text="${entry.title}">An activity</h3>
+                        <p class="agenda-period" th:text="${entry.period}">Date and time</p>
+                        <p class="agenda-location" th:if="${!entry.location.isEmpty()}"><strong>Where: </strong><span th:text="${entry.location}">Location</span></p>
+                        <p class="agenda-description" th:if="${!entry.description.isEmpty()}" th:text="${entry.description}">Description</p>
+                    </div>
+                    <a class="agenda-back" href="#month-heading" aria-label="Back to month calendar">↑</a>
+                </article>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer dashboard-footer">
+        <span>Project 11 · better together</span>
+        <span>Activities &amp; holidays · shared with every member</span>
+    </footer>
+</div>
+</body>
+</html>

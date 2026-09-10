@@ -47,7 +47,6 @@ src/main/java/de/tyro/project11/
 src/main/resources/
   application.properties                          default configuration
   application-dev.properties                      local template cache setting
-  schema.sql                                      initial database table
   templates/                                      HTML evaluated by Thymeleaf
   static/css/app.css                              CSS served as /css/app.css
 src/test/java/de/tyro/project11/
@@ -223,7 +222,7 @@ public class Note {
 }
 ```
 
-This is an extension example; add a matching `notes` table before starting with `ddl-auto=validate`.
+This is an extension example; Hibernate creates the `notes` table from the entity on startup with `ddl-auto=update`.
 Use regular non-final classes for entities. Records work well as DTOs, not as ordinary JPA entities.
 With annotations on fields, JPA uses field access; public setters for every field are unnecessary.
 Prefer methods such as `rename(...)` that represent intentional changes.
@@ -318,7 +317,7 @@ Sign-in is implemented, but add ownership/role authorization before exposing acc
 For a future Note owned by a user:
 
 ```java
-// Fields inside Note; also add an owner_id foreign key in schema.sql.
+// Fields inside Note; Hibernate generates the owner_id column and foreign key.
 @ManyToOne(fetch = FetchType.LAZY, optional = false)
 @JoinColumn(name = "owner_id", nullable = false)
 private AppUser owner;
@@ -336,10 +335,12 @@ Loading each row's relation separately can cause N+1 queries; inspect query coun
 
 ### Schema ownership and optional plain SQL
 
-`schema.sql` creates missing tables at startup with `spring.sql.init.mode=always`.
-`spring.jpa.hibernate.ddl-auto=validate` checks entity mappings against them; Hibernate does not create/drop the tables.
-`CREATE TABLE IF NOT EXISTS` does **not** migrate an existing table when you edit its definition.
-For a new entity, create its table. For changed fields, migrate existing databases and update the definition for new ones.
+`spring.jpa.hibernate.ddl-auto=update` lets Hibernate create missing tables and update the schema from entity mappings on startup.
+`spring.sql.init.mode=never` disables SQL initialization scripts; there is no separate `schema.sql` to maintain.
+For a new entity, define its columns, relationships, constraints, and indexes with annotations, then restart.
+`AppUser` uses `@ColumnDefault` for database defaults and `@Table(check = @CheckConstraint(...))` for nonnegative tallies.
+The administrator initializer promotes the oldest existing user only if no administrator exists; registration makes the first new account an administrator.
+Automatic updates do not infer column renames or data transformations, and may not update existing constraints. Back up persistent data before schema changes and use explicit migrations for those cases.
 Avoid `create` or `create-drop` with data you want to retain. A migration tool is the natural next step as schemas grow.
 
 You can still inject `JdbcClient` for a specific SQL query; the tests use it to inspect real rows independently of JPA:

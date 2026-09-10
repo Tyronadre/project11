@@ -34,10 +34,12 @@ The first build needs internet to download Gradle and dependencies. After prepar
 - A persistent database at `data/project11.mv.db`, relative to the working directory.
 - A mapped `AppUser` entity, `JpaRepository`, transactional service, and separate form object.
 - Email/password sign-in backed by the registered users, with a Spring Security session.
+- A shared, read-only calendar at `/calendar`, with month navigation, activity/holiday filters, and an agenda. Activity times and today's date always use `Europe/Berlin`; holidays include both selected dates.
 - A protected, otherwise empty `/welcome` page and CSRF-protected sign-out.
 
 Start at `/signin`, or create an account at `/register`. Registration success links to sign-in; successful sign-in opens `/welcome`.
 Email verification, password reset, and user management are future work.
+Activity creation and holiday submission will be added later through separate workflows. The calendar already reads persisted `Activity` and `Holiday` records; it shows an empty state until records exist and does not add sample data to your database.
 For public deployment, add HTTPS and registration abuse controls; see the [Pi guide](doc/raspberry-pi.md).
 
 ## Test and package
@@ -62,11 +64,14 @@ Start with [the offline guide index](doc/README.md).
 | Guide | Contents |
 | --- | --- |
 | [Spring Boot cheatsheet](doc/spring-boot-cheatsheet.md) | Entities, repositories, relationships, transactions, DTOs, controllers, validation, configuration, testing |
+| [User-owned data and pages](doc/user-owned-data.md) | Secure ownership, per-user create/list/detail pages, related records, and tests |
 | [Frontend cheatsheet](doc/frontend-cheatsheet.md) | HTML, CSS, Thymeleaf forms, validation errors, accessibility, optional JavaScript/fetch |
 | [SQL cheatsheet](doc/sql-cheatsheet.md) | Open the database, CRUD, joins, transactions, constraints, indexes, backup, schema changes |
 | [Raspberry Pi and offline setup](doc/raspberry-pi.md) | Cache dependencies, run a JAR, systemd service, backups, logs, updates |
 
 ## Configuration
+
+Hibernate creates and updates the database schema from entity annotations (`spring.jpa.hibernate.ddl-auto=update`). There is no `schema.sql` to maintain. Add an entity or mapped field and restart to apply supported changes. Back up before changing persistent data; renames, data transformations, and changes to existing constraints may require explicit migrations.
 
 | Environment variable | Default | Purpose |
 | --- | --- | --- |

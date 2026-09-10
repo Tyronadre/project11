@@ -26,8 +26,11 @@ public class RegistrationService {
     public void register(@Valid RegistrationForm form) {
         String hash = passwords.encode(form.getPassword());
         try {
+            // The very first account bootstraps administration. Existing admins can
+            // promote further accounts from the tally dashboard.
+            boolean firstAccount = users.count() == 0;
             // Flush here so a constraint error is raised inside this method, before commit.
-            users.saveAndFlush(new AppUser(form.getDisplayName(), form.getEmail(), hash));
+            users.saveAndFlush(new AppUser(form.getDisplayName(), form.getEmail(), hash, firstAccount));
         } catch (DataIntegrityViolationException exception) {
             // The database constraint also handles two simultaneous registrations.
             if (isDuplicateEmail(exception)) {

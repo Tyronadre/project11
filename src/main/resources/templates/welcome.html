@@ -3,21 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome · Project 11</title>
+    <title>The Strichliste · Project 11</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body>
-<div class="page">
-    <header class="site-header">
+<body class="dashboard-body">
+<div class="page dashboard-page">
+    <header class="site-header dashboard-header">
         <a class="brand" th:href="@{/}"><span class="brand-mark" aria-hidden="true">11</span> Project 11</a>
-        <form th:action="@{/logout}" method="post">
-            <button class="header-link" type="submit">Sign out <span aria-hidden="true">↗</span></button>
-        </form>
+        <nav class="page-nav" aria-label="Main navigation">
+            <a th:href="@{/welcome}" aria-current="page">Marks</a>
+            <a th:href="@{/calendar}">Calendar</a>
+        </nav>
+        <div class="header-account">
+            <div class="signed-in-as">
+                <span th:text="${dashboard.currentUserName}">Alex Morgan</span>
+                <span class="mini-admin-badge" th:if="${dashboard.admin}">Admin</span>
+            </div>
+            <form th:action="@{/logout}" method="post">
+                <button class="header-link" type="submit">Sign out <span aria-hidden="true">↗</span></button>
+            </form>
+        </div>
     </header>
-    <main class="welcome-layout">
-        <h1>Welcome.</h1>
-        <!-- Add your application's content here. -->
+
+    <main class="dashboard-layout">
+        <section class="tally-hero" aria-labelledby="dashboard-title">
+            <div class="hero-copy">
+                <p class="eyebrow"><span class="status-dot"></span> The shared scoreboard</p>
+                <h1 id="dashboard-title">Every mark<br>tells a story.</h1>
+                <p>One beautifully simple <em>Strichliste</em> for every member. Count the little things; celebrate the big number.</p>
+            </div>
+            <div class="hero-stats" aria-label="Scoreboard summary">
+                <div class="hero-stat hero-stat--primary">
+                    <strong th:text="${dashboard.totalTallies}">0</strong>
+                    <span>marks made</span>
+                </div>
+                <div class="hero-stat">
+                    <strong th:text="${dashboard.users.size()}">1</strong>
+                    <span th:text="${dashboard.users.size() == 1 ? 'member' : 'members'}">members</span>
+                </div>
+            </div>
+            <div class="hero-scribble" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span>
+            </div>
+        </section>
+
+        <section class="tally-section" aria-labelledby="tallies-heading">
+            <div class="section-heading">
+                <div>
+                    <p class="section-kicker">Live count</p>
+                    <h2 id="tallies-heading">The tallies</h2>
+                </div>
+                <p class="admin-note" th:if="${dashboard.admin}"><span aria-hidden="true">✦</span> Admin mode · you can edit</p>
+                <p class="admin-note admin-note--view" th:unless="${dashboard.admin}"><span aria-hidden="true">◎</span> View only</p>
+            </div>
+
+            <div class="tally-grid">
+                <article class="tally-card" th:each="user : ${dashboard.users}"
+                         th:id="|user-${user.id}|"
+                         th:classappend="${user.admin} ? ' tally-card--admin' : ''">
+                    <header class="tally-card-header">
+                        <div class="member-identity">
+                            <span class="avatar" th:text="${user.initials}">AM</span>
+                            <div>
+                                <div class="member-name-line">
+                                    <h3 th:text="${user.displayName}">Alex Morgan</h3>
+                                    <span class="you-badge" th:if="${user.id == dashboard.currentUserId}">You</span>
+                                </div>
+                                <p th:text="${user.email}">alex@example.com</p>
+                            </div>
+                        </div>
+                        <span class="admin-badge" th:if="${user.admin}"><span aria-hidden="true">✦</span> Admin</span>
+                    </header>
+
+                    <div class="tally-number-row">
+                        <strong class="tally-number" th:text="${user.tallyCount}">0</strong>
+                        <span th:text="${user.tallyCount == 1 ? 'mark' : 'marks'}">marks</span>
+                    </div>
+
+                    <div class="tally-paper" role="img" th:aria-label="|${user.tallyCount} tally marks for ${user.displayName}|">
+                        <div class="tally-groups" th:if="${user.tallyCount > 0}">
+                            <div class="tally-group tally-group--complete" th:each="ignored : ${user.fullGroups}" aria-hidden="true">
+                                <span></span><span></span><span></span><span></span><span class="tally-cross"></span>
+                            </div>
+                            <div class="tally-group tally-group--partial" th:if="${user.remainder > 0}" aria-hidden="true">
+                                <span th:each="ignored : ${#numbers.sequence(1, user.remainder)}"></span>
+                            </div>
+                            <span class="hidden-marks" th:if="${user.hiddenCount > 0}" th:text="|+${user.hiddenCount} more|">+10 more</span>
+                        </div>
+                        <div class="empty-tally" th:if="${user.tallyCount == 0}">
+                            <span class="first-mark" aria-hidden="true"></span>
+                            <span>Waiting for the first mark</span>
+                        </div>
+                    </div>
+
+                    <div class="admin-controls" th:if="${dashboard.admin}">
+                        <div class="quick-actions" aria-label="Quick tally actions">
+                            <form th:action="@{/users/{id}/tally(id=${user.id})}" method="post">
+                                <input type="hidden" name="change" value="DECREMENT">
+                                <button class="count-button" type="submit" th:disabled="${user.tallyCount == 0}" th:aria-label="|Remove one mark from ${user.displayName}|">−1</button>
+                            </form>
+                            <form th:action="@{/users/{id}/tally(id=${user.id})}" method="post">
+                                <input type="hidden" name="change" value="INCREMENT">
+                                <button class="count-button count-button--primary" type="submit" th:disabled="${user.tallyCount >= 999}" th:aria-label="|Add one mark to ${user.displayName}|">+1</button>
+                            </form>
+                            <form th:action="@{/users/{id}/tally(id=${user.id})}" method="post">
+                                <input type="hidden" name="change" value="ADD_FIVE">
+                                <button class="count-button" type="submit" th:disabled="${user.tallyCount >= 999}" th:aria-label="|Add five marks to ${user.displayName}|">+5</button>
+                            </form>
+                            <form th:action="@{/users/{id}/tally(id=${user.id})}" method="post">
+                                <input type="hidden" name="change" value="RESET">
+                                <button class="count-button count-button--quiet" type="submit" th:disabled="${user.tallyCount == 0}" th:aria-label="|Reset ${user.displayName}'s tally|">Reset</button>
+                            </form>
+                        </div>
+
+                        <div class="fine-controls">
+                            <form class="exact-form" th:action="@{/users/{id}/tally(id=${user.id})}" method="post">
+                                <input type="hidden" name="change" value="SET">
+                                <label th:for="|exact-${user.id}|">Set exact count</label>
+                                <div>
+                                    <input th:id="|exact-${user.id}|" name="value" type="number" min="0" max="999" required th:value="${user.tallyCount}">
+                                    <button type="submit">Set</button>
+                                </div>
+                            </form>
+
+                            <form class="role-form" th:action="@{/users/{id}/admin(id=${user.id})}" method="post">
+                                <input type="hidden" name="admin" th:value="${!user.admin}">
+                                <span>Account role</span>
+                                <button type="submit"
+                                        th:disabled="${user.admin && dashboard.adminCount == 1}"
+                                        th:title="${user.admin && dashboard.adminCount == 1} ? 'The last admin cannot be removed' : null"
+                                        th:text="${user.admin} ? 'Remove admin' : 'Make admin'">Make admin</button>
+                            </form>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
     </main>
+
+    <footer class="site-footer dashboard-footer">
+        <span>Project 11 · one mark at a time</span>
+        <span th:text="|${dashboard.users.size()} tallies, always in sync|">Always in sync</span>
+    </footer>
 </div>
 </body>
 </html>
