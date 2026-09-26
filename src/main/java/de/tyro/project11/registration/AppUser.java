@@ -46,6 +46,11 @@ public class AppUser {
     @ColumnDefault("0")
     private int tallyCount;
 
+    @JsonIgnore
+    @Column(name = "credential_version", nullable = false)
+    @ColumnDefault("0")
+    private long credentialVersion;
+
     protected AppUser() {
         // Required by JPA when loading a row.
     }
@@ -61,6 +66,7 @@ public class AppUser {
         this.createdAt = OffsetDateTime.now(ZoneOffset.UTC);
         this.admin = admin;
         this.tallyCount = 0;
+        this.credentialVersion = 0;
     }
 
     public Long getId() {
@@ -100,5 +106,23 @@ public class AppUser {
             throw new IllegalArgumentException("A tally cannot be negative.");
         }
         this.tallyCount = tallyCount;
+    }
+
+    public long getCredentialVersion() {
+        return credentialVersion;
+    }
+
+    public void changeEmail(String email) {
+        this.email = email;
+        credentialsChanged();
+    }
+
+    public void changePassword(String passwordHash) {
+        this.passwordHash = passwordHash;
+        credentialsChanged();
+    }
+
+    private void credentialsChanged() {
+        credentialVersion = Math.incrementExact(credentialVersion);
     }
 }

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Beitrag schreiben · Project 11</title><link rel="stylesheet" th:href="@{/css/app.css}"><link rel="stylesheet" th:href="@{/css/vendor/quill-2.0.3.snow.css}"><link rel="stylesheet" th:href="@{/css/profile.css}"></head>
+<body class="dashboard-body"><div class="page dashboard-page"><header th:replace="~{profile/fragments :: header}"></header>
+<main class="profile-editor blog-editor"><a class="event-back" th:href="@{/users/{id}(id=${userId})}">← Zum Profil</a><p class="eyebrow">Platz für deine Gedanken</p><h1 th:text="${entryId == null ? 'Eine neue Geschichte.' : 'Deine Geschichte bearbeiten.'}"></h1><p class="profile-muted">Markiere Wörter oder ganze Passagen und gestalte sie direkt im Text. Gespeicherte Beiträge sind für die Gruppe sichtbar.</p>
+<form id="blog-form" class="profile-form" th:action="@{${saveUrl}}" method="post" th:object="${blogForm}">
+<div class="notice notice-error" role="alert" th:if="${#fields.hasAnyErrors()}"><strong>Bitte prüfe deinen Beitrag.</strong><ul><li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li></ul></div>
+<div class="field"><label for="title">Titel</label><input th:field="*{title}" maxlength="160" required placeholder="Was möchtest du festhalten?"></div>
+<div id="editor-seed" hidden><div data-block th:each="block : *{blocks}" th:attr="data-kind=${block.kind}"><span th:each="run : ${block.runs}" th:attr="data-font=${run.font},data-color=${run.color},data-bold=${run.bold},data-italic=${run.italic},data-underline=${run.underline},data-strike=${run.strike}" th:text="${run.text}"></span></div></div>
+<div class="rich-editor-shell" id="rich-editor-shell" hidden>
+<div class="rich-toolbar" id="rich-toolbar" role="group" aria-label="Textformatierung">
+<div class="rich-toolbar-group"><button type="button" data-action="undo" title="Rückgängig (Strg/⌘ Z)" aria-label="Rückgängig">↶</button><button type="button" data-action="redo" title="Wiederholen (Strg/⌘ Umschalt Z)" aria-label="Wiederholen">↷</button></div>
+<label>Absatzstil<select id="rich-kind"><option value="paragraph">Normaler Text</option><option value="heading">Überschrift</option><option value="quote">Zitat</option></select></label>
+<label>Schrift<select id="rich-font"><option value="serif">Georgia</option><option value="sans">System</option><option value="mono">Monospace</option></select></label>
+<div class="rich-toolbar-group"><button type="button" data-format="bold" aria-label="Fett" aria-pressed="false" title="Fett (Strg/⌘ B)"><b>B</b></button><button type="button" data-format="italic" aria-label="Kursiv" aria-pressed="false" title="Kursiv (Strg/⌘ I)"><i>I</i></button><button type="button" data-format="underline" aria-label="Unterstrichen" aria-pressed="false" title="Unterstrichen (Strg/⌘ U)"><u>U</u></button><button type="button" data-format="strike" aria-label="Durchgestrichen" aria-pressed="false"><s>S</s></button></div>
+<label>Textfarbe<input id="rich-color" type="color" value="#203c32"></label>
+<button type="button" data-action="clear" aria-label="Formatierung entfernen" title="Formatierung entfernen">Tx</button>
+</div>
+<label class="visually-hidden" id="rich-text-label">Dein Beitrag</label><div id="rich-editor"></div>
+<div class="rich-editor-status"><span>Text markieren → Format auswählen</span><span id="editor-count" role="status"></span></div>
+</div>
+<div id="editor-fields"></div><p id="editor-error" class="field-error" role="alert" hidden></p>
+<p id="editor-loading" class="profile-muted">Editor wird geladen …</p>
+<noscript><p class="notice notice-error">Bitte aktiviere JavaScript, um den Texteditor zu verwenden. Dein gespeicherter Beitrag bleibt erhalten.</p></noscript>
+<div class="profile-form-actions"><button id="blog-save" class="button" type="submit" disabled th:text="${entryId == null ? 'Beitrag veröffentlichen' : 'Änderungen speichern'}"></button><a th:href="@{/users/{id}(id=${userId})}">Abbrechen</a></div>
+</form>
+<details class="blog-delete" th:if="${entryId != null}"><summary>Beitrag löschen</summary><p>Dieser Beitrag wird dauerhaft aus deinem Profil entfernt.</p><form th:action="@{/users/{id}/blog/{entryId}/delete(id=${userId},entryId=${entryId})}" method="post"><button class="calendar-control" type="submit">Beitrag endgültig löschen</button></form></details>
+</main></div><script defer th:src="@{/js/vendor/quill-2.0.3.js}"></script><script defer th:src="@{/js/profile-editor.js}"></script></body></html>

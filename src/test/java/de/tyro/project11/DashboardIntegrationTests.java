@@ -67,7 +67,7 @@ class DashboardIntegrationTests {
 
         mvc.perform(get("/welcome").with(user("ada@example.com")))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("The shared scoreboard")))
+                .andExpect(content().string(containsString("What’s coming up.")))
                 .andExpect(content().string(containsString("Ada Admin")))
                 .andExpect(content().string(containsString("Mina Member")))
                 .andExpect(content().string(containsString("Admin mode · you can edit")))

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org"><body>
+<section th:fragment="section" class="for-you" id="for-you" lang="de" aria-labelledby="for-you-title">
+    <header class="for-you-heading">
+        <div><p class="section-kicker">Dein Überblick</p><h2 id="for-you-title">Für dich offen</h2><p>Kosten, Anträge und Fristen. Nur deine Hinweise, alles an einem Ort.</p></div>
+        <span class="for-you-total" th:text="|${openItems.count()} Hinweise|">0 Hinweise</span>
+    </header>
+    <p class="notice notice-success" role="status" th:if="${decisionRead == true}">Als gelesen markiert. Die Entscheidung bleibt in deiner Antragsakte erhalten.</p>
+    <div class="for-you-summary">
+        <a href="#open-costs"><span>Von dir zu zahlen</span><strong th:text="${openItems.payable}">0,00 €</strong></a>
+        <a href="#open-costs"><span>An dich zu erstatten</span><strong th:text="${openItems.receivable}">0,00 €</strong></a>
+        <a href="#open-deadlines"><span>Bald fällig oder überfällig</span><strong th:text="${openItems.urgentCount()}">0</strong></a>
+        <a href="#open-decisions"><span>Ungelesene Entscheidungen</span><strong th:text="${openItems.decisions.size()}">0</strong></a>
+    </div>
+    <p class="for-you-clear" th:if="${openItems.count() == 0}"><span aria-hidden="true">✓</span> Alles erledigt. Aktuell gibt es keine offenen Aufgaben oder neuen Entscheidungen für dich.</p>
+    <div class="for-you-columns">
+        <section class="for-you-panel" id="open-costs" aria-labelledby="open-costs-title">
+            <header><h3 id="open-costs-title">Offene Kosten</h3><span th:text="${openItems.costs.size()}">0</span></header>
+            <p class="for-you-empty" th:if="${openItems.costs.isEmpty()}">Keine offenen Zahlungen oder Erstattungen.</p>
+            <div class="for-you-list"><th:block th:each="item : ${openItems.costs}"><article th:replace="~{fragments/open-items :: item(${item})}"></article></th:block></div>
+            <p class="for-you-footnote" th:unless="${openItems.costs.isEmpty()}">Bereits als bezahlt erfasste Anteile sind hier nicht mehr enthalten.</p>
+            <a class="for-you-more" th:href="@{/costs}">Alle Kosten ansehen →</a>
+        </section>
+        <section class="for-you-panel" id="open-deadlines" aria-labelledby="open-deadlines-title">
+            <header><h3 id="open-deadlines-title">Anträge &amp; Fristen</h3><span th:text="${openItems.deadlines.size()}">0</span></header>
+            <p class="for-you-empty" th:if="${openItems.deadlines.isEmpty()}">Kein AaA oder Reisebericht offen.</p>
+            <div class="for-you-list"><th:block th:each="item : ${openItems.deadlines}"><article th:replace="~{fragments/open-items :: item(${item})}"></article></th:block></div>
+            <p class="for-you-footnote">Nach Frist sortiert · Alle Zeiten gelten für Berlin.</p>
+        </section>
+        <section class="for-you-panel" id="open-decisions" aria-labelledby="open-decisions-title">
+            <header><h3 id="open-decisions-title">Entscheidungen</h3><span th:text="${openItems.decisions.size()}">0</span></header>
+            <p class="for-you-empty" th:if="${openItems.decisions.isEmpty()}">Du bist auf dem neuesten Stand.</p>
+            <div class="for-you-list"><th:block th:each="item : ${openItems.decisions}"><article th:replace="~{fragments/open-items :: item(${item})}"></article></th:block></div>
+            <a class="for-you-more" th:href="@{/amt/mitglieder/{id}(id=${dashboard.currentUserId})}">Deine Antragsakte →</a>
+        </section>
+    </div>
+</section>
+<article th:fragment="item(item)" class="for-you-item">
+    <div class="for-you-item-top"><span class="for-you-kind" th:text="${item.kind}">AaA</span><span class="for-you-badge" th:classappend="|for-you-badge--${item.tone}|" th:text="${item.badge}">Offen</span></div>
+    <h4 th:text="${item.title}">Event</h4>
+    <p class="for-you-detail" th:text="${item.detail}">Details</p>
+    <p class="for-you-meta" th:text="${item.meta}">Frist</p>
+    <div class="for-you-actions">
+        <a th:href="@{${item.url}}" th:text="|${item.action} ↗|">Ansehen ↗</a>
+        <form th:if="${item.source != null}" th:action="@{/welcome/decisions/{source}/{id}/read(source=${item.source},id=${item.applicationId})}" method="post">
+            <button type="submit" th:aria-label="|${item.kind}: ${item.title} als gelesen markieren|">Als gelesen markieren</button>
+        </form>
+    </div>
+</article>
+</body></html>

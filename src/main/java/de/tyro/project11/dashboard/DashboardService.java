@@ -16,6 +16,8 @@ public class DashboardService {
     public static final int MAX_TALLY = 999;
 
     private final UserRepository users;
+    @jakarta.persistence.PersistenceContext
+    private jakarta.persistence.EntityManager entityManager;
 
     public DashboardService(UserRepository users) {
         this.users = users;
@@ -45,8 +47,8 @@ public class DashboardService {
         int current = user.getTallyCount();
         int next = switch (change) {
             case DECREMENT -> Math.max(0, current - 1);
-            case INCREMENT -> Math.min(MAX_TALLY, current + 1);
-            case ADD_FIVE -> Math.min(MAX_TALLY, current + 5);
+            case INCREMENT -> current >= MAX_TALLY ? current : current + 1;
+            case ADD_FIVE -> current >= MAX_TALLY ? current : Math.min(MAX_TALLY, current + 5);
             case RESET -> 0;
             case SET -> validateExactValue(exactValue);
         };
@@ -87,7 +89,11 @@ public class DashboardService {
     }
 
     private AppUser findLockedUser(long userId) {
-        return users.findLockedById(userId)
+        var user = users.findLockedById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        // Editing one's own tally can have loaded this account during authorization,
+        // before a concurrent automatic assessment committed its updated total.
+        entityManager.refresh(user, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        return user;
     }
 }

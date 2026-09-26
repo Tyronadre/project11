@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{portal/fragments :: head('Erneute abschließende Bestätigung')}"></head>
+<body class="amt-body"><div class="amt-wrapper"><header th:replace="~{portal/fragments :: header}"></header>
+    <div class="amt-shell"><aside th:replace="~{portal/fragments :: sidebar}"></aside>
+        <main class="amt-main"><p class="amt-breadcrumb">Referat A &gt; Einreichungsfreigabe &gt; Letzte Rückversicherung (vorläufig)</p>
+            <div class="amt-page-title"><span>SCHRITT 11 VON 9</span><h2>Bitte bestätigen Sie erneut.</h2><p>Die bisherige Bestätigung wurde zur Kenntnis genommen.</p></div>
+            <div class="amt-progress-panel"><strong>Schritt 11 von 9</strong><div class="amt-progress-track" aria-hidden="true"><span style="width:73%"></span></div><span>73 % abgeschlossen*</span><small>*Der Fortschritt wurde nach fachlicher Neubewertung korrigiert.</small></div>
+            <section class="amt-dialog"><div class="amt-dialog-title">AGATA – Abschließende Eingangsfreigabe</div><div class="amt-dialog-body"><span class="amt-dialog-icon" aria-hidden="true">!</span><div><h3>Der nächste Klick reicht Ihren AaA tatsächlich ein.</h3><p>Die Angaben werden dauerhaft in Ihrer Teilnehmerakte gespeichert und sind für alle Mitglieder lesbar. Eine nachträgliche Änderung oder Löschung ist nicht vorgesehen.</p><p><strong>Erst jetzt wird der fristwahrende Eingangsstempel vergeben.</strong></p></div></div><div class="amt-dialog-actions"><a class="amt-button" th:href="@{/amt/aaa(vorgang=${draft.id})}">Doch noch einmal zurück</a><form th:action="@{/amt/aaa/einreichen}" method="post"><input type="hidden" name="vorgang" th:value="${draft.id}"><button class="amt-button amt-primary" type="submit">Erneut bestätigen und verbindlich einreichen</button></form></div></section>
+            <p class="amt-fineprint">Hinweis zur sozialen Zuverlässigkeit: Nach Eingang wird die unverbindliche Verwaltungskennzahl um bis zu vier Punkte herabgesetzt. Ihre tatsächliche Strichliste bleibt davon unberührt.</p>
+            <p class="amt-rubber-stamp amt-stamp-large">BESTÄTIGUNG<br>DER BESTÄTIGUNG<br>ERBETEN</p>
+        </main>
+    </div><footer th:replace="~{portal/fragments :: footer}"></footer>
+</div></body>
+</html>

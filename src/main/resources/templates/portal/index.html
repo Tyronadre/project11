@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{portal/fragments :: head('Zentrale Auskunft')}"></head>
+<body class="amt-body">
+<div class="amt-wrapper">
+    <header th:replace="~{portal/fragments :: header}"></header>
+    <div class="amt-shell"><aside th:replace="~{portal/fragments :: sidebar}"></aside>
+        <main class="amt-main">
+            <p class="amt-breadcrumb">Sie befinden sich hier: Startseite &gt; Zuständigkeit &gt; wahrscheinlich richtig</p>
+            <div class="amt-page-title"><span>FACHVERFAHREN 00 / AUSKUNFT</span><h2>Willkommen im Verwaltungsportal.</h2><p>Ihre Freizeit ist uns eine Akte wert.</p></div>
+            <div class="amt-ticker"><span>+++ Bitte lesen Sie sämtliche Hinweise, auch wenn diese auf andere Hinweise verweisen. +++ Die Zuständigkeit wird unabhängig von ihrer Erforderlichkeit geprüft. +++</span></div>
+            <div class="amt-notice"><strong>NEU seit einiger Zeit:</strong> Abwesenheiten können jetzt elektronisch zur vorläufigen Einreichung vorbereitet werden. Ein erfolgreicher Mausklick stellt noch keinen Antrag dar.</div>
+
+            <section class="amt-box"><h2>1. Auswahl des Begehrens</h2><div class="amt-box-content">
+                <div class="amt-procedure amt-procedure-active"><span class="amt-form-code">AaA<br><small>01 / 2007</small></span><div><h3>Antrag auf Abwesenheit</h3><p>Für die beabsichtigte Nichtteilnahme an genau einer Gruppenaktivität. Einschließlich Begründungswesen und Eignungsprüfung.</p><a class="amt-button amt-primary" th:href="@{/amt/aaa}">Antragsverfahren eröffnen &gt;&gt;</a></div><span class="amt-new">NEU!</span></div>
+                <div class="amt-procedure amt-procedure-active"><span class="amt-form-code">AaB</span><div><h3>Antrag auf Beurlaubung</h3><p>Für einen Zeitraum mit Kalenderblock. Einschließlich Prüfung Ihrer Erholungsbedürftigkeit.</p><a class="amt-button amt-primary" th:href="@{/amt/aab}">Beurlaubungsverfahren eröffnen &gt;&gt;</a></div></div>
+                <div class="amt-procedure amt-procedure-active"><span class="amt-form-code">EeR</span><div><h3>Einreichung eines Reiseberichtes</h3><p>Reiseverlauf, Erkenntnisse und kulinarische Rechenschaft. Binnen sieben Tagen nach Urlaubsende, mit mindestens drei Fotos.</p><a class="amt-button amt-primary" th:href="@{/amt/eer}">Rechenschaftsverfahren eröffnen &gt;&gt;</a></div></div>
+            </div></section>
+
+            <div class="amt-two-columns"><section class="amt-box"><h2>2. Verbindliche Verfahrenshinweise</h2><div class="amt-box-content"><ol><li>Der AaA wird einer vorhandenen Aktivität zugeordnet.</li><li>Einreichung vor 00:00 Uhr (Berlin) am siebten Tag nach dem Eventdatum: Event am 1.1. → Frist am 8.1. um 00:00 Uhr.</li><li>Pro Person und Aktivität wird genau ein Antrag entgegengenommen.</li><li>Der AaB erfasst beide Urlaubstage einschließlich als Kalenderblock und wird von einem Admin entschieden.</li><li>Der Reisebericht ist bis zum Ende des siebten Tages nach Urlaubsende fällig (Berlin): Urlaubsende am 1.1. → Eingang bis einschließlich 8.1. Er benötigt eine Admin-Bestätigung; bei fehlendem oder abgelehntem Bericht verfällt der angenommene Urlaub nach der Frist.</li><li>Eingereichte Anträge sind für <strong>alle Mitglieder lesbar</strong> und nicht nachträglich änderbar oder löschbar.</li></ol><p class="amt-fineprint">Fristwahrend ist ausschließlich der Eingangsstempel nach der letzten Bestätigung.</p></div></section>
+                <section class="amt-box"><h2>3. Kennzahlen von zweifelhafter Tragweite</h2><div class="amt-box-content"><dl class="amt-stat-list"><dt>Registrierte Vorgänge</dt><dd th:text="${totalApplications}">0</dd><dt>Ihre eingereichten Anträge</dt><dd th:text="${citizen.applicationCount}">0</dd><dt>Zuständige Referate</dt><dd>5 + Kommission</dd><dt>Geschätzter Verwaltungsbedarf</dt><dd>erheblich</dd></dl><p class="amt-rubber-stamp">ZUSTÄNDIGKEIT<br>VORLÄUFIG BESTÄTIGT</p></div></section></div>
+
+            <section class="amt-box"><h2>4. Jüngste Aktenbewegungen</h2><div th:replace="~{portal/fragments :: applicationTable(${recent})}"></div><p class="amt-box-links"><a th:href="@{/amt/akten}">Zur vollständigen Registratur &gt;&gt;</a></p></section>
+            <section class="amt-box"><h2>5. Teilnehmerakten / persönliche Veröffentlichungen</h2><div class="amt-box-content"><p>Alle vergangenen Anträge einer Person, chronologisch und zur allgemeinen Kenntnisnahme.</p><ul class="amt-member-list"><li th:each="member : ${members}"><a th:href="@{/amt/mitglieder/{id}(id=${member.id})}"><span th:text="${member.number}" class="amt-monospace">TN-000001</span> · <span th:text="${member.name}">Name</span></a></li></ul></div></section>
+            <p class="amt-fineprint">*Die interne Prüfungsreise ist eine bürokratische Inszenierung. Sie ändert weder den tatsächlichen Eingang noch Ihre Striche.</p>
+        </main>
+    </div><footer th:replace="~{portal/fragments :: footer}"></footer>
+</div>
+</body>
+</html>

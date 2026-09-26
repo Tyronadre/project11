@@ -1,0 +1,18 @@
+<!DOCTYPE html><html lang="de" xmlns:th="http://www.thymeleaf.org"><head th:fragment="head(title)">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title th:text="|${title} · Project 11|">Kosten · Project 11</title>
+<link rel="stylesheet" th:href="@{/css/app.css}"><link rel="stylesheet" th:href="@{/css/costs.css}">
+</head><body>
+<section class="cost-card" th:fragment="summary(eventCosts)">
+    <div class="cost-heading"><div><p class="section-kicker" th:text="${eventCosts.date}">Event</p><h2><a th:href="@{/events/{id}/costs(id=${eventCosts.id})}" th:text="${eventCosts.title}">Eventkosten</a></h2></div><a class="calendar-control" th:href="@{/events/{id}/costs/new(id=${eventCosts.id})}">Kosten eintragen +</a></div>
+    <dl class="cost-totals">
+        <div><dt>Gesamtkosten</dt><dd th:text="${eventCosts.total()}">0,00 €</dd></div>
+        <div><dt>Dein Anteil</dt><dd th:text="${eventCosts.myShare()}">0,00 €</dd></div>
+        <div><dt>Von dir noch zu zahlen</dt><dd th:text="${eventCosts.myDue()}">0,00 €</dd></div>
+        <div><dt>An dich noch zu zahlen</dt><dd th:text="${eventCosts.myReceivable()}">0,00 €</dd></div>
+    </dl>
+    <p class="cost-muted" th:text="${eventCosts.distributionStatus}"></p>
+    <p class="cost-pending" th:if="${eventCosts.awaitingDistribution}">Noch nicht aufgeteilt: Die persönlichen Summen sind vorläufig. Bitte Teilnehmerliste und Personenauswahl prüfen; nur bestätigte Anwesende aus der gewählten Gruppe zählen.</p>
+    <div class="cost-links"><a th:href="@{/events/{id}/costs(id=${eventCosts.id})}">Anfragen und Aufteilung ansehen →</a><span><span th:text="${eventCosts.requests.size()}">0</span> Anfragen · <span th:text="${eventCosts.open()}">0 €</span> offene Erstattungen</span></div>
+</section>
+</body></html>

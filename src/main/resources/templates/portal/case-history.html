@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org"><body>
+<section class="amt-box" th:fragment="history(dossier)" aria-labelledby="case-history-title">
+<h2 id="case-history-title">Bearbeitungsverlauf · Dienstweg mit Zeitstempel</h2>
+<div class="amt-box-content">
+<p>Hier stehen die gespeicherten Vorgänge. Die Büroklammerninventur hat ausnahmsweise keinen Einfluss auf den Bearbeitungsstand.</p>
+<ol class="amt-case-history">
+<li th:each="entry : ${dossier.history}">
+<time th:attr="datetime=${entry.at}" th:text="${entry.stamp}"></time>
+<h3 th:text="${entry.title}"></h3><p><strong th:text="${entry.actor}"></strong></p>
+<p class="amt-case-text" th:text="${entry.detail}"></p>
+<a th:if="${entry.url != null}" th:href="@{${entry.url}}">Zugehörigen Vorgang öffnen →</a>
+</li></ol>
+<p th:unless="${dossier.issued}">Eine Entscheidung ist noch nicht hinterlegt. Bis dahin kann kein Bescheid ausgestellt werden.</p>
+<div th:if="${dossier.issued}" class="amt-case-decision">
+<h3 th:text="|Entscheidung: ${dossier.outcome}|"></h3>
+<p th:text="|${dossier.decided} · ${dossier.official}|"></p>
+<p class="amt-case-text" th:text="${dossier.reason.isBlank() ? 'Keine zusätzliche Begründung hinterlegt.' : dossier.reason}"></p>
+<p th:text="${dossier.effect}"></p>
+<a class="amt-button amt-primary" th:href="@{${dossier.url + '/bescheid'}}">Bescheid öffnen / drucken</a>
+</div></div></section>
+</body></html>

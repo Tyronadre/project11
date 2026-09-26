@@ -32,6 +32,8 @@ public class Holiday {
 
     @Column(name = "submitted_at", nullable = false, updatable = false)
     private OffsetDateTime submittedAt;
+    // A missing/late/rejected report permanently invalidates an accepted leave after its cutoff.
+    private OffsetDateTime invalidatedAt;
 
     protected Holiday() {}
 
@@ -52,4 +54,7 @@ public class Holiday {
     public LocalDate getStartsOn() { return startsOn; }
     public LocalDate getEndsOn() { return endsOn; }
     public OffsetDateTime getSubmittedAt() { return submittedAt; }
+    public OffsetDateTime getInvalidatedAt() { return invalidatedAt; }
+    public boolean isInvalidated() { return invalidatedAt != null; }
+    public void invalidate(OffsetDateTime now) { if (invalidatedAt == null) invalidatedAt = now; }
 }

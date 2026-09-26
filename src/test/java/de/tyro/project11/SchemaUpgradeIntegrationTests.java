@@ -34,6 +34,7 @@ class SchemaUpgradeIntegrationTests {
         assertThat(second.isAdmin()).isFalse();
         assertThat(first.getTallyCount()).isZero();
         assertThat(second.getTallyCount()).isZero();
+        assertThat(first.getCredentialVersion()).isZero();
 
         // Subsequent startup initialization must preserve an administrator chosen in the UI.
         first.setAdmin(false);

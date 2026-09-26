@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{profile/fragments :: head('Profil bearbeiten')}"></head>
+<body class="dashboard-body"><div class="page dashboard-page"><header th:replace="~{profile/fragments :: header}"></header>
+<main class="profile-editor"><a class="event-back" th:href="@{/users/{id}(id=${userId})}">← Zum Profil</a><p class="eyebrow">Ganz du selbst</p><h1>Dein Profil</h1><p class="profile-muted" th:text="|${profileName}, erzähl der Gruppe ein bisschen von dir.|"></p>
+<form class="profile-card profile-form" th:action="@{/users/{id}/profile(id=${userId})}" method="post" th:object="${profileForm}">
+<div class="notice notice-error" role="alert" th:if="${#fields.hasAnyErrors()}"><strong>Bitte prüfe deine Angaben.</strong><ul><li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li></ul></div>
+<h2>Persönliches</h2><p class="profile-muted">Diese Angaben und deine Antworten sind für angemeldete Gruppenmitglieder sichtbar. Alle Angaben außer der Profilfarbe sind freiwillig. Leere Felder entfernen gespeicherte Angaben.</p>
+<div class="profile-form-grid"><div class="field"><label for="color">Deine Profilfarbe</label><input type="color" th:field="*{color}" required></div><div class="field"><label for="birthday">Wann hast du Geburtstag?</label><input type="date" th:field="*{birthday}"></div></div>
+<h2>Zahlungsdaten</h2><p class="profile-muted">Andere Mitglieder können diese Daten mit „Zahlungsdaten anzeigen“ aufrufen.</p>
+<div class="field"><label for="paypal">Deine PayPal-E-Mail-Adresse oder dein paypal.me-Link</label><input type="text" th:field="*{paypal}" maxlength="254" placeholder="https://paypal.me/deinname" autocomplete="off"></div>
+<div class="field"><label for="iban">Deine IBAN</label><input type="text" th:field="*{iban}" maxlength="42" placeholder="DE89 3704 0044 0532 0130 00" autocomplete="off" spellcheck="false"></div>
+<h2 id="facts">Dein Steckbrief</h2><p class="profile-muted">Antworte so kurz oder ausführlich, wie du magst. Bis zu 300 Zeichen je Frage.</p>
+<th:block th:each="question, iter : ${questions}"><h3 class="fact-section" th:if="${iter.first or question.section != questions[iter.index - 1].section}" th:text="${question.section}"></h3><div class="field"><label th:for="|answer-${question.key}|" th:text="|${iter.count}. ${question.label}|"></label><textarea th:id="|answer-${question.key}|" th:field="*{answers[__${question.key}__]}" rows="2" maxlength="300"></textarea></div></th:block>
+<div class="profile-form-actions"><button class="button" type="submit">Profil speichern</button><a th:href="@{/users/{id}(id=${userId})}">Abbrechen</a></div>
+</form></main></div></body></html>

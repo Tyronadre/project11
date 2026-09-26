@@ -1,0 +1,2 @@
+<!DOCTYPE html><html lang="de" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{costs/fragments :: head('Kostenanfrage prüfen')}"></head>
+<body class="dashboard-body"><div class="page dashboard-page"><header th:replace="~{profile/fragments :: header}"></header><main class="cost-layout cost-form-layout"><section class="cost-card"><h1>Bitte noch einmal prüfen.</h1><p th:text="${problem}" role="alert"></p><a class="calendar-control" th:href="@{/costs}">Aktuelle Kostenübersicht öffnen →</a></section></main></div></body></html>

@@ -1,0 +1,57 @@
+.cost-layout { max-width: 1040px; margin: 32px auto 72px; }
+.cost-intro { max-width: 690px; margin: 30px 0; }
+.cost-intro h1 { font: 400 clamp(38px, 6vw, 62px)/1.1 Georgia, serif; letter-spacing: -1.5px; margin: 14px 0 20px; overflow-wrap: anywhere; }
+.cost-intro > p:last-child, .cost-empty p { color: var(--muted); line-height: 1.8; font-size: 14px; }
+.cost-card { padding: 28px 32px; border: 1px solid var(--line); background: #fbfcf8; border-radius: 20px; margin: 24px 0; overflow-wrap: anywhere; }
+.cost-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.cost-heading h2, .cost-empty h2 { font: 400 28px/1.25 Georgia, serif; margin: 10px 0; }
+.cost-heading h2 a { text-decoration: none; }
+.cost-heading > .calendar-control { flex-shrink: 0; }
+.cost-totals { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px; margin: 30px 0 20px; }
+.cost-totals dt { color: var(--muted); font-size: 11px; line-height: 1.6; }
+.cost-totals dd { font-size: clamp(17px, 2.5vw, 24px); font-weight: 550; margin: 7px 0 0; font-variant-numeric: tabular-nums; }
+.cost-muted, .cost-pending { font-size: 12px; line-height: 1.8; color: var(--muted); }
+.cost-pending { background: #f4eddd; color: #725723; padding: 12px 16px; border-radius: 8px; }
+.cost-links, .cost-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; font-size: 12px; margin-top: 24px; }
+.cost-links > span { color: var(--muted); }
+.cost-back { margin-bottom: 28px; }
+.cost-back .event-back { margin: 0; }
+.cost-picker { display: flex; align-items: flex-end; gap: 20px; padding: 24px; background: #edf2e7; border-radius: 16px; }
+.cost-picker .field { flex: 1; margin: 0; }
+.cost-picker select { width: 100%; min-width: 0; font: inherit; font-size: 14px; padding: 13px; border-radius: 8px; border: 1px solid var(--line); background: #fff; color: var(--ink); }
+.cost-picker select:focus { outline: 3px solid #c9d9bc; }
+.cost-picker .calendar-control { min-height: 45px; }
+.cost-amount { font-size: 29px; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cost-status { display: inline-block; padding: 5px 9px; border-radius: 6px; color: #775b2b; background: #f1eadb; font-size: 11px; }
+.cost-paid { background: #e5eedc; color: #375b2b; }
+.cost-partial { background: #e8edf3; color: #35516a; }
+.cost-shares { list-style: none; padding: 0; margin: 24px 0 16px; border-top: 1px solid var(--line); }
+.cost-shares li { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding: 13px 12px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.cost-shares strong { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.cost-mine { background: #eef3e8; }
+.cost-share-paid { box-shadow: inset 3px 0 #7b9a68; }
+.cost-share-note { font-size: 11px; color: var(--muted); }
+.cost-payment-paid { color: #375b2b; }
+.cost-payment-open { color: #775b2b; }
+.cost-share-side { display: flex; align-items: flex-end; gap: 7px; flex-direction: column; text-align: right; }
+.cost-payment-toggle { border: 0; padding: 0; background: transparent; color: var(--green); font: inherit; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.cost-payment-toggle:focus-visible { outline: 3px solid #c9d9bc; outline-offset: 3px; }
+.cost-actions { justify-content: flex-start; }
+.cost-actions .button { width: auto; }
+.cost-primary { background: var(--green); color: #fff; }
+.cost-reopen summary { cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.cost-reopen p { line-height: 1.7; max-width: 520px; }
+.cost-form-layout { max-width: 700px; }
+.cost-form-layout .cost-intro h1 { font-size: clamp(34px, 5vw, 48px); }
+.cost-card a { text-underline-offset: 4px; }
+@media (max-width: 680px) {
+    .cost-layout { margin-top: 22px; }
+    .cost-card { padding: 24px 20px; }
+    .cost-heading, .cost-picker { flex-direction: column; align-items: stretch; }
+    .cost-shares li { align-items: stretch; flex-direction: column; }
+    .cost-share-side { align-items: flex-start; text-align: left; }
+    .cost-totals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cost-heading .calendar-control { align-self: flex-start; }
+    .cost-amount { font-size: 26px; }
+    .cost-actions > form, .cost-actions .calendar-control { max-width: 100%; white-space: normal; }
+}

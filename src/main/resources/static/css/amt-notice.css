@@ -1,0 +1,34 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #e7e5de; color: #25251f; font: 16px/1.55 Georgia, serif; }
+a { color: #23433c; }
+.notice-tools { max-width: 850px; margin: 24px auto; padding: 0 24px; font: 14px/1.5 Arial, sans-serif; }
+.notice-tools button { padding: 10px 16px; margin: 8px 0 8px 20px; border: 1px solid #31453e; color: white; background: #31453e; cursor: pointer; font: inherit; }
+.notice-paper { max-width: 850px; margin: 24px auto; padding: 56px 64px; background: white; box-shadow: 0 4px 24px #0002; overflow-wrap: anywhere; }
+.notice-letterhead { display: flex; gap: 22px; border-bottom: 3px double #555; padding-bottom: 24px; font-family: Arial, sans-serif; }
+.notice-letterhead p { margin: 6px 0; }
+.notice-seal { border: 3px double #555; border-radius: 50%; width: 66px; height: 66px; flex-shrink: 0; text-align: center; font: 46px Georgia, serif; }
+.notice-reference { margin-top: 28px; font: 12px/1.6 monospace; }
+h1 { font-size: 34px; margin-bottom: 0; }
+.notice-subtitle { margin-top: 0; }
+h2 { margin-top: 28px; font-size: 19px; break-after: avoid; }
+.notice-metadata { display: grid; grid-template-columns: 160px 1fr; gap: 8px 16px; padding: 20px 0; border-block: 1px solid #aaa; font: 14px/1.6 Arial, sans-serif; }
+.notice-metadata dt { font-weight: bold; }
+.notice-metadata dd { margin: 0; }
+.notice-outcome { font-weight: bold; font-size: 23px; border-left: 4px solid #555; padding-left: 14px; }
+.notice-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.notice-history { padding-left: 22px; }
+.notice-history li { margin-bottom: 16px; }
+.notice-history p { margin-top: 5px; }
+footer { border-top: 1px solid #aaa; margin-top: 32px; padding-top: 12px; font: 11px/1.6 Arial, sans-serif; }
+@media (max-width: 600px) { .notice-paper { margin: 0; padding: 24px; } .notice-metadata { grid-template-columns: 1fr; gap: 3px; } .notice-metadata dd { margin-bottom: 10px; } .notice-tools button { margin-left: 0; } }
+@page { size: A4; margin: 18mm; }
+@media print {
+    body { background: white; color: black; font-size: 11pt; }
+    .notice-tools { display: none !important; }
+    .notice-paper { width: auto; max-width: none; margin: 0; padding: 0; box-shadow: none; }
+    .notice-letterhead, .notice-metadata { break-inside: avoid; }
+    .notice-metadata { grid-template-columns: 40mm 1fr; }
+    .notice-metadata dd { margin: 0; }
+    p { orphans: 3; widows: 3; }
+    h1, h2 { break-after: avoid; }
+}

@@ -3,20 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>The Strichliste · Project 11</title>
+    <title>Our group · Project 11</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/open-items.css}">
 </head>
 <body class="dashboard-body">
 <div class="page dashboard-page">
     <header class="site-header dashboard-header">
         <a class="brand" th:href="@{/}"><span class="brand-mark" aria-hidden="true">11</span> Project 11</a>
         <nav class="page-nav" aria-label="Main navigation">
-            <a th:href="@{/welcome}" aria-current="page">Marks</a>
+            <a th:href="@{/welcome}" aria-current="page">Overview</a>
             <a th:href="@{/calendar}">Calendar</a>
+            <a th:href="@{/polls}">Abstimmungen</a>
+            <a th:href="@{/amt}">Applications</a>
+            <a th:href="@{/costs}">Kosten</a><a th:href="@{/users/me}">My profile</a>
         </nav>
         <div class="header-account">
             <div class="signed-in-as">
-                <span th:text="${dashboard.currentUserName}">Alex Morgan</span>
+                <a class="account-settings-link" th:href="@{/account}" th:text="${dashboard.currentUserName}" title="Kontoeinstellungen">Alex Morgan</a>
                 <span class="mini-admin-badge" th:if="${dashboard.admin}">Admin</span>
             </div>
             <form th:action="@{/logout}" method="post">
@@ -26,27 +30,31 @@
     </header>
 
     <main class="dashboard-layout">
-        <section class="tally-hero" aria-labelledby="dashboard-title">
-            <div class="hero-copy">
-                <p class="eyebrow"><span class="status-dot"></span> The shared scoreboard</p>
-                <h1 id="dashboard-title">Every mark<br>tells a story.</h1>
-                <p>One beautifully simple <em>Strichliste</em> for every member. Count the little things; celebrate the big number.</p>
+        <section th:replace="~{fragments/open-items :: section}"></section>
+        <section class="upcoming-section" aria-labelledby="dashboard-title">
+            <div class="upcoming-heading">
+                <div><p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> More time together</p><h1 id="dashboard-title">What’s coming up.</h1><p>Our next plans, all in one place. Times are shown in Berlin time.</p></div>
+                <a class="button event-create-link" th:href="@{/events/new}"><span aria-hidden="true">＋</span> New event</a>
             </div>
-            <div class="hero-stats" aria-label="Scoreboard summary">
-                <div class="hero-stat hero-stat--primary">
-                    <strong th:text="${dashboard.totalTallies}">0</strong>
-                    <span>marks made</span>
-                </div>
-                <div class="hero-stat">
-                    <strong th:text="${dashboard.users.size()}">1</strong>
-                    <span th:text="${dashboard.users.size() == 1 ? 'member' : 'members'}">members</span>
-                </div>
+            <div class="upcoming-empty" th:if="${upcomingEvents.isEmpty()}"><span aria-hidden="true">✳</span><h2>A little room for plans.</h2><p>No upcoming events yet. Pick a day and bring everyone together.</p><a class="calendar-control" th:href="@{/events/new}">Make the first plan ↗</a></div>
+            <div class="upcoming-grid" th:unless="${upcomingEvents.isEmpty()}">
+                <a class="upcoming-card" th:each="event : ${upcomingEvents}" th:href="@{/events/{id}(id=${event.id})}">
+                    <div class="upcoming-card-top"><time class="upcoming-date" th:datetime="${event.date}"><span th:text="${event.month}">SEP</span><strong th:text="${event.day}">13</strong></time><span class="upcoming-status" th:classappend="${event.status == 'Happening now'} ? ' upcoming-status-live' : ''" th:text="${event.status}">Coming up</span></div>
+                    <h2 th:text="${event.title}">Our next plan</h2>
+                    <p class="upcoming-period" th:text="${event.period}">Date and time</p>
+                    <p class="upcoming-description" th:if="${!event.description.isEmpty()}" th:text="${event.description}">The details</p>
+                    <div class="upcoming-card-bottom"><span th:text="|Planned by ${event.owner}|"></span><span aria-hidden="true">↗</span></div>
+                </a>
             </div>
-            <div class="hero-scribble" aria-hidden="true">
-                <span></span><span></span><span></span><span></span><span></span>
-            </div>
+            <a class="upcoming-calendar-link" th:href="@{/calendar}">View the full calendar <span aria-hidden="true">→</span></a>
         </section>
 
+        <section class="attendance-admin-section" th:if="${!attendanceEvents.isEmpty()}" aria-labelledby="attendance-admin-title">
+            <div class="section-heading"><div><p class="section-kicker">Your events · attendance</p><h2 id="attendance-admin-title">Attendance</h2></div><a class="header-link" th:href="@{/calendar}">Older events in the calendar →</a></div>
+            <div class="attendance-event-list"><a th:each="event : ${attendanceEvents}" th:href="@{/events/{id}/attendance(id=${event.id})}"><div><strong th:text="${event.title}">Event</strong><span th:text="${event.ended}">Ended</span></div><span class="attendance-action" th:text="${event.recorded ? 'Review attendance →' : 'Record attendance →'}">Record attendance</span></a></div>
+        </section>
+
+        <section th:if="${dashboard.admin}" class="attendance-admin-section"><a class="calendar-control" th:href="@{/admin/aaa}">AaAs prüfen und entscheiden →</a> <a class="calendar-control" th:href="@{/admin/travel}">AaBs und Reiseberichte prüfen →</a></section>
         <section class="tally-section" aria-labelledby="tallies-heading">
             <div class="section-heading">
                 <div>
@@ -66,7 +74,7 @@
                             <span class="avatar" th:text="${user.initials}">AM</span>
                             <div>
                                 <div class="member-name-line">
-                                    <h3 th:text="${user.displayName}">Alex Morgan</h3>
+                                    <h3><a th:href="@{/users/{id}(id=${user.id})}" th:text="${user.displayName}">Alex Morgan</a></h3>
                                     <span class="you-badge" th:if="${user.id == dashboard.currentUserId}">You</span>
                                 </div>
                                 <p th:text="${user.email}">alex@example.com</p>
@@ -79,6 +87,8 @@
                         <strong class="tally-number" th:text="${user.tallyCount}">0</strong>
                         <span th:text="${user.tallyCount == 1 ? 'mark' : 'marks'}">marks</span>
                     </div>
+
+                    <p class="tally-pending" th:if="${pendingAttendance.counts.containsKey(user.id)}"><span class="pending-mark-badge" th:text="|${pendingAttendance.counts.get(user.id)} ${pendingAttendance.counts.get(user.id) == 1 ? 'Strich' : 'Striche'} vorgemerkt|"></span><small>Not yet included in the tally</small></p>
 
                     <div class="tally-paper" role="img" th:aria-label="|${user.tallyCount} tally marks for ${user.displayName}|">
                         <div class="tally-groups" th:if="${user.tallyCount > 0}">

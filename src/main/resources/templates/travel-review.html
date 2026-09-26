@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{profile/fragments :: head('Reiseantrag entscheiden')}"></head>
+<body class="dashboard-body"><div class="page dashboard-page"><header th:replace="~{profile/fragments :: header}"></header>
+<main class="profile-editor">
+    <a class="event-back" th:href="@{/admin/travel}">← Zu allen Reiseanträgen</a>
+    <p class="eyebrow" th:text="|Administration · ${review.kind}|"></p><h1 th:text="${review.title}"></h1>
+    <p class="notice notice-success" role="status" th:if="${decisionSaved == true}">Entscheidung gespeichert. Die Benachrichtigung ist zur Zustellung vorgemerkt.</p>
+    <p class="notice notice-error" role="alert" th:if="${decisionError != null}" th:text="${decisionError}"></p>
+    <p class="field-hint" th:unless="${mailEnabled}">Der E-Mail-Versand ist deaktiviert. Entscheidungsnachrichten werden gespeichert und nach Aktivierung zugestellt.</p>
+    <section class="profile-card">
+        <h2 th:text="${review.applicant}"></h2><p th:text="|Eingang: ${review.submitted}|"></p><p th:text="|Berichtsfrist: ${review.deadline}|"></p>
+        <strong th:text="${review.decision == 'PENDING' ? 'Noch nicht entschieden' : (review.decision == 'ACCEPTED' ? 'Angenommen' : 'Abgelehnt')}"></strong>
+        <p th:if="${!review.reason.isEmpty()}" th:text="${review.reason}"></p>
+        <p class="notice notice-error" th:if="${review.late}">Dieser Bericht ist verspätet. Auch eine Bestätigung macht den Eingang nicht fristgerecht und hebt Tagesstriche nicht auf.</p>
+        <p class="notice notice-error" th:if="${review.invalidated}">Der Urlaub ist wegen der abgelaufenen Berichtsfrist ungültig. Pro Urlaubstag wurde ein Strich vergeben; abgedeckte Events werden nicht zusätzlich bestraft.</p>
+        <p th:if="${review.relatedId != null}"><a th:href="@{/admin/travel/{id}(id=${review.relatedId})}" th:text="${review.kind == 'AaB' ? 'Zugehörigen Bericht prüfen →' : 'Zugehörigen AaB prüfen →'}"></a></p>
+        <dl th:each="answer : ${review.answers}"><dt th:text="${answer.question}"></dt><dd style="white-space:pre-wrap;overflow-wrap:anywhere" th:text="${answer.answer}"></dd></dl>
+        <div class="travel-review-photos" th:if="${!review.photos.isEmpty()}">
+            <figure th:each="photo : ${review.photos}"><a th:href="@{/amt/fotos/{id}(id=${photo.id})}" target="_blank" rel="noopener"><img th:src="@{/amt/fotos/{id}(id=${photo.id})}" th:alt="${photo.originalName}" loading="lazy"></a><figcaption th:text="${photo.originalName}"></figcaption></figure>
+        </div>
+        <form class="profile-form" th:if="${review.pending}" th:action="@{/admin/travel/{id}(id=${review.id})}" method="post">
+            <p class="field-hint" th:if="${review.kind == 'EeR' and review.leaveDecision != 'ACCEPTED'}">Vor der Bestätigung des Berichts muss der zugehörige AaB angenommen werden.</p>
+            <label for="reason">Begründung (bei Ablehnung erforderlich)</label><textarea id="reason" name="reason" maxlength="2000" rows="4" th:text="${reason}"></textarea>
+            <p class="field-hint">Die endgültige Entscheidung wird per E-Mail mitgeteilt. Bei fehlendem oder abgelehntem Bericht wird ein angenommener Urlaub nach der Berichtsfrist ungültig.</p>
+            <div class="profile-form-actions"><button class="button" type="submit" name="decision" value="ACCEPTED" th:disabled="${!review.canAccept}">Annehmen</button><button class="calendar-control" type="submit" name="decision" value="REJECTED">Ablehnen</button></div>
+        </form>
+    </section>
+</main></div></body></html>

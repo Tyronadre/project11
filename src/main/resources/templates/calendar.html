@@ -11,8 +11,11 @@
     <header class="site-header dashboard-header">
         <a class="brand" th:href="@{/}"><span class="brand-mark" aria-hidden="true">11</span> Project 11</a>
         <nav class="page-nav" aria-label="Main navigation">
-            <a th:href="@{/welcome}">Marks</a>
+            <a th:href="@{/polls}">Abstimmungen</a>
+            <a th:href="@{/welcome}">Overview</a>
             <a th:href="@{/calendar}" aria-current="page">Calendar</a>
+            <a th:href="@{/amt}">Applications</a>
+            <a th:href="@{/costs}">Kosten</a><a th:href="@{/users/me}">My profile</a>
         </nav>
         <div class="header-account">
             <form th:action="@{/logout}" method="post">
@@ -28,9 +31,10 @@
                 <h1 id="calendar-title">The group calendar.</h1>
                 <p>What we're doing, and who's away. All in one place.</p>
             </div>
-            <p class="timezone-note"><span aria-hidden="true">◷</span> Berlin time <span>CET / CEST</span></p>
+            <div class="calendar-create-actions"><a class="button event-create-link" th:href="@{/events/new}"><span aria-hidden="true">＋</span> New event</a><p class="timezone-note"><span aria-hidden="true">◷</span> Berlin time <span>CET / CEST</span></p></div>
         </section>
 
+        <div class="notice notice-success" role="status" th:if="${createdEvent != null}"><strong th:text="${createdEvent}"></strong> is on the calendar. Let’s make it a good one.</div>
         <section class="calendar-panel" aria-labelledby="month-heading">
             <div class="calendar-toolbar">
                 <div class="calendar-month-heading">
@@ -59,7 +63,7 @@
                     </a>
                     <a th:href="@{/calendar(month=${calendar.month},show='HOLIDAYS')}"
                        th:attr="aria-current=${calendar.filter.name() == 'HOLIDAYS' ? 'true' : null}">
-                        <span class="legend-dot legend-dot--holiday" aria-hidden="true"></span>Holidays
+                        <svg class="holiday-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="7" width="16" height="14" rx="2"/><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3M9 11v6m6-6v6"/></svg>Holidays
                         <span class="filter-count" th:text="${calendar.holidayCount}">0</span>
                     </a>
                 </nav>
@@ -86,16 +90,26 @@
                     <tr th:each="week : ${#numbers.sequence(0, calendar.days.size() / 7 - 1)}">
                         <td class="calendar-day" th:each="day : ${calendar.days.subList(week * 7, week * 7 + 7)}"
                             th:classappend="${(!day.inMonth ? ' calendar-day--outside' : '') + (day.today ? ' calendar-day--today' : '')}">
-                            <time class="day-number" th:datetime="${day.date}" th:attr="aria-current=${day.today ? 'date' : null}">
+                            <a class="calendar-date-link" th:if="${day.inMonth}" th:href="@{/events/new(date=${day.date})}" th:attr="aria-label=|Create an event on ${day.date}|"><time class="day-number" th:datetime="${day.date}" th:attr="aria-current=${day.today ? 'date' : null}"><span class="visually-hidden" th:if="${day.today}">Today, </span><span th:text="${day.number}">1</span></time><span class="calendar-day-plus" aria-hidden="true">+</span></a>
+                            <time th:unless="${day.inMonth}" class="day-number" th:datetime="${day.date}" th:attr="aria-current=${day.today ? 'date' : null}">
                                 <span class="visually-hidden" th:if="${day.today}">Today, </span>
                                 <span th:text="${day.number}">1</span>
                             </time>
                             <div class="day-entries">
                                 <a class="calendar-entry" th:each="entry : ${day.entries}"
-                                   th:classappend="| calendar-entry--${entry.kind}|" th:href="|#${entry.key}|">
-                                    <span class="entry-kind" th:text="${entry.kind == 'activity' ? 'Activity' : 'Holiday'}">Activity</span>
-                                    <strong th:text="${entry.title}">An activity</strong>
-                                    <span class="entry-summary" th:text="${entry.summary}">18:00 · Alex</span>
+                                   th:classappend="| calendar-entry--${entry.kind}|" th:href="@{${entry.url}}"
+                                   th:style="${entry.kind == 'holiday'} ? |--holiday-color: ${entry.color}| : null"
+                                   th:attr="aria-label=${entry.kind == 'holiday' ? entry.details : null},data-holiday-details=${entry.kind == 'holiday' ? entry.details : null}"
+                                   th:title="${entry.kind == 'holiday' ? entry.details : null}">
+                                    <th:block th:if="${entry.kind == 'activity'}">
+                                        <span class="entry-kind">Activity</span>
+                                        <strong th:text="${entry.title}">An activity</strong>
+                                        <span class="entry-summary" th:text="${entry.summary}">18:00 · Alex</span>
+                                    </th:block>
+                                    <th:block th:if="${entry.kind == 'holiday'}">
+                                        <svg class="holiday-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="7" width="16" height="14" rx="2"/><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3M9 11v6m6-6v6"/></svg>
+                                        <span class="holiday-name" th:text="${entry.title}">Holiday</span>
+                                    </th:block>
                                 </a>
                             </div>
                         </td>
@@ -120,20 +134,21 @@
             <div class="calendar-empty" th:if="${calendar.entries.isEmpty()}">
                 <span aria-hidden="true">◌</span>
                 <h3 th:text="${calendar.filter.name() == 'ACTIVITIES' ? 'No activities this month.' : (calendar.filter.name() == 'HOLIDAYS' ? 'No holidays this month.' : 'A little room for plans.')} ">A little room for plans.</h3>
-                <p>Activities and submitted holidays will appear here. Try another month or filter to explore the calendar.</p>
+                <p>Activities and submitted holidays will appear here. Try another month or make a plan together.</p><a class="calendar-control calendar-empty-create" th:href="@{/events/new}">＋ Create an event</a>
             </div>
             <div class="agenda-list" th:unless="${calendar.entries.isEmpty()}">
                 <article class="agenda-entry" th:each="entry : ${calendar.entries}" th:id="${entry.key}"
                          th:classappend="| agenda-entry--${entry.kind}|" tabindex="-1">
                     <div class="agenda-entry-label">
-                        <span class="entry-kind" th:text="${entry.kind == 'activity' ? 'Activity' : 'Holiday'}">Activity</span>
-                        <span th:text="${entry.owner}">Alex Morgan</span>
+                        <span class="entry-kind"><svg th:if="${entry.kind == 'holiday'}" class="holiday-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="7" width="16" height="14" rx="2"/><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3M9 11v6m6-6v6"/></svg><span th:text="${entry.kind == 'activity' ? 'Activity' : 'Holiday'}">Activity</span></span>
+                        <span th:text="${entry.owner}">Owner</span>
                     </div>
                     <div class="agenda-entry-content">
-                        <h3 th:text="${entry.title}">An activity</h3>
+                        <h3><a th:if="${entry.kind == 'activity'}" class="event-title-link" th:href="@{${entry.url}}" th:text="${entry.title}">Event</a><span th:unless="${entry.kind == 'activity'}" th:text="${entry.title}">Holiday</span></h3>
                         <p class="agenda-period" th:text="${entry.period}">Date and time</p>
                         <p class="agenda-location" th:if="${!entry.location.isEmpty()}"><strong>Where: </strong><span th:text="${entry.location}">Location</span></p>
                         <p class="agenda-description" th:if="${!entry.description.isEmpty()}" th:text="${entry.description}">Description</p>
+                        <a class="calendar-control agenda-attendance-link" th:if="${attendanceLinks.containsKey(entry.key)}" th:href="@{/events/{id}/attendance(id=${attendanceLinks.get(entry.key)})}">Manage attendance →</a>
                     </div>
                     <a class="agenda-back" href="#month-heading" aria-label="Back to month calendar">↑</a>
                 </article>
@@ -145,5 +160,7 @@
         <span>Activities &amp; holidays · shared with every member</span>
     </footer>
 </div>
+<div id="calendar-holiday-tooltip" class="holiday-tooltip" role="tooltip" hidden></div>
+<script th:src="@{/js/calendar.js}" defer></script>
 </body>
 </html>

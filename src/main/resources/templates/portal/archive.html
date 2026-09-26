@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{portal/fragments :: head('Registratur und Teilnehmerakten')}"></head>
+<body class="amt-body"><div class="amt-wrapper"><header th:replace="~{portal/fragments :: header}"></header>
+    <div class="amt-shell"><aside th:replace="~{portal/fragments :: sidebar}"></aside>
+        <main class="amt-main"><p class="amt-breadcrumb"><a th:href="@{/amt}">Startseite</a> &gt; Registratur &gt; Allgemeine Kenntnisnahme</p>
+            <div class="amt-page-title"><span>AKTENEINSICHT FÜR DEN GESAMTEN FREUNDESKREIS</span><h2 th:text="${member != null ? 'Teilnehmerakte: ' + member.name : 'Zentrale Antragsregistratur'}">Zentrale Antragsregistratur</h2><p th:if="${member != null}"><span th:text="${member.number}" class="amt-monospace">TN-000001</span> · Persönliche Veröffentlichungshistorie</p><p>Vergangene Anträge in absteigender Eingangsreihenfolge. Lesen ist ausnahmsweise ohne gesonderten Antrag möglich.</p></div>
+            <div class="amt-notice">Jedes Mitglied kann jede Akte vollständig einsehen. Aktenzeichen, Eingangsstempel und gespeicherte Entscheidungen bleiben nachvollziehbar.</div>
+            <section class="amt-box"><h2>Aktenbestand: <span th:text="${archive.totalElements}">0</span> Vorgänge</h2><div th:replace="~{portal/fragments :: applicationTable(${archive.content})}"></div></section>
+            <nav class="amt-pagination" aria-label="Aktenseiten">
+                <a class="amt-button" th:if="${archive.hasPrevious() && member == null}" th:href="@{/amt/akten(page=${archive.number - 1})}">&lt;&lt; Vorherige Aktenseite</a>
+                <a class="amt-button" th:if="${archive.hasPrevious() && member != null}" th:href="@{/amt/mitglieder/{id}(id=${member.id},page=${archive.number - 1})}">&lt;&lt; Vorherige Aktenseite</a>
+                <span th:text="|Seite ${archive.number + 1} von ${archive.totalPages == 0 ? 1 : archive.totalPages}|"></span>
+                <a class="amt-button" th:if="${archive.hasNext() && member == null}" th:href="@{/amt/akten(page=${archive.number + 1})}">Weitere Vorgänge &gt;&gt;</a>
+                <a class="amt-button" th:if="${archive.hasNext() && member != null}" th:href="@{/amt/mitglieder/{id}(id=${member.id},page=${archive.number + 1})}">Weitere Vorgänge &gt;&gt;</a>
+            </nav>
+            <section class="amt-box"><h2>Andere Teilnehmerakten öffnen</h2><div class="amt-box-content"><ul class="amt-member-list"><li><a th:href="@{/amt/akten}">[ Gesamten Aktenbestand anzeigen ]</a></li><li th:each="person : ${members}"><a th:href="@{/amt/mitglieder/{id}(id=${person.id})}"><span th:text="${person.number}" class="amt-monospace"></span> · <span th:text="${person.name}"></span></a></li></ul></div></section>
+        </main>
+    </div><footer th:replace="~{portal/fragments :: footer}"></footer>
+</div></body>
+</html>

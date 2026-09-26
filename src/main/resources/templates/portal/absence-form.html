@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{portal/fragments :: head('Antrag auf Abwesenheit')}"></head>
+<body class="amt-body">
+<div class="amt-wrapper"><header th:replace="~{portal/fragments :: header}"></header>
+    <div class="amt-shell"><aside th:replace="~{portal/fragments :: sidebar}"></aside>
+        <main class="amt-main">
+            <p class="amt-breadcrumb"><a th:href="@{/amt}">Startseite</a> &gt; Referat A &gt; Abwesenheitsbegehren &gt; Ersterfassung</p>
+            <div class="amt-page-title"><span>FORMBLATT AaA-01 / AUSFERTIGUNG FÜR DIE GRUPPE</span><h2>Antrag auf Abwesenheit</h2><p>Eine private Angelegenheit ist kein Grund, auf eine Begründung zu verzichten.</p></div>
+            <div class="amt-progress-panel"><strong id="amt-step-label">Schritt 1 von 7</strong><div class="amt-progress-track" aria-hidden="true"><span id="amt-progress-fill" style="width:73%"></span></div><span id="amt-progress-label">73 % abgeschlossen*</span><small>*Amtliche Schätzung. Abweichungen vom tatsächlichen Fortschritt sind verfahrensbedingt.</small></div>
+            <p class="amt-fineprint">Entwurfskennung: <span th:text="${draft.id}" class="amt-monospace">Kennung</span> · Entwürfe gelten nur für diese Sitzung.</p>
+            <div class="amt-notice"><strong>Vor dem Ausfüllen beachten:</strong> Alle eingereichten Angaben sind für sämtliche Mitglieder sichtbar. Der Antrag bleibt nach Einreichung unveränderlich. Entwürfe wahren keine Frist. Alle Zeitangaben beziehen sich auf Berlin.</div>
+            <div class="amt-notice amt-alert" th:if="${activities.isEmpty()}"><strong>Keine antragsfähige Aktivität vorhanden.</strong> Es gibt derzeit keine Aktivität innerhalb der Einreichungsfrist, für die Sie noch keinen AaA eingereicht haben. <a th:href="@{/events/new}">Neue Aktivität im Kalender anlegen</a> oder <a th:href="@{/calendar}">Kalender einsehen</a>. Das Formblatt kann bereits besichtigt werden.</div>
+            <noscript><p class="amt-notice">Ohne JavaScript werden alle Abschnitte gemeinsam angezeigt. Die Weiter-Schritte und zufälligen Verwaltungshindernisse entfallen ausnahmsweise.</p></noscript>
+
+            <form id="absence-form" th:action="@{/amt/aaa/pruefen}" th:object="${absenceForm}" method="post">
+                <input type="hidden" name="vorgang" th:value="${draft.id}">
+                <section class="amt-errors" role="alert" th:if="${#fields.hasErrors('*')}"><h3>Ihr Antrag konnte nicht unmittelbar weitergeleitet werden.</h3><p>Grund: formale Unstimmigkeiten. Ihre bisherigen Angaben und Fragen wurden beibehalten.</p><ul><li th:each="error : ${#fields.errors('*')}" th:text="${error}">Fehler</li></ul><p>Bitte beheben Sie die Beanstandungen und reichen Sie die Vorbereitung erneut zur Vorbereitung ein.</p></section>
+
+                <fieldset class="amt-fieldset"><legend>A. Angaben zum Abwesenheitsvorgang</legend><p class="amt-fineprint">Mit * gekennzeichnete Felder sind Pflichtfelder. Die übrigen Felder sind ebenfalls gekennzeichnet.</p>
+                    <div class="amt-form-row"><label for="applicantName">A.1 Vollständiger Name <b>*</b></label><div><input id="applicantName" th:field="*{applicantName}" required maxlength="120" autocomplete="name" th:errorclass="amt-invalid"><small>Auch dann auszufüllen, wenn Ihr Name bereits links steht.</small><p class="amt-field-error" th:errors="*{applicantName}"></p></div></div>
+                    <div class="amt-form-row"><label for="activityId">A.2 Betroffene Gruppenaktivität <b>*</b></label><div><select id="activityId" th:field="*{activityId}" required th:errorclass="amt-invalid"><option value="">-- Bitte Vorgang zuordnen --</option><option th:each="activity : ${activities}" th:value="${activity.id}" th:text="|${activity.title} (${activity.date})|" th:attr="data-period=${activity.period},data-deadline=${activity.deadline},data-date=${activity.date}">Aktivität</option></select><p id="activity-information" class="amt-inline-info" aria-live="polite">Nach Auswahl werden Termin und Einreichungsfrist zur Kenntnisnahme mitgeteilt.</p><p class="amt-field-error" th:errors="*{activityId}"></p></div></div>
+                    <div class="amt-form-row"><label for="activityDate">A.3 Datum der Gruppenaktivität <b>*</b></label><div><input id="activityDate" th:field="*{activityDate}" type="date" required th:errorclass="amt-invalid"><small>Bitte das Beginn-Datum der ausgewählten Aktivität erneut eintippen. Eine automatische Übernahme ist nicht vorgesehen.</small><p class="amt-field-error" th:errors="*{activityDate}"></p></div></div>
+                    <div class="amt-form-row"><label for="destination">A.5 Zielort <b>*</b></label><div><input id="destination" th:field="*{destination}" required maxlength="200" th:errorclass="amt-invalid"><p class="amt-field-error" th:errors="*{destination}"></p></div></div>
+                    <div class="amt-form-row"><label for="companions">A.6 Begleitpersonen <b>*</b></label><div><input id="companions" th:field="*{companions}" required maxlength="500" placeholder="Bei Alleingang ausdrücklich: keine" th:errorclass="amt-invalid"><p class="amt-field-error" th:errors="*{companions}"></p></div></div>
+                    <div class="amt-form-row"><label for="reason">A.7 Grund der Abwesenheit <b>*</b></label><div><textarea id="reason" th:field="*{reason}" required maxlength="1000" rows="3" th:errorclass="amt-invalid"></textarea><p class="amt-field-error" th:errors="*{reason}"></p></div></div>
+                    <div class="amt-form-row"><label for="transport">A.9 Verkehrsmittel <b>*</b></label><div><input id="transport" th:field="*{transport}" required maxlength="120" placeholder="Bahn, Fahrrad, zu Fuß, sonstige Fortbewegung" th:errorclass="amt-invalid"><p class="amt-field-error" th:errors="*{transport}"></p></div></div>
+                    <div class="amt-form-row"><label for="catering">A.10 Geplante Verpflegung während der Abwesenheit <b>*</b></label><div><textarea id="catering" th:field="*{catering}" required maxlength="1000" rows="3" th:errorclass="amt-invalid"></textarea><small>Die fachliche Würdigung erfolgt durch Referat E – Kulinarische Angelegenheiten.</small><p class="amt-field-error" th:errors="*{catering}"></p></div></div>
+                </fieldset>
+
+                <fieldset class="amt-fieldset"><legend>B. Begründungswesen / vertiefte Darlegung</legend>
+                    <div class="amt-form-row"><label for="priorityReason">B.1 Warum ist diese Aktivität wichtiger als die Teilnahme an der Gruppenaktivität? <b>*</b></label><div><textarea id="priorityReason" th:field="*{priorityReason}" required maxlength="2000" rows="4" th:errorclass="amt-invalid"></textarea><small>Die Antwort „ist sie nicht“ entbindet nicht von den nachfolgenden Angaben.</small><p class="amt-field-error" th:errors="*{priorityReason}"></p></div></div>
+                    <div class="amt-form-row"><label for="detailedReason">B.2 Ausführliche Begründung <b>*</b></label><div><p class="amt-instruction">Bitte begründen Sie ausführlich, weshalb die private Angelegenheit einer Teilnahme an der gemeinschaftlich vorgesehenen Aktivität vorzuziehen ist.</p><textarea id="detailedReason" th:field="*{detailedReason}" required minlength="50" maxlength="6000" rows="8" th:errorclass="amt-invalid"></textarea><small><span id="reason-count" aria-live="polite">0</span> Zeichen / mindestens 50. Kürze ist keine Verwaltungstugend.</small><p class="amt-field-error" th:errors="*{detailedReason}"></p></div></div>
+                </fieldset>
+
+                <div th:replace="~{portal/questions :: questions}"></div>
+                <div class="amt-submit-area"><p>Mit dem nächsten Schritt wird noch nichts eingereicht. Zunächst wird die Einreichung vorbereitet. Anschließend folgen weitere Bestätigungen.</p><button class="amt-button amt-primary" type="submit" th:disabled="${activities.isEmpty()}">Antrag zur vorläufigen Einreichung vorbereiten &gt;&gt;</button><a th:href="@{/amt}">Verfahren vorerst unbeendet verlassen</a></div>
+            </form>
+        </main>
+    </div><footer th:replace="~{portal/fragments :: footer}"></footer>
+</div>
+</body>
+</html>

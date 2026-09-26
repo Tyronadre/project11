@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{portal/fragments :: head('Akteneinsicht')}"></head>
+<body class="amt-body"><div class="amt-wrapper"><header th:replace="~{portal/fragments :: header}"></header>
+    <div class="amt-shell"><aside th:replace="~{portal/fragments :: sidebar}"></aside>
+        <main class="amt-main"><p class="amt-breadcrumb"><a th:href="@{/amt/akten}">Registratur</a> &gt; <a th:href="@{/amt/mitglieder/{id}(id=${file.summary.applicantId})}" th:text="${file.summary.applicantName}">Name</a> &gt; <span th:text="${file.summary.reference}">Aktenzeichen</span></p>
+            <div class="amt-notice amt-success" role="status" th:if="${newlySubmitted == true}"><strong>Ihr Antrag ist ordnungsgemäß eingegangen.</strong> Bitte sehen Sie von einer erneuten Einreichung ab. Die Prüfungsreise beginnt unabhängig von ihrer Notwendigkeit.</div>
+            <div class="amt-page-title"><span>AUSFERTIGUNG ZUR ALLGEMEINEN KENNTNISNAHME</span><h2>Antrag auf Abwesenheit</h2><p class="amt-monospace" th:text="${file.summary.reference}">AaA-2026-000001</p></div>
+            <div class="amt-file-header"><dl><dt>Antragstellende Person</dt><dd><a th:href="@{/amt/mitglieder/{id}(id=${file.summary.applicantId})}" th:text="${file.summary.applicantName}">Name</a></dd><dt>Betroffene Aktivität</dt><dd th:text="${file.summary.activityTitle}">Aktivität</dd><dt>Verbindlicher Eingangsstempel</dt><dd th:text="${file.summary.submittedAt}">Eingang</dd><dt>Aktueller Bearbeitungsstand</dt><dd><strong class="amt-status" th:text="${file.summary.status}">Eingereicht</strong></dd></dl><span class="amt-rubber-stamp">EINGEGANGEN<br>NICHT MEHR ÄNDERBAR</span></div>
+            <div th:replace="~{portal/case-history :: history(${dossier})}"></div>
+            <div th:replace="~{portal/fragments :: answers(${file.sections})}"></div>
+            <div class="amt-notice">Diese Akte ist abgeschlossen eingereicht und für alle Mitglieder lesbar. Nachträgliche Änderungen, Löschungen und ersetzende Zweiteinreichungen sind nicht vorgesehen.</div>
+            <div class="amt-dialog-actions"><a class="amt-button" th:href="@{/amt/mitglieder/{id}(id=${file.summary.applicantId})}">Zur Teilnehmerakte</a><a class="amt-button" th:href="@{/amt/akten}">Zur Gesamtregistratur</a></div>
+        </main>
+    </div><footer th:replace="~{portal/fragments :: footer}"></footer>
+</div></body>
+</html>

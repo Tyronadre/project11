@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="|${title} – AGATA Fachverfahren|">AGATA Fachverfahren</title>
+    <link rel="stylesheet" th:href="@{/css/amt.css}">
+    <script defer th:src="@{/js/amt.js}"></script>
+    <script defer th:src="@{/js/amt-steps.js}"></script>
+</head>
+<body>
+<header class="amt-header" th:fragment="header">
+    <div class="amt-systembar"><span>AGATA • Intranet / Sozialverwaltung / Produktivbetrieb*</span><a th:href="@{/welcome}">Zurück zur modernen Oberfläche »</a></div>
+    <div class="amt-masthead">
+        <div class="amt-seal" aria-hidden="true"><span>§</span><small>AGATA</small></div>
+        <div><p>Der Freundeskreis · Zentrale Verwaltungsstelle</p><h1>Amt für Gruppenaktivitäten<br>und temporäre Abwesenheiten</h1><p class="amt-subtitle">Elektronische Antragsannahme · Fachverfahren SOZ-ABW 2007</p></div>
+        <div class="amt-version">ONLINE<br><strong>mit Einschränkungen</strong><br>Version 2.0.7b<br><span>Optimiert für Geduld.</span></div>
+    </div>
+    <div class="amt-warning"><strong>ACHTUNG:</strong> Dieses Portal ist ausschließlich für die ordnungsgemäße Verwaltung sozialer Anwesenheitsverhältnisse bestimmt. Eine missbräuchliche Nutzung des Systems kann zu einer vorübergehenden Einschränkung Ihrer Freizeit führen.</div>
+    <nav class="amt-topnav" aria-label="Portalnavigation"><a th:href="@{/amt}">[ Startseite ]</a><a th:href="@{/amt/aaa}">[ Neuer AaA ]</a><a th:href="@{/amt/akten}">[ Öffentliche Gruppenakten ]</a><a th:href="@{/calendar}">[ Kalender ]</a><form th:action="@{/logout}" method="post"><button type="submit">Sitzung ordnungsgemäß beenden</button></form></nav>
+</header>
+
+<aside class="amt-sidebar" th:fragment="sidebar">
+    <div class="amt-box"><h2>Ihre Teilnehmerkennung</h2><div class="amt-box-content"><strong class="amt-monospace" th:text="${citizen.number}">TN-000001</strong><p th:text="${citizen.name}">Antragstellende Person</p><small>Bei jeder Rückfrage unaufgefordert bereithalten.</small></div></div>
+    <nav class="amt-box amt-tree" aria-label="Fachbereiche"><h2>Vorgangsübersicht</h2><div class="amt-box-content">
+        <a th:href="@{/amt}">▣ Zentrale Auskunft</a>
+        <strong>− Antragswesen</strong>
+        <a class="amt-tree-child" th:href="@{/amt/aaa}">└ AaA / Abwesenheit</a>
+        <a class="amt-tree-child" th:href="@{/amt/aab}">└ AaB / Beurlaubung</a>
+        <a class="amt-tree-child" th:href="@{/amt/eer}">└ EeR / Reisebericht</a>
+        <strong>− Registratur</strong>
+        <a class="amt-tree-child" th:href="@{/amt/mitglieder/{id}(id=${citizen.id})}">└ Meine Teilnehmerakte</a>
+        <a class="amt-tree-child" th:href="@{/amt/akten}">└ Alle Anträge lesen</a>
+    </div></nav>
+    <div class="amt-box"><h2>Sozialer Zuverlässigkeitsindex</h2><div class="amt-box-content"><strong class="amt-score" th:text="|${citizen.reliability}/100|">87/100</strong><div class="amt-score-track" aria-hidden="true"><span th:style="|width:${citizen.reliability}%|"></span></div><p>Bewertung: <strong>unter Vorbehalt</strong></p><small>Unverbindliche Verwaltungskennzahl. Keine Auswirkung auf Ihre Striche.</small></div></div>
+    <details class="amt-box"><summary>Zuständige Referate [+]</summary><div class="amt-box-content"><p>A – Anwesenheitsverwaltung</p><p>B – Urlaubsangelegenheiten</p><p>C – Reiseberichterstattung</p><p>D – Ungewöhnliche Abwesenheitsgründe</p><p>E – Kulinarische Angelegenheiten</p><hr><p>Oberste Kommission für soziale Integrität</p></div></details>
+    <div class="amt-sticky">WICHTIG!<br>Das Ausfüllen eines Formulars ersetzt nicht das Ausfüllen dieses Formulars.</div>
+</aside>
+
+<footer class="amt-footer" th:fragment="footer"><p>AGATA · Referat EDV und sonstige Zumutungen · Stand der Benutzerführung: April 2007</p><p>*Freizeitverwaltung des Freundeskreises. Keine echte Behörde. Alle Uhrzeiten: Europe/Berlin.</p><span class="amt-web-badge">HTML<br>VERWALTET</span> <span class="amt-web-badge">KEINE<br>ABKÜRZUNGEN</span> <span class="amt-web-badge">BESTÄTIGUNG<br>ERFORDERLICH</span></footer>
+
+<div th:fragment="applicationTable(records)" class="amt-table-scroll">
+    <table class="amt-register"><thead><tr><th scope="col">Aktenzeichen</th><th scope="col">Antragstellende Person</th><th scope="col">Aktivität / Reise</th><th scope="col">Eingangsstempel</th><th scope="col">Bearbeitungsstand</th></tr></thead>
+        <tbody><tr th:if="${records.isEmpty()}"><td colspan="5" class="amt-empty">Keine Vorgänge vorhanden. Die Registratur wartet pflichtbewusst.</td></tr>
+        <tr th:each="record : ${records}"><td><a class="amt-monospace" th:href="@{${record.url}}" th:text="${record.reference}">AaA-000000</a></td><td><a th:href="@{/amt/mitglieder/{id}(id=${record.applicantId})}" th:text="${record.applicantName}">Name</a></td><td th:text="${record.activityTitle}">Aktivität</td><td th:text="${record.submittedAt}">Eingang</td><td><span class="amt-status" th:text="${record.status}">Eingereicht</span></td></tr></tbody>
+    </table>
+</div>
+
+<div th:fragment="answers(sections)" class="amt-file-answers">
+    <section th:each="section : ${sections}" class="amt-answer-section"><h3 th:text="${section.name}">Abschnitt</h3><dl><div th:each="answer : ${section.answers}"><dt th:text="${answer.question}">Frage</dt><dd th:text="${answer.answer}">Antwort</dd></div></dl></section>
+</div>
+</body>
+</html>

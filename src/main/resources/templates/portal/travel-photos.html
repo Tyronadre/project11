@@ -1,0 +1,4 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org"><body>
+<section th:fragment="gallery(photos)" th:if="${!photos.isEmpty()}" class="amt-photo-evidence"><h3>Fotografische Anlagen</h3><div class="amt-photo-grid"><figure th:each="photo, iter : ${photos}"><a th:href="@{/amt/fotos/{id}(id=${photo.id})}" target="_blank" rel="noopener"><img th:src="@{/amt/fotos/{id}(id=${photo.id})}" th:alt="|Reisefoto ${iter.count}: ${photo.originalName}|" loading="lazy"></a><figcaption><strong th:text="|Anlage ${iter.count}|"></strong> · <span th:text="${photo.originalName}"></span></figcaption></figure></div></section>
+</body></html>

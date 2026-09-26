@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{portal/fragments :: head('Verfahrenshindernis')}"></head>
+<body class="amt-body"><div class="amt-wrapper"><header th:replace="~{portal/fragments :: header}"></header>
+    <div class="amt-shell"><aside th:replace="~{portal/fragments :: sidebar}"></aside><main class="amt-main">
+        <div class="amt-page-title"><span>REFERAT VERFAHRENSHINDERNISSE</span><h2>So kann der Vorgang nicht fortgesetzt werden.</h2></div>
+        <div class="amt-errors" role="alert"><p th:text="${problem}">Der Vorgang ist nicht verfügbar.</p></div>
+        <p>Bereits eingereichte Anträge finden Sie in der Registratur. Ein Entwurf kann über seine ursprüngliche Adresse erneut geöffnet werden, solange die Sitzung besteht.</p>
+        <div class="amt-dialog-actions"><a class="amt-button" th:href="@{/amt/akten}">Registratur einsehen</a><a class="amt-button" th:href="@{/amt/aaa}">Neues Verfahren eröffnen</a><a th:href="@{/amt}">Zur zentralen Auskunft</a></div>
+    </main></div><footer th:replace="~{portal/fragments :: footer}"></footer>
+</div></body>
+</html>

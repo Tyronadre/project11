@@ -1,0 +1,46 @@
+.for-you { margin-bottom: 48px; scroll-margin-top: 24px; }
+.for-you-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
+.for-you-heading h2 { margin: 5px 0 10px; font-size: clamp(28px, 4vw, 38px); font-weight: 550; letter-spacing: -1.2px; }
+.for-you-heading p:not(.section-kicker) { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+.for-you-total { flex-shrink: 0; padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; }
+.for-you-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: #eaf0e4; margin-bottom: 20px; }
+.for-you-summary a { padding: 20px; text-decoration: none; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; }
+.for-you-summary a + a { border-left: 1px solid #d4dfcc; }
+.for-you-summary a:hover { background: #dfe9d8; }
+.for-you-summary a:focus-visible { outline-offset: -4px; }
+.for-you-summary span { font-size: 12px; line-height: 1.5; color: #4c6251; }
+.for-you-summary strong { font-size: clamp(23px, 3vw, 30px); font-weight: 550; letter-spacing: -.6px; overflow-wrap: anywhere; }
+.for-you-columns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.for-you-panel { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 22px; min-width: 0; scroll-margin-top: 24px; }
+.for-you-panel > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.for-you-panel h3 { margin: 0; font-size: 17px; letter-spacing: -.3px; }
+.for-you-panel > header > span { min-width: 25px; padding: 4px 7px; text-align: center; background: var(--paper); border-radius: 8px; font-size: 12px; }
+.for-you-item { padding: 20px 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.for-you-item-top { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
+.for-you-kind { color: var(--muted); font-size: 11px; font-weight: 650; }
+.for-you-badge { padding: 5px 8px; border-radius: 6px; background: #f0f3ed; font-size: 11px; font-weight: 650; }
+.for-you-badge--warning { background: #fff0d3; color: #775015; }
+.for-you-badge--danger { background: #fae8e4; color: #993e30; }
+.for-you-badge--success { background: #e6f1e3; color: #285640; }
+.for-you-item h4 { margin: 12px 0 8px; font-size: 15px; line-height: 1.45; }
+.for-you-detail { margin: 0 0 10px; font-size: 13px; line-height: 1.6; white-space: pre-line; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
+.for-you-meta, .for-you-footnote, .for-you-empty { font-size: 12px; color: var(--muted); line-height: 1.65; }
+.for-you-meta { margin: 0; }
+.for-you-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-top: 15px; }
+.for-you-actions a, .for-you-more { color: var(--green); font-size: 12px; font-weight: 650; text-underline-offset: 4px; }
+.for-you-actions form { margin: 0; }
+.for-you-actions button { border: 1px solid var(--line); border-radius: 7px; padding: 9px 12px; font: inherit; font-size: 12px; background: white; color: var(--ink); cursor: pointer; }
+.for-you-actions button:hover { background: var(--paper); border-color: #a9b7a9; }
+.for-you-more { display: inline-block; margin-top: 16px; }
+.for-you-clear { display: flex; align-items: center; gap: 12px; padding: 16px 20px; background: #eaf0e4; border-radius: 12px; font-size: 14px; line-height: 1.6; }
+.for-you-clear span { font-size: 20px; }
+@media (max-width: 1000px) { .for-you-columns { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+    .for-you-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .for-you-summary a { padding: 16px; }
+    .for-you-summary a:nth-child(3) { border-left: 0; }
+    .for-you-summary a:nth-child(n+3) { border-top: 1px solid #d4dfcc; }
+    .for-you-heading { align-items: flex-start; }
+    .for-you-total { padding: 7px 9px; }
+    .for-you-panel { padding: 18px; }
+}

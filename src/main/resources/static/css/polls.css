@@ -1,0 +1,17 @@
+.poll-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.poll-link { text-decoration: none; transition: border-color .15s; overflow-wrap: anywhere; }
+.poll-link:hover { border-color: var(--green); }
+.poll-link p { color: var(--muted); font-size: 14px; line-height: 1.7; }
+.poll-description { white-space: pre-wrap; overflow-wrap: anywhere; }
+.poll-ballot { margin-top: 24px; }
+.poll-slot { display: flex; align-items: center; gap: 16px; padding: 18px; border: 1px solid var(--line); border-radius: 12px; margin: 12px 0; cursor: pointer; background: #fafbf7; }
+.poll-slot input { width: 22px; height: 22px; min-height: 22px; flex-shrink: 0; accent-color: var(--green); }
+.poll-slot strong { display: block; line-height: 1.6; }
+.poll-slot small { display: block; color: var(--green); margin-top: 4px; }
+.poll-leading { background: #edf3e3; border-color: #b7c99c; }
+.poll-count { margin-left: auto; white-space: nowrap; font-size: 12px; color: var(--green); }
+.poll-ballot select { width: 100%; padding: 14px; border: 1px solid var(--line); border-radius: 8px; font: inherit; color: var(--ink); background: white; margin-bottom: 18px; }
+.poll-ballot .button { margin-top: 20px; }
+@media(max-width: 760px) { .poll-grid { grid-template-columns: 1fr; } .poll-slot { flex-wrap: wrap; gap: 10px; padding: 12px; } .poll-count { margin-left: 32px; } }
+
+.poll-slot .poll-chosen { font-weight: 700; color: var(--ink); }

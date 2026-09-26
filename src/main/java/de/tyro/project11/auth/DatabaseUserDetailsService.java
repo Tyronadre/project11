@@ -1,7 +1,6 @@
 package de.tyro.project11.auth;
 
 import de.tyro.project11.registration.UserRepository;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -27,10 +26,12 @@ public class DatabaseUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Invalid email or password."));
         // Spring Security verifies the submitted password with our BCrypt encoder.
         // Keep the JPA entity out of the HTTP session.
-        String role = user.isAdmin() ? "ADMIN" : "USER";
-        return User.withUsername(user.getEmail())
-                .password(user.getPasswordHash())
-                .roles(role)
-                .build();
+        return new AppUserPrincipal(
+                user.getId(),
+                user.getEmail(),
+                user.getPasswordHash(),
+                user.isAdmin(),
+                user.getCredentialVersion()
+        );
     }
 }

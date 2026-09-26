@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org"><body>
+<div th:fragment="questions">
+                <fieldset class="amt-fieldset"><legend>C. Ergänzende persönliche Angaben (zufällige Zuständigkeit)</legend><p class="amt-fineprint">Sachlich entbehrliche Angaben dürfen frei erfunden werden. Aus der Auswahl lässt sich keinerlei Sinn ableiten.</p>
+                    <div class="amt-random-fields">
+                        <div class="amt-form-row amt-random-row" th:each="question, iter : ${draft.questions.personal}"><label th:for="|personal-${iter.index}|"><span th:text="|C.${iter.count} ${question}|"></span> <b>*</b></label><div><input th:id="|personal-${iter.index}|" th:field="*{personalAnswers[__${iter.index}__]}" required maxlength="300" autocomplete="off" th:errorclass="amt-invalid"><p class="amt-field-error" th:errors="*{personalAnswers[__${iter.index}__]}"></p></div></div>
+                    </div><p id="personal-useless-note" class="amt-useless-note" aria-live="polite" hidden>Vielen Dank. Diese Information war für Ihren Antrag nicht erforderlich.</p><p id="field-reorder-notice" class="amt-fineprint" aria-live="polite"></p>
+                </fieldset>
+
+                <fieldset class="amt-fieldset"><legend>D. Wissens-, Eignungs- und Loyalitätsnachweis</legend>
+                    <fieldset class="amt-subfieldset"><legend>D.1 Allgemeinwissen <b>*</b></legend><p th:text="${draft.questions.knowledge.question}">Wissensfrage</p><label class="amt-check" th:each="option : ${draft.questions.knowledge.options}"><input type="radio" th:field="*{knowledgeAnswer}" th:value="${option}" required><span th:text="${option}">Antwort</span></label><p class="amt-field-error" th:errors="*{knowledgeAnswer}"></p><small>Die Relevanz dieser Frage ist nicht Gegenstand des Verfahrens.</small></fieldset>
+                    <div class="amt-form-row"><label for="absurdAnswer">D.2 Hypothetische Lagebeurteilung <b>*</b></label><div><p class="amt-instruction" th:text="${draft.questions.absurd}">Hypothetische Frage</p><textarea id="absurdAnswer" th:field="*{absurdAnswer}" required minlength="20" maxlength="3000" rows="5" th:errorclass="amt-invalid"></textarea><small>Mindestens 20 Zeichen. Bitte bleiben Sie innerhalb der vorgegebenen Unwirklichkeit.</small><p class="amt-field-error" th:errors="*{absurdAnswer}"></p></div></div>
+                    <div class="amt-form-row"><label for="loyaltyAnswer">D.3 Soziale Loyalität <b>*</b></label><div><p class="amt-instruction" th:text="${draft.questions.loyalty}">Loyalitätsfrage</p><select id="loyaltyAnswer" th:field="*{loyaltyAnswer}" required th:errorclass="amt-invalid"><option value="">-- Amtliche Selbsteinschätzung --</option><option th:each="option : ${loyaltyOptions}" th:value="${option}" th:text="${option}">Antwort</option></select><p class="amt-field-error" th:errors="*{loyaltyAnswer}"></p></div></div>
+                    <div class="amt-form-row amt-rare-question" th:if="${draft.questions.audit}"><label for="auditAnswer">D.4 Seltene Aktualitätsprüfung <b>*</b></label><div><p>Sie haben diese Frage möglicherweise bereits bei einem vorherigen Antrag beantwortet. Bitte beantworten Sie sie erneut, um die Aktualität Ihrer Angaben sicherzustellen: Welche Nudelform bevorzugen Sie?</p><textarea id="auditAnswer" th:field="*{auditAnswer}" required maxlength="1000" rows="3"></textarea><small>Sie wurden für die 2-%-Stichprobe ausgewählt. Glückwünsche sind nicht erforderlich.</small><p class="amt-field-error" th:errors="*{auditAnswer}"></p></div></div>
+                </fieldset>
+
+                <fieldset class="amt-fieldset amt-confirmations"><legend>E. Bestätigung der Bestätigungsfähigkeit</legend>
+                    <label class="amt-check"><input type="checkbox" th:field="*{confirmedDetails}" required data-primary-confirmation><span>Ich bestätige meine Angaben.</span></label>
+                    <label class="amt-check"><input type="checkbox" th:field="*{confirmedConfirmation}" required data-primary-confirmation><span>Ich bestätige die Bestätigung meiner Angaben.</span></label>
+                    <label class="amt-check"><input type="checkbox" th:field="*{understoodConfirmation}" required data-primary-confirmation><span>Ich bestätige, dass ich die Bestätigung verstanden habe.</span></label>
+                    <div id="final-checkbox" class="amt-confirmation-extra"><p><strong>Bitte bestätigen Sie, dass Sie die drei Bestätigungen bestätigen.</strong></p><label class="amt-check"><input type="checkbox" th:field="*{confirmedAll}" required><span>Hiermit bestätige ich alle drei vorstehenden Bestätigungen.</span></label></div>
+                    <section class="amt-terms" aria-labelledby="amt-terms-title">
+                        <h3 id="amt-terms-title" th:text="|E.5 ${portalTerms.title}|"></h3>
+                        <p class="amt-fineprint" th:text="|Fassung ${portalTerms.version} · Referat für Kleingedrucktes und erhebliche Nebensächlichkeiten|"></p>
+                        <div class="amt-terms-scroll" tabindex="0" role="region" aria-label="Vollständiger Text der Allgemeinen Gruppenbedingungen">
+                            <p>Bitte nehmen Sie sich für die folgenden Bestimmungen mehr Zeit, als ihr Inhalt rechtfertigt.</p>
+                            <section th:each="clause : ${portalTerms.clauses}"><h4 th:text="${clause.heading}"></h4><p th:text="${clause.text}"></p></section>
+                        </div>
+                        <label class="amt-check"><input type="checkbox" th:field="*{acceptedTerms}" required th:errorclass="amt-invalid"><span>Ich akzeptiere die Allgemeinen Gruppenbedingungen einschließlich ihrer erheblichen Nebensächlichkeiten. <b>*</b></span></label>
+                        <p class="amt-field-error" th:errors="*{acceptedTerms}"></p>
+                    </section>
+                </fieldset>
+</div>
+</body></html>

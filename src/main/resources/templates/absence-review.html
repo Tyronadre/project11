@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{profile/fragments :: head('AaA entscheiden')}"></head>
+<body class="dashboard-body"><div class="page dashboard-page"><header th:replace="~{profile/fragments :: header}"></header>
+<main class="profile-editor"><a class="event-back" th:href="@{/admin/aaa}">← Zu allen AaAs</a><p class="eyebrow">Administration · Verbindliche Entscheidung</p><h1 th:text="${review.title}"></h1>
+<p class="notice notice-success" th:if="${decisionSaved == true}">Die Entscheidung wurde gespeichert und die Benachrichtigung zur Zustellung vorgemerkt.</p>
+<p class="notice notice-error" role="alert" th:if="${decisionError != null}" th:text="${decisionError}"></p>
+<p class="field-hint" th:unless="${mailEnabled}">Der E-Mail-Versand ist deaktiviert. Entscheidungsnachrichten werden gespeichert und nach Aktivierung des Versands zugestellt.</p>
+<section class="profile-card"><h2 th:text="${review.applicant}"></h2><p th:text="|Eingang: ${review.submitted}|"></p><p th:text="|Frist: vor ${review.deadline}|"></p>
+<strong th:if="${review.cancelled}">Event abgesagt · keine Entscheidung erforderlich</strong><strong th:unless="${review.cancelled}" th:text="${!review.timely ? 'Nichtig · verspätet eingereicht' : (review.decision == 'PENDING' ? 'Noch nicht entschieden' : (review.decision == 'ACCEPTED' ? 'Angenommen' : 'Abgelehnt'))}"></strong><p th:if="${!review.reason.isEmpty()}" th:text="${review.reason}"></p>
+<dl th:each="answer : ${review.answers}"><dt th:text="${answer.question}"></dt><dd th:text="${answer.answer}"></dd></dl>
+<form class="profile-form" th:if="${review.pending}" th:action="@{/admin/aaa/{id}(id=${review.id})}" method="post">
+<label for="reason">Begründung (bei Ablehnung erforderlich)</label><textarea id="reason" name="reason" maxlength="2000" rows="4" th:text="${reason}"></textarea>
+<p class="field-hint">Eine endgültige Entscheidung kann nicht erneut getroffen werden. Die Person erhält das Ergebnis per E-Mail.</p>
+<div class="profile-form-actions"><button class="button" type="submit" name="decision" value="ACCEPTED">Annehmen</button><button class="calendar-control" type="submit" name="decision" value="REJECTED">Ablehnen</button></div>
+</form></section>
+</main></div></body></html>

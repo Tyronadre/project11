@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{polls/fragments :: head}"></head>
+<body class="dashboard-body"><div class="page dashboard-page">
+<header th:replace="~{polls/fragments :: header}"></header>
+<main class="calendar-layout">
+<div class="calendar-intro"><div><p class="eyebrow">Zusammen planen</p><h1>Wann passt’s euch?</h1><p>Termine vorschlagen, gemeinsam abstimmen und direkt ein Event planen.</p></div><a class="calendar-control" th:href="@{/polls/new}">＋ Neue Abstimmung</a></div>
+<div class="calendar-empty" th:if="${polls.isEmpty()}"><h2>Der nächste Plan beginnt hier.</h2><p>Schlage mindestens zwei Termine vor und finde heraus, wann die Gruppe Zeit hat.</p><a class="header-link" th:href="@{/polls/new}">Erste Abstimmung starten →</a></div>
+<div class="poll-grid"><a class="form-card poll-link" th:each="poll : ${polls}" th:href="@{/polls/{id}(id=${poll.id})}">
+<span class="eyebrow" th:text="${poll.eventId != null ? 'Event geplant' : (poll.votingOpen ? 'Abstimmung offen' : 'Termine vergangen')}"></span>
+<h2 th:text="${poll.title}"></h2><p th:text="|Von ${poll.owner} · ${poll.slots.size()} Vorschläge|"></p>
+<p th:text="|${poll.responses} von ${poll.members} Mitgliedern haben abgestimmt|"></p>
+<span class="header-link" th:text="${poll.eventId != null or !poll.votingOpen ? 'Ergebnis ansehen →' : (poll.answered ? 'Deine Auswahl ändern →' : 'Jetzt abstimmen →')}"></span>
+</a></div></main></div></body></html>

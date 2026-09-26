@@ -5,7 +5,17 @@ The examples are local and self-contained; reference links are optional reading 
 
 ## Find what you need
 
+- **Find a date together and create an event:** [Terminabstimmungen](date-polls.md).
+
+- **Change login details or configure password recovery:** [Kontoeinstellungen und Reset-Mails](account-settings.md).
+- **See personal open costs, deadlines, and decisions:** [Für dich offen](personal-overview.md).
+
 - **Understand the planned activity tracker:** [Project outline and implementation order](project-outline.md).
+- **Use or extend user profiles and personal blogs:** [Profile pages, payment reveal, and text editor](user-profiles.md).
+- **Edit or cancel an event and notify the group:** [Event management](event-management.md).
+- **Split expenses by event:** [Eventkosten, payment status, and allocation rules](event-costs.md).
+- **Manage attendance, automatic marks, AaA decisions, and email:** [SMTP setup and delivery behavior](attendance-email.md).
+- **Use or extend the deliberately bad application portal:** [AaA workflow and portal implementation](application-portal.md), based on the [bureaucracy concept](bad-protal.md).
 - **Start or package the app:** [Spring Boot commands](spring-boot-cheatsheet.md#everyday-commands).
 - **Understand where code belongs:** [Project map](spring-boot-cheatsheet.md#project-map).
 - **Use entities, JPA repositories, relationships, and DTOs:** [JPA essentials](spring-boot-cheatsheet.md#entities-repositories-and-transactions).

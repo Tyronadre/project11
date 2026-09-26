@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title th:text="|Bescheid ${dossier.reference} · AGATA|"></title>
+<link rel="stylesheet" th:href="@{/css/amt-notice.css}"><script defer th:src="@{/js/amt-print.js}"></script></head>
+<body>
+<nav class="notice-tools" aria-label="Bescheidaktionen"><a th:href="@{${dossier.url}}">← Zur Akte</a><button type="button" id="print-notice" hidden>Bescheid drucken / als PDF speichern</button><p>Im Druckdialog kann „Als PDF speichern“ gewählt werden. Drucken ist auch mit Strg+P bzw. ⌘P möglich.</p></nav>
+<main class="notice-paper">
+<header class="notice-letterhead"><span class="notice-seal" aria-hidden="true">§</span><div><strong>AGATA · Zentrale Verwaltungsstelle</strong><p>Amt für Gruppenaktivitäten<br>und temporäre Abwesenheiten</p><small>Freizeitverwaltung des Freundeskreises</small></div></header>
+<p class="notice-reference">Bei Rückfragen bitte unaufgefordert angeben:<br><strong th:text="${dossier.reference}"></strong></p>
+<h1>Bescheid</h1><p class="notice-subtitle" th:text="${dossier.title}"></p>
+<dl class="notice-metadata"><dt>Aktenzeichen</dt><dd th:text="${dossier.reference}"></dd><dt>Antragstellende Person</dt><dd th:text="${dossier.applicant}"></dd><dt>Betreff</dt><dd th:text="${dossier.subject}"></dd><dt>Eingang</dt><dd th:text="${dossier.submitted}"></dd><dt>Entscheidung vom</dt><dd th:text="${dossier.decided}"></dd><dt>Entschieden durch</dt><dd th:text="${dossier.official}"></dd></dl>
+<section><h2>1. Entscheidung</h2><p class="notice-outcome" th:text="${dossier.outcome}"></p></section>
+<section><h2>2. Begründung</h2><p class="notice-text" th:text="${dossier.reason.isBlank() ? 'Keine zusätzliche Begründung hinterlegt.' : dossier.reason}"></p></section>
+<section><h2>3. Wirkung und aktueller Aktenstand</h2><p><strong th:text="${dossier.status}"></strong></p><p th:text="${dossier.effect}"></p></section>
+<section><h2>4. Dokumentierter Bearbeitungsverlauf</h2><ol class="notice-history"><li th:each="entry : ${dossier.history}"><strong th:text="${entry.title}"></strong><br><span th:text="|${entry.stamp} · ${entry.actor}|"></span><p class="notice-text" th:text="${entry.detail}"></p></li></ol></section>
+<footer><p>Maschinell erstellte Ausfertigung der gespeicherten Entscheidung. Das Dienstsiegel befindet sich ordnungsgemäß im digitalen Umlauf.</p><p>Keine echte Behörde · Gruppeninterne Freizeitverwaltung · Alle Zeiten: Europe/Berlin</p><p>Spätere Folgeereignisse sind im aktuellen Aktenstand ausgewiesen. Rückfragen bitte unter Angabe des Aktenzeichens an die Gruppenverwaltung richten.</p></footer>
+</main></body></html>

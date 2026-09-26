@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{polls/fragments :: head}"></head>
+<body class="dashboard-body"><div class="page dashboard-page"><header th:replace="~{polls/fragments :: header}"></header>
+<main class="account-layout"><a class="event-back" th:href="@{/polls}">← Alle Abstimmungen</a>
+<div class="calendar-intro"><div><p class="eyebrow">Ein Plan, mehrere Möglichkeiten</p><h1>Termine vorschlagen</h1><p>Zwei bis sechs Termine. Alle Uhrzeiten gelten für Berlin.</p></div></div>
+<form class="form-card event-card" th:action="@{/polls}" th:object="${pollForm}" method="post">
+<div class="notice notice-error" role="alert" th:if="${#fields.hasAnyErrors()}">Bitte prüfe deine Angaben.<ul><li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li></ul></div>
+<p class="notice notice-error" role="alert" th:if="${problem}" th:text="${problem}"></p>
+<div class="field"><label for="title">Was habt ihr vor?</label><input id="title" th:field="*{title}" maxlength="120" required></div>
+<div class="field"><label for="location">Ort (optional)</label><input id="location" th:field="*{location}" maxlength="200"></div>
+<div class="field"><label for="description">Beschreibung (optional)</label><textarea id="description" th:field="*{description}" maxlength="2000"></textarea></div>
+<div class="field"><label for="duration">Dauer in Minuten</label><input id="duration" type="number" th:field="*{durationMinutes}" min="15" max="1440" required></div>
+<div class="poll-grid"><div class="field" th:each="slot, iter : *{slots}"><label th:for="|slot-${iter.index}|" th:text="|Vorschlag ${iter.count}${iter.index > 1 ? ' (optional)' : ''}|"></label><input type="datetime-local" th:id="|slot-${iter.index}|" th:name="|slots[${iter.index}]|" th:value="${slot}" th:required="${iter.index < 2}"></div></div>
+<button class="button" type="submit">Abstimmung starten <span aria-hidden="true">→</span></button>
+</form></main></div></body></html>

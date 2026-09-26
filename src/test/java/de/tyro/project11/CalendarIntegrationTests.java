@@ -1,6 +1,9 @@
 package de.tyro.project11;
 
 import de.tyro.project11.calendar.*;
+import de.tyro.project11.profile.ProfileForm;
+import de.tyro.project11.profile.ProfileService;
+import de.tyro.project11.profile.UserProfileRepository;
 import de.tyro.project11.registration.AppUser;
 import de.tyro.project11.registration.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,6 +46,8 @@ class CalendarIntegrationTests {
     @Autowired HolidayRepository holidays;
     @Autowired UserRepository users;
     @Autowired JdbcClient jdbc;
+    @Autowired UserProfileRepository profiles;
+    @Autowired ProfileService profileService;
 
     AppUser alex;
     AppUser mina;
@@ -51,6 +56,7 @@ class CalendarIntegrationTests {
     void prepareUsers() {
         holidays.deleteAllInBatch();
         activities.deleteAllInBatch();
+        profiles.deleteAll();
         users.deleteAllInBatch();
         alex = users.save(new AppUser("Alex Morgan", "alex@example.com", "test-hash", true));
         mina = users.save(new AppUser("Mina Member", "mina@example.com", "test-hash"));
@@ -94,7 +100,7 @@ class CalendarIntegrationTests {
         var activity = activity("Dinner <script>alert('x')</script>", "2026-09-10T16:00:00Z", "2026-09-10T19:00:00Z");
         holiday("Mina's holiday", "2026-09-11", "2026-09-13");
 
-        mvc.perform(get("/calendar").param("month", "2026-09").with(user(mina.getEmail())))
+        var response = mvc.perform(get("/calendar").param("month", "2026-09").with(user(mina.getEmail())))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Alex Morgan")))
                 .andExpect(content().string(containsString("Mina Member")))
@@ -102,8 +108,12 @@ class CalendarIntegrationTests {
                 .andExpect(content().string(containsString("&lt;script&gt;")))
                 .andExpect(content().string(not(containsString("<script>alert"))))
                 .andExpect(content().string(containsString("10 Sep 2026, 18:00 CEST")))
-                .andExpect(content().string(containsString("href=\"#activity-" + activity.getId() + "\"")))
-                .andExpect(content().string(containsString("id=\"activity-" + activity.getId() + "\"")));
+                .andExpect(content().string(containsString("href=\"/events/" + activity.getId() + "\"")))
+                .andExpect(content().string(containsString("id=\"activity-" + activity.getId() + "\""))).andReturn();
+        String grid = response.getResponse().getContentAsString().split("<div class=\"calendar-caption\">")[0];
+        assertThat(grid).contains("class=\"holiday-name\">Mina&#39;s holiday</span>", "--holiday-color: #52734d",
+                        "title=\"Mina&#39;s holiday", "Mina Member", "11 Sep 2026 – 13 Sep 2026", "Away with friends.")
+                .doesNotContain("class=\"holiday-name\">Mina Member</span>", "Mina Member · all day");
         mvc.perform(get("/welcome").with(user(mina.getEmail())))
                 .andExpect(content().string(containsString("href=\"/calendar\"")));
     }
@@ -131,6 +141,9 @@ class CalendarIntegrationTests {
 
     @Test
     void overlappingEntriesAppearOnEveryCoveredDayButMidnightEndDoesNotOccupyTheNextDay() {
+        var form = new ProfileForm();
+        form.setColor("#7854ab");
+        profileService.save(mina.getId(), mina.getEmail(), form);
         activity("Overnight", "2026-08-31T21:00:00Z", "2026-09-02T22:00:00Z");
         activity("Ends before September", "2026-08-31T18:00:00Z", "2026-08-31T22:00:00Z");
         activity("Starts in October", "2026-09-30T22:00:00Z", "2026-10-01T01:00:00Z");
@@ -140,7 +153,14 @@ class CalendarIntegrationTests {
         var view = calendar.load("2026-09", CalendarFilter.ALL);
         assertThat(view.activityCount()).isOne();
         assertThat(view.holidayCount()).isEqualTo(2);
-        assertThat(day(view, "2026-09-01").entries()).hasSize(2);
+        assertThat(day(view, "2026-09-01").entries()).extracting(CalendarView.DayEntry::kind)
+                .containsExactly("activity", "holiday");
+        assertThat(day(view, "2026-09-01").entries().getLast().color()).isEqualTo("#7854ab");
+        assertThat(day(view, "2026-09-01").entries().getLast().owner()).isEqualTo("Mina Member");
+        form.setColor("#1480a0");
+        profileService.save(mina.getId(), mina.getEmail(), form);
+        assertThat(day(calendar.load("2026-09", CalendarFilter.ALL), "2026-09-01").entries().getLast().color())
+                .isEqualTo("#1480a0");
         assertThat(day(view, "2026-09-02").entries()).hasSize(2);
         assertThat(day(view, "2026-09-03").entries()).isEmpty();
         assertThat(day(view, "2026-09-30").entries()).extracting(CalendarView.DayEntry::title)

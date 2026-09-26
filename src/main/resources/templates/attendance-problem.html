@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Attendance · Project 11</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
+<body class="dashboard-body"><div class="page dashboard-page">
+    <header class="site-header dashboard-header">
+        <a class="brand" th:href="@{/}"><span class="brand-mark" aria-hidden="true">11</span> Project 11</a>
+        <nav class="page-nav" aria-label="Main navigation">
+            <a th:href="@{/welcome}">Overview</a>
+            <a th:href="@{/calendar}" aria-current="page">Calendar</a>
+            <a th:href="@{/amt}">Applications</a>
+        </nav>
+        <div class="header-account">
+            <form th:action="@{/logout}" method="post">
+                <button class="header-link" type="submit">Sign out <span aria-hidden="true">↗</span></button>
+            </form>
+        </div>
+    </header>
+<main class="message-layout"><section class="form-card message-card"><p class="eyebrow">Attendance</p><h1>Let’s check that again.</h1><p class="notice notice-error" role="alert" th:text="${problem}"></p><p>Your attendance changes have not been saved. Return to the overview and open the event again to see its current details.</p><a class="button" th:href="@{/welcome}">Back to overview <span aria-hidden="true">→</span></a></section></main>
+</div></body></html>

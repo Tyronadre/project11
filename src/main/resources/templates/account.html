@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kontoeinstellungen · Project 11</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="dashboard-body">
+<div class="page dashboard-page">
+    <header class="site-header dashboard-header">
+        <a class="brand" th:href="@{/welcome}"><span class="brand-mark" aria-hidden="true">11</span> Project 11</a>
+        <nav class="page-nav" aria-label="Hauptnavigation">
+            <a th:href="@{/welcome}">Übersicht</a>
+            <a th:href="@{/calendar}">Kalender</a>
+            <a th:href="@{/amt}">Anträge</a>
+            <a th:href="@{/costs}">Kosten</a>
+            <a th:href="@{/users/me}">Mein Profil</a>
+        </nav>
+        <form th:action="@{/logout}" method="post"><button class="header-link" type="submit">Abmelden ↗</button></form>
+    </header>
+
+    <main class="account-layout">
+        <a class="event-back" th:href="@{/users/me}">← Zurück zu meinem Profil</a>
+        <section class="account-intro">
+            <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> Nur für dich</p>
+            <h1>Kontoeinstellungen</h1>
+            <p>E-Mail-Adresse und Passwort für <strong th:text="${account.displayName}">dein Konto</strong> verwalten.</p>
+        </section>
+
+        <div class="account-grid">
+            <section class="form-card account-card" aria-labelledby="email-title">
+                <span class="account-card-icon" aria-hidden="true">@</span>
+                <p class="section-kicker">Anmeldung</p>
+                <h2 id="email-title">E-Mail-Adresse ändern</h2>
+                <p class="card-copy">Danach wirst du abgemeldet und meldest dich mit der neuen Adresse wieder an.</p>
+                <form th:action="@{/account/email}" th:object="${emailChangeForm}" method="post">
+                    <div class="field">
+                        <label for="account-email">Neue E-Mail-Adresse</label>
+                        <input id="account-email" name="email" type="email" autocomplete="email" maxlength="254" required
+                               th:value="*{email}" th:attr="aria-invalid=${#fields.hasErrors('email')}">
+                        <p class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+                    </div>
+                    <div class="field">
+                        <label for="email-current-password">Aktuelles Passwort</label>
+                        <input id="email-current-password" name="currentPassword" type="password"
+                               autocomplete="current-password" maxlength="72" required
+                               th:attr="aria-invalid=${#fields.hasErrors('currentPassword')}">
+                        <p class="field-error" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}"></p>
+                    </div>
+                    <button class="button" type="submit">E-Mail ändern <span aria-hidden="true">→</span></button>
+                </form>
+            </section>
+
+            <section class="form-card account-card" aria-labelledby="password-title">
+                <span class="account-card-icon account-card-icon--key" aria-hidden="true">⌁</span>
+                <p class="section-kicker">Sicherheit</p>
+                <h2 id="password-title">Passwort ändern</h2>
+                <p class="card-copy">Verwende mindestens 12 Zeichen. Nach der Änderung werden alle Sitzungen beendet.</p>
+                <form th:action="@{/account/password}" th:object="${accountPasswordForm}" method="post">
+                    <div class="field">
+                        <label for="password-current">Aktuelles Passwort</label>
+                        <input id="password-current" name="currentPassword" type="password" autocomplete="current-password"
+                               maxlength="72" required th:attr="aria-invalid=${#fields.hasErrors('currentPassword')}">
+                        <p class="field-error" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}"></p>
+                    </div>
+                    <div class="field">
+                        <label for="password-new">Neues Passwort</label>
+                        <input id="password-new" name="newPassword" type="password" autocomplete="new-password"
+                               minlength="12" maxlength="72" required th:attr="aria-invalid=${#fields.hasErrors('newPassword')}">
+                        <p class="field-error" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></p>
+                        <p class="field-error" th:if="${#fields.hasErrors('passwordWithinByteLimit')}" th:errors="*{passwordWithinByteLimit}"></p>
+                    </div>
+                    <div class="field">
+                        <label for="password-confirm">Neues Passwort wiederholen</label>
+                        <input id="password-confirm" name="confirmPassword" type="password" autocomplete="new-password"
+                               maxlength="72" required th:attr="aria-invalid=${#fields.hasErrors('confirmPassword') or #fields.hasErrors('passwordsMatching')}">
+                        <p class="field-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></p>
+                        <p class="field-error" th:if="${#fields.hasErrors('passwordsMatching')}" th:errors="*{passwordsMatching}"></p>
+                    </div>
+                    <button class="button" type="submit">Passwort ändern <span aria-hidden="true">→</span></button>
+                </form>
+            </section>
+        </div>
+    </main>
+    <footer class="site-footer"><span>Project 11</span><span>Sicher und bei dir.</span></footer>
+</div>
+</body>
+</html>

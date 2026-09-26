@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org"><head th:fragment="head(title)">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title th:text="|${title} · Project 11|">Profil · Project 11</title>
+<link rel="stylesheet" th:href="@{/css/app.css}"><link rel="stylesheet" th:href="@{/css/profile.css}">
+</head><body>
+<header class="site-header dashboard-header" th:fragment="header">
+<a class="brand" th:href="@{/welcome}"><span class="brand-mark" aria-hidden="true">11</span> Project 11</a>
+<nav class="page-nav" aria-label="Hauptnavigation"><a th:href="@{/welcome}">Übersicht</a><a th:href="@{/calendar}">Kalender</a><a th:href="@{/amt}">Anträge</a><a th:href="@{/costs}">Kosten</a><a th:href="@{/users/me}">Mein Profil</a></nav>
+<form th:action="@{/logout}" method="post"><button class="header-link" type="submit">Abmelden ↗</button></form>
+</header>
+<th:block th:fragment="runs(runs)"><span th:each="run : ${runs}" th:class="|font-${run.font}${run.bold ? ' text-bold' : ''}${run.italic ? ' text-italic' : ''}${run.underline ? ' text-underline' : ''}${run.strike ? ' text-strike' : ''}|" th:style="|color: ${run.color}|" th:text="${run.text}"></span></th:block>
+<div th:fragment="blocks(blocks)" class="blog-body">
+<div class="blog-block" th:each="block : ${blocks}">
+<h3 th:if="${block.kind == 'heading'}" th:insert="~{profile/fragments :: runs(${block.runs})}"></h3>
+<blockquote th:if="${block.kind == 'quote'}" th:insert="~{profile/fragments :: runs(${block.runs})}"></blockquote>
+<p th:if="${block.kind == 'paragraph'}" th:insert="~{profile/fragments :: runs(${block.runs})}"></p>
+</div>
+</div>
+</body></html>

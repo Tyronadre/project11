@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{portal/fragments :: head('Vorprüfung der Einreichungsvorbereitung')}"></head>
+<body class="amt-body"><div class="amt-wrapper"><header th:replace="~{portal/fragments :: header}"></header>
+    <div class="amt-shell"><aside th:replace="~{portal/fragments :: sidebar}"></aside>
+        <main class="amt-main"><p class="amt-breadcrumb">Referat A &gt; Vorprüfung &gt; Vorbereitung der Vorbereitung</p>
+            <div class="amt-page-title"><span>SCHRITT 8 VON 7</span><h2>Vorprüfung erfolgreich vorbereitet.</h2><p>Ihr Antrag ist weiterhin nicht eingereicht.</p></div>
+            <div class="amt-progress-panel"><strong>Schritt 8 von 7</strong><div class="amt-progress-track" aria-hidden="true"><span style="width:92%"></span></div><span>92 % abgeschlossen*</span><small>*Weitere Schritte bleiben ausdrücklich vorbehalten.</small></div>
+            <div class="amt-notice"><strong>Bitte sämtliche Angaben prüfen.</strong> Nach dem endgültigen Eingang ist die Akte für jedes Mitglied lesbar und nicht mehr änderbar. Änderungen an diesem Entwurf führen zurück in die Vorprüfung.</div>
+            <div th:replace="~{portal/fragments :: answers(${sections})}"></div>
+            <section class="amt-dialog"><div class="amt-dialog-title">AGATA – Rückversicherung 1 von mindestens 2</div><div class="amt-dialog-body"><span class="amt-dialog-icon" aria-hidden="true">?</span><div><h3>Sind Sie sicher, dass Sie den Antrag zur vorläufigen Einreichung vorbereiten möchten?</h3><p>Die Beantwortung dieser Frage ersetzt nicht die anschließende erneute Bestätigung.</p></div></div><div class="amt-dialog-actions"><a class="amt-button" th:href="@{/amt/aaa(vorgang=${draft.id})}">Nein / Angaben korrigieren</a><form th:action="@{/amt/aaa/bestaetigen}" method="post"><input type="hidden" name="vorgang" th:value="${draft.id}"><button class="amt-button amt-primary" type="submit">Ja, Vorbereitung bestätigen</button></form></div></section>
+        </main>
+    </div><footer th:replace="~{portal/fragments :: footer}"></footer>
+</div></body>
+</html>

@@ -23,6 +23,18 @@
             <div class="notice notice-success" role="status" th:if="${param.logout != null}">
                 You have been signed out.
             </div>
+            <div class="notice notice-success" role="status" th:if="${param.passwordReset != null}">
+                Dein Passwort wurde zurückgesetzt. Du kannst dich jetzt anmelden.
+            </div>
+            <div class="notice notice-success" role="status" th:if="${param.passwordChanged != null}">
+                Dein Passwort wurde geändert. Bitte melde dich erneut an.
+            </div>
+            <div class="notice notice-success" role="status" th:if="${param.emailChanged != null}">
+                Deine E-Mail-Adresse wurde geändert. Bitte melde dich mit der neuen Adresse an.
+            </div>
+            <div class="notice notice-error" role="alert" th:if="${param.sessionExpired != null}">
+                Deine Anmeldedaten wurden geändert. Bitte melde dich erneut an.
+            </div>
             <!-- Spring Security handles this POST, including CSRF and password verification. -->
             <form th:action="@{/signin}" method="post">
                 <div class="field">
@@ -37,6 +49,7 @@
                 </div>
                 <button class="button" type="submit">Sign in <span aria-hidden="true">↗</span></button>
             </form>
+            <p class="forgot-link"><a th:href="@{/forgot-password}">Passwort vergessen?</a></p>
             <p class="account-switch">New here? <a th:href="@{/register}">Create an account</a></p>
         </section>
     </main>

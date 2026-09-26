@@ -14,6 +14,10 @@ public interface UserRepository extends JpaRepository<AppUser, Long> {
 
     Optional<AppUser> findByEmail(String email);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select user from AppUser user where user.email = :email")
+    Optional<AppUser> findLockedByEmail(@Param("email") String email);
+
     boolean existsByEmail(String email);
 
     List<AppUser> findAllByOrderByDisplayNameAsc();

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{profile/fragments :: head('AaBs und Reiseberichte prüfen')}"></head>
+<body class="dashboard-body"><div class="page dashboard-page"><header th:replace="~{profile/fragments :: header}"></header>
+<main class="profile-editor">
+    <a class="event-back" th:href="@{/welcome}">← Zur Übersicht</a>
+    <p class="eyebrow">Administration</p><h1>AaBs und Reiseberichte</h1>
+    <p class="profile-muted">AaB und Bericht werden getrennt entschieden. Ein fristgerecht eingegangener Bericht hält die Tagesstriche bis zur Entscheidung zurück.</p>
+    <div class="profile-card" th:if="${applications.empty}">Es liegen noch keine Reiseanträge vor.</div>
+    <article class="profile-card" style="margin-bottom:16px" th:each="review : ${applications.content}">
+        <p class="section-kicker" th:text="|${review.kind} · ${review.applicant}|"></p>
+        <h2><a th:href="@{/admin/travel/{id}(id=${review.id})}" th:text="${review.title}"></a></h2>
+        <p th:text="|Eingang: ${review.submitted}|"></p>
+        <strong th:text="${review.decision == 'PENDING' ? 'Offen · Entscheidung erforderlich' : (review.decision == 'ACCEPTED' ? 'Angenommen' : 'Abgelehnt')}"></strong>
+        <p th:if="${review.late}">Bericht verspätet eingegangen</p>
+        <p th:if="${review.invalidated}">Urlaub ungültig · Tagesstriche vergeben</p>
+    </article>
+    <nav class="timeline-links"><a th:if="${applications.hasPrevious()}" th:href="@{/admin/travel(page=${applications.number - 1})}">← Vorherige Seite</a><a th:if="${applications.hasNext()}" th:href="@{/admin/travel(page=${applications.number + 1})}">Nächste Seite →</a></nav>
+</main></div></body></html>

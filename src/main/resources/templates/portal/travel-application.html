@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{portal/fragments :: head('Reiseakte')}"></head>
+<body class="amt-body"><div class="amt-wrapper"><header th:replace="~{portal/fragments :: header}"></header>
+    <div class="amt-shell"><aside th:replace="~{portal/fragments :: sidebar}"></aside>
+        <main class="amt-main"><p class="amt-breadcrumb"><a th:href="@{/amt/akten}">Registratur</a> &gt; <a th:href="@{/amt/mitglieder/{id}(id=${file.summary.applicantId})}" th:text="${file.summary.applicantName}"></a> &gt; <span th:text="${file.summary.reference}"></span></p>
+            <div class="amt-notice amt-success" role="status" th:if="${newlySubmitted == true}"><strong>Der Vorgang ist ordnungsgemäß eingegangen.</strong> Bitte sehen Sie von einer erneuten Einreichung ab.</div>
+            <div class="amt-page-title"><span>AUSFERTIGUNG ZUR ALLGEMEINEN KENNTNISNAHME</span><h2 th:text="${file.kind.title}"></h2><p class="amt-monospace" th:text="${file.summary.reference}"></p></div>
+            <div class="amt-file-header"><dl><dt>Antragstellende Person</dt><dd th:text="${file.summary.applicantName}"></dd><dt>Reise / Beurlaubung</dt><dd th:text="${file.summary.activityTitle}"></dd><dt>Urlaubstage (jeweils einschließlich)</dt><dd th:text="${file.holidayPeriod}"></dd><dt>Verbindlicher Eingangsstempel</dt><dd th:text="${file.summary.submittedAt}"></dd><dt>Frist für den Reisebericht</dt><dd th:text="${file.deadline}"></dd><dt>Aktueller Bearbeitungsstand</dt><dd><strong class="amt-status" th:text="${file.summary.status}"></strong></dd></dl><span class="amt-rubber-stamp">EINGEGANGEN<br>NICHT MEHR ÄNDERBAR</span></div>
+            <div class="amt-notice" th:if="${file.kind.route == 'aab'}">Der Zeitraum ist im <a th:href="@{/calendar}">gemeinsamen Kalender</a> erfasst. AaB und Reisebericht benötigen jeweils eine Admin-Entscheidung. Ein Bericht muss bis einschließlich zum angezeigten Fristdatum eingehen. Fehlt ein rechtzeitiger Bericht oder wird er abgelehnt, verfällt ein angenommener Urlaub nach der Frist: ein Strich pro Urlaubstag, ohne zusätzliche Event-Striche im abgedeckten Zeitraum.</div>
+            <div class="amt-notice amt-alert" th:if="${file.late}"><strong>Der Reisebericht wurde verspätet eingereicht.</strong> Der tatsächliche Eingangsstempel bleibt erhalten; die verspätete Einreichung wird durch die Anerkennung nicht rückwirkend fristgerecht.</div>
+            <div class="amt-dialog-actions"><a class="amt-button" th:if="${file.leaveId != null and file.kind.route == 'eer'}" th:href="@{/amt/reisen/{id}(id=${file.leaveId})}">Zugehörigen AaB lesen</a><a class="amt-button" th:if="${file.reportId != null and file.kind.route == 'aab'}" th:href="@{/amt/reisen/{id}(id=${file.reportId})}">Zugehörigen Reisebericht lesen</a><a class="amt-button amt-primary" th:if="${file.mayReport}" th:href="@{/amt/eer(holiday=${file.holidayId})}">Reisebericht für meine Beurlaubung beginnen</a></div>
+            <div th:replace="~{portal/case-history :: history(${dossier})}"></div>
+            <div th:replace="~{portal/fragments :: answers(${file.sections})}"></div>
+            <div th:replace="~{portal/travel-photos :: gallery(${file.photos})}"></div>
+            <div class="amt-notice">Diese Akte und ihre Anlagen sind für alle Mitglieder lesbar. Nachträgliche Änderungen, Löschungen und ersetzende Zweiteinreichungen sind nicht vorgesehen.</div>
+            <div class="amt-dialog-actions"><a class="amt-button" th:href="@{/amt/mitglieder/{id}(id=${file.summary.applicantId})}">Zur Teilnehmerakte</a><a class="amt-button" th:href="@{/amt/akten}">Zur Gesamtregistratur</a></div>
+        </main>
+    </div><footer th:replace="~{portal/fragments :: footer}"></footer>
+</div></body></html>

@@ -1,5 +1,6 @@
 package de.tyro.project11.calendar;
 
+import de.tyro.project11.profile.UserProfileRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class CalendarService {
@@ -28,11 +31,13 @@ public class CalendarService {
     private final ActivityRepository activities;
     private final HolidayRepository holidays;
     private final Clock clock;
+    private final UserProfileRepository profiles;
 
-    public CalendarService(ActivityRepository activities, HolidayRepository holidays, Clock clock) {
+    public CalendarService(ActivityRepository activities, HolidayRepository holidays, Clock clock, UserProfileRepository profiles) {
         this.activities = activities;
         this.holidays = holidays;
         this.clock = clock;
+        this.profiles = profiles;
     }
 
     @Transactional(readOnly = true)
@@ -47,6 +52,15 @@ public class CalendarService {
                 first.atStartOfDay(CalendarTime.BERLIN).toOffsetDateTime());
         var monthHolidays = holidays.findByStartsOnLessThanEqualAndEndsOnGreaterThanEqualOrderByStartsOnAscIdAsc(
                 month.atEndOfMonth(), first);
+
+        // Fetch only colors, without loading private profile fields or one profile per holiday.
+        var holidayUserIds = monthHolidays.stream().map(holiday -> holiday.getUser().getId()).distinct().toList();
+        Map<Long, String> userColors = filter == CalendarFilter.ACTIVITIES || holidayUserIds.isEmpty() ? Map.of()
+                : profiles.findColorsByUserIds(holidayUserIds).stream().collect(Collectors.toMap(
+                        UserProfileRepository.ProfileColor::getUserId, UserProfileRepository.ProfileColor::getColor));
+        var holidayColors = monthHolidays.stream().collect(Collectors.toMap(
+                holiday -> "holiday-" + holiday.getId(),
+                holiday -> userColors.getOrDefault(holiday.getUser().getId(), "#52734d")));
 
         List<CalendarView.Entry> entries = new ArrayList<>();
         if (filter != CalendarFilter.HOLIDAYS) {
@@ -66,8 +80,12 @@ public class CalendarService {
             // Adjacent-month cells are muted placeholders; navigate to see their full agenda.
             var dayEntries = inMonth ? entries.stream()
                     .filter(entry -> !date.isBefore(entry.firstDay()) && !date.isAfter(entry.lastDay()))
+                    // Stable grouping keeps the existing order within events and within holidays.
+                    .sorted(Comparator.comparingInt(entry -> entry.kind().equals("activity") ? 0 : 1))
                     .map(entry -> new CalendarView.DayEntry(entry.key(), entry.kind(), entry.title(),
-                            daySummary(entry, date)))
+                            daySummary(entry, date), entry.owner(), holidayColors.get(entry.key()),
+                            entry.kind().equals("holiday") ? entry.title() + "\nUrlaub von " + entry.owner() + "\n" + entry.period()
+                                    + (entry.description().isBlank() ? "" : "\n" + entry.description()) : null))
                     .toList() : List.<CalendarView.DayEntry>of();
             return new CalendarView.Day(date, date.getDayOfMonth(), inMonth, date.equals(today), dayEntries);
         }).toList();
@@ -77,6 +95,25 @@ public class CalendarService {
                 month.equals(LAST_MONTH) ? null : month.plusMonths(1).toString(),
                 YearMonth.from(today).toString(), filter, monthActivities.size(), monthHolidays.size(),
                 days, List.copyOf(entries));
+    }
+
+    public record UpcomingEvent(long id, String title, String description, String owner, String period,
+                                LocalDate date, String day, String month, String calendarMonth, String status) {}
+
+    @Transactional(readOnly = true)
+    public List<UpcomingEvent> upcoming() {
+        var now = clock.instant();
+        var today = LocalDate.now(clock.withZone(CalendarTime.BERLIN));
+        return activities.findTop6ByEndsAtAfterOrderByStartsAtAscIdAsc(now.atOffset(java.time.ZoneOffset.UTC)).stream()
+                .map(activity -> {
+                    var entry = activityEntry(activity);
+                    var date = entry.firstDay();
+                    String status = activity.hasStartTime() && !activity.getStartsAt().toInstant().isAfter(now)
+                            ? "Happening now" : date.equals(today) ? "Today" : date.equals(today.plusDays(1)) ? "Tomorrow" : "Coming up";
+                    return new UpcomingEvent(activity.getId(), entry.title(), entry.description(), entry.owner(), entry.period(),
+                            date, date.format(DateTimeFormatter.ofPattern("dd")), date.format(DateTimeFormatter.ofPattern("MMM", Locale.ENGLISH)),
+                            YearMonth.from(date).toString(), status);
+                }).toList();
     }
 
     private YearMonth parseMonth(String value, LocalDate today) {
@@ -97,13 +134,17 @@ public class CalendarService {
         }
     }
 
-    private CalendarView.Entry activityEntry(Activity activity) {
+    static CalendarView.Entry activityEntry(Activity activity) {
         var start = activity.getStartsAt().atZoneSameInstant(CalendarTime.BERLIN);
         var end = activity.getEndsAt().atZoneSameInstant(CalendarTime.BERLIN);
-        return new CalendarView.Entry("activity-" + activity.getId(), "activity", activity.getTitle(),
-                activity.getCreatedBy().getDisplayName(), start.format(DATE_TIME_LABEL) + " – " + end.format(DATE_TIME_LABEL),
+        String period = activity.isAllDay() ? start.format(DATE_LABEL) + (end.minusNanos(1).toLocalDate().equals(start.toLocalDate()) ? "" : " – " + end.minusNanos(1).format(DATE_LABEL)) + " · all day"
+                : !activity.hasStartTime() ? start.format(DATE_LABEL) + " · until " + (end.toLocalDate().equals(start.toLocalDate())
+                    ? end.format(DateTimeFormatter.ofPattern("HH:mm z", Locale.ENGLISH)) : end.format(DATE_TIME_LABEL))
+                : start.format(DATE_TIME_LABEL) + (activity.hasEndTime() ? " – " + end.format(DATE_TIME_LABEL) : "");
+        return new CalendarView.Entry("activity-" + activity.getId(), "activity", (activity.isCancelled() ? "Abgesagt · " : "") + activity.getTitle(),
+                activity.getCreatedBy().getDisplayName(), period,
                 activity.getLocation(), activity.getDescription(), start.toLocalDate(),
-                end.minusNanos(1).toLocalDate(), start.format(TIME_LABEL));
+                end.minusNanos(1).toLocalDate(), activity.isAllDay() ? "" : !activity.hasStartTime() ? "Until " + end.format(TIME_LABEL) : start.format(TIME_LABEL));
     }
 
     private CalendarView.Entry holidayEntry(Holiday holiday) {
@@ -114,7 +155,7 @@ public class CalendarService {
     }
 
     private String daySummary(CalendarView.Entry entry, LocalDate date) {
-        if (entry.kind().equals("holiday")) {
+        if (entry.kind().equals("holiday") || entry.startTime().isEmpty()) {
             return entry.owner() + " · all day";
         }
         return (date.equals(entry.firstDay()) ? entry.startTime() : "Continues") + " · " + entry.owner();
