@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{portal/fragments :: head('Fundbüroakte')}"></head>
+<body class="amt-body"><div class="amt-wrapper">
+<header th:replace="~{portal/fragments :: header}"></header>
+<div class="amt-shell"><aside th:replace="~{portal/fragments :: sidebar}"></aside>
+<main class="amt-main leisure-main">
+<a th:href="@{/amt/extra}">← Zusatzverwaltungswesen</a>
+
+<p><a th:href="@{/amt/extra/fundbuero}">← Alle Anzeigen</a></p>
+<div class="amt-page-title"><span th:text="|${notice.reference} · ${notice.lost ? 'VERLOREN' : 'GEFUNDEN'}|"></span><h2 th:text="${notice.subject}"></h2><p th:text="|${notice.applicant} · ${notice.created} Uhr (Berlin)|"></p></div>
+<p class="amt-case-text" th:text="${notice.description}"></p>
+<p th:if="${notice.parentId != null}"><a th:href="@{/amt/extra/fundbuero/{id}(id=${notice.parentId})}">Zur zugehörigen Verlustanzeige</a></p>
+<p class="amt-notice" th:if="${notice.resolved != null}" th:text="|Am ${notice.resolved} Uhr von der einreichenden Person als erledigt abgeheftet.|"></p>
+<a class="amt-button" th:if="${notice.lost and notice.resolved == null}" th:href="@{/amt/extra/fundbuero/neu(parent=${notice.id})}">Dazu habe ich etwas gefunden</a>
+<form th:if="${notice.owner and notice.resolved == null}" th:action="@{/amt/extra/fundbuero/{id}/erledigt(id=${notice.id})}" method="post"><p>Hiermit wird nur deine Anzeige abgeschlossen. Verknüpfte Meldungen bleiben unverändert.</p><button class="amt-button" type="submit" th:text="${notice.lost ? 'Als wiedergefunden abheften' : 'Als übergeben abheften'}"></button></form>
+<section th:if="${notice.lost}"><h3>Passende Fundmeldungen</h3><p th:if="${replies.empty}">Noch keine Funde. Die Hoffnung verbleibt vorerst in Ihrer Obhut.</p>
+<ol class="leisure-records"><li th:each="reply : ${replies.content}"><a th:href="@{/amt/extra/fundbuero/{id}(id=${reply.id})}" th:text="${reply.subject}"></a><small th:text="|${reply.applicant} · ${reply.created}|"></small></li></ol>
+<nav class="amt-pagination" aria-label="Seiten der Fundmeldungen"><a th:if="${replies.hasPrevious()}" th:href="@{/amt/extra/fundbuero/{id}(id=${notice.id},page=${replies.number - 1})}">Neuere Funde</a><a th:if="${replies.hasNext()}" th:href="@{/amt/extra/fundbuero/{id}(id=${notice.id},page=${replies.number + 1})}">Ältere Funde</a></nav></section>
+</main></div><footer th:replace="~{portal/fragments :: footer}"></footer>
+</div></body></html>

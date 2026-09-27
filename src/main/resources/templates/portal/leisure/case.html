@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{portal/fragments :: head('Zusatzakte')}"></head>
+<body class="amt-body"><div class="amt-wrapper">
+<header th:replace="~{portal/fragments :: header}"></header>
+<div class="amt-shell"><aside th:replace="~{portal/fragments :: sidebar}"></aside>
+<main class="amt-main leisure-main">
+<a th:href="@{/amt/extra}">← Zusatzverwaltungswesen</a>
+
+<div class="amt-page-title"><span th:text="${record.reference}"></span><h2 th:text="${record.kind.title}"></h2><p th:text="${record.subject}"></p></div>
+<p th:text="|Eingereicht von ${record.applicant} · ${record.created} Uhr (Berlin)|"></p>
+<p class="amt-case-text" th:if="${!record.explanation.isBlank()}" th:text="${record.explanation}"></p>
+<p class="amt-notice" th:text="${record.outcome}"></p>
+<section th:if="${record.jurisdiction}"><h3>Dokumentierter Dienstweg</h3><ol class="amt-case-history"><li th:each="station : ${record.route}" th:text="${station}"></li></ol>
+<form th:if="${record.owner and !record.finished}" th:action="@{/amt/extra/akten/{id}/weiter(id=${record.id})}" method="post"><input type="hidden" name="stage" th:value="${record.stage}"><button class="amt-button" type="submit">An die nächste unzuständige Stelle weiterreichen</button></form></section>
+<section th:if="${record.waiting and !record.finished}" aria-labelledby="waiting-title">
+<h3 id="waiting-title">Ihre Wartemarke <span th:text="${record.reference}"></span></h3>
+<div class="leisure-waiting-board"><strong th:text="${record.waitingReady ? 'AUFRUF: SCHALTER 7' : 'BITTE NICHT VORDRÄNGELN'}"></strong><p th:text="${record.waitingReady ? 'Schalter 3 verweist Sie an Schalter 7.' : 'Die virtuelle Warteschlange bewegt sich alle 15 Sekunden.'}"></p></div>
+<p>Die Personen vor Ihnen sind erfunden. Andere Mitglieder und echte Verfahren warten nicht mit.</p>
+<div th:if="${!record.waitingReady}" data-waiting-refresh><button type="button" class="amt-button" id="waiting-auto" hidden>Automatische Aktualisierung starten</button><span id="waiting-update-status" role="status">Die Anzeige aktualisiert sich beim erneuten Öffnen.</span></div>
+<p><a th:href="@{/amt/extra/akten/{id}(id=${record.id})}">Anzeige jetzt aktualisieren</a></p>
+<form th:if="${record.owner and record.waitingReady}" th:action="@{/amt/extra/akten/{id}/schalter(id=${record.id})}" method="post"><button class="amt-button amt-primary" type="submit">Der Weiterleitung an Schalter 7 folgen</button></form>
+<form th:if="${record.owner}" th:action="@{/amt/extra/akten/{id}/verlassen(id=${record.id})}" method="post"><button class="amt-button" type="submit">Wartezimmer sofort verlassen</button></form>
+</section>
+<p th:if="${record.finished}" th:text="|Abgeschlossen am ${record.completed} Uhr (Berlin)|"></p>
+<p th:if="${record.printable}"><span class="amt-rubber-stamp">AMTLICH FOLGENLOS<br>ORDNUNGSGEMÄSS BESIEGELT</span></p>
+<a class="amt-button amt-primary" th:if="${record.printable}" th:href="@{/amt/extra/akten/{id}/urkunde(id=${record.id})}">Urkunde öffnen / drucken</a>
+<p th:if="${record.activityId != null}"><a th:href="@{/events/{id}(id=${record.activityId})}">Zum damaligen Treffen →</a></p>
+<p class="amt-fineprint">Dieser Spaßvorgang verändert weder Kontonamen noch Striche, Teilnahme, Kosten oder andere Anträge.</p>
+</main></div><footer th:replace="~{portal/fragments :: footer}"></footer>
+</div><script defer th:src="@{/js/amt-waiting.js}"></script></body></html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{portal/fragments :: head('Zusatzverwaltungswesen')}"></head>
+<body class="amt-body"><div class="amt-wrapper">
+<header th:replace="~{portal/fragments :: header}"></header>
+<div class="amt-shell"><aside th:replace="~{portal/fragments :: sidebar}"></aside>
+<main class="amt-main leisure-main">
+<a th:href="@{/amt}">← Zentrale Auskunft</a>
+
+<div class="amt-page-title"><span>REFERAT U / UNNÖTIGE ANGELEGENHEITEN</span><h2>Ihre Freizeit benötigt weitere Formulare.</h2><p>Freiwillige Verfahren mit sorgfältig dokumentierter Folgenlosigkeit.</p></div>
+<p class="amt-notice">Alles in diesem Bereich ist reine Unterhaltung. Striche, Teilnahme, Kosten, Fristen und echte Anträge bleiben unberührt. Urkunden und Fundbüroanzeigen sind für angemeldete Mitglieder lesbar; Wartemarken und Statistik sind persönlich.</p>
+<div class="leisure-grid">
+<section class="amt-box" th:each="procedure : ${procedures}"><h3 th:text="${procedure.title}"></h3><div class="amt-box-content"><strong class="amt-form-code" th:text="${procedure.code}"></strong><p th:text="${procedure.description}"></p><a class="amt-button" th:href="@{/amt/extra/formular/{slug}(slug=${procedure.slug})}">Verfahren eröffnen →</a></div></section>
+<section class="amt-box"><h3>Digitales Wartezimmer</h3><div class="amt-box-content"><p>3 Personen und eine ungeklärte Zuständigkeit vor Ihnen. Ausgang jederzeit offen.</p><a class="amt-button" th:href="@{/amt/extra/wartezimmer}">Zum Wartezimmer →</a></div></section>
+<section class="amt-box"><h3>Fundbüro für immaterielle Gegenstände</h3><div class="amt-box-content"><p>Motivation verloren? Einen Rest Geduld gefunden? Die Gruppe hilft bei der Zuordnung.</p><a class="amt-button" th:href="@{/amt/extra/fundbuero}">Fundbüro öffnen →</a></div></section>
+<section class="amt-box"><h3>Persönliche Amtsstatistik</h3><div class="amt-box-content"><p>Ihr Beitrag zur Bindung virtueller Büroklammern. Erkenntnisgewinn: in Prüfung.</p><a class="amt-button" th:href="@{/amt/extra/statistik}">Zahlen einsehen →</a></div></section>
+</div>
+<h2>Meine Zusatzakten</h2><p th:if="${cases.empty}">Noch keine Akten. Das Verwaltungspotenzial ist beträchtlich.</p>
+<ol class="leisure-records"><li th:each="record : ${cases.content}"><a th:href="@{/amt/extra/akten/{id}(id=${record.id})}" th:text="|${record.reference} · ${record.kind.title}|"></a><small th:text="|${record.created} · ${record.finished ? 'Abgeschlossen' : 'In freiwilliger Bearbeitung'}|"></small></li></ol>
+<nav class="amt-pagination" aria-label="Seiten der Zusatzakten"><a th:if="${cases.hasPrevious()}" th:href="@{/amt/extra(page=${cases.number - 1})}">Neuere Akten</a><a th:if="${cases.hasNext()}" th:href="@{/amt/extra(page=${cases.number + 1})}">Ältere Akten</a></nav>
+</main></div><footer th:replace="~{portal/fragments :: footer}"></footer>
+</div></body></html>

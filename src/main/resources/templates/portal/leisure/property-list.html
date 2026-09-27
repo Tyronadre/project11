@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{portal/fragments :: head('Immaterielles Fundbüro')}"></head>
+<body class="amt-body"><div class="amt-wrapper">
+<header th:replace="~{portal/fragments :: header}"></header>
+<div class="amt-shell"><aside th:replace="~{portal/fragments :: sidebar}"></aside>
+<main class="amt-main leisure-main">
+<a th:href="@{/amt/extra}">← Zusatzverwaltungswesen</a>
+
+<div class="amt-page-title"><span>FUNDBÜRO / NICHT ANFASSBARE GEGENSTÄNDE</span><h2>Hier findet sich vielleicht Ihre Motivation.</h2><p>Verlust- und Fundanzeigen aus dem Freundeskreis.</p></div>
+<a class="amt-button amt-primary" th:href="@{/amt/extra/fundbuero/neu}">Verlust oder Fund melden</a>
+<p class="amt-notice">Alle Anzeigen und Antworten sind für angemeldete Mitglieder lesbar. Bitte nur Dinge melden, die man ohnehin nicht anfassen kann. Eine Zuordnung verändert keine anderen Daten.</p>
+<p th:if="${notices.empty}">Noch nichts verloren. Nicht einmal die Hoffnung.</p>
+<div class="leisure-grid"><article class="amt-box" th:each="n : ${notices.content}"><h3><a th:href="@{/amt/extra/fundbuero/{id}(id=${n.id})}" th:text="${n.subject}"></a></h3><div class="amt-box-content"><strong th:text="${n.lost ? 'Verlustanzeige' : 'Fundanzeige'}"></strong><p th:text="|${n.applicant} · ${n.created}|"></p><p th:text="${n.resolved == null ? 'Offen zur allgemeinen Kenntnisnahme' : 'Von der einreichenden Person erledigt'}"></p><small th:if="${n.parentId != null}">Passender Fund zu einer Verlustanzeige</small></div></article></div>
+<nav class="amt-pagination" aria-label="Seiten des Fundbüros"><a th:if="${notices.hasPrevious()}" th:href="@{/amt/extra/fundbuero(page=${notices.number - 1})}">Neuere Anzeigen</a><a th:if="${notices.hasNext()}" th:href="@{/amt/extra/fundbuero(page=${notices.number + 1})}">Ältere Anzeigen</a></nav>
+</main></div><footer th:replace="~{portal/fragments :: footer}"></footer>
+</div></body></html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{portal/fragments :: head('Digitales Wartezimmer')}"></head>
+<body class="amt-body"><div class="amt-wrapper">
+<header th:replace="~{portal/fragments :: header}"></header>
+<div class="amt-shell"><aside th:replace="~{portal/fragments :: sidebar}"></aside>
+<main class="amt-main leisure-main">
+<a th:href="@{/amt/extra}">← Zusatzverwaltungswesen</a>
+
+<div class="amt-page-title"><span>SCHALTER 3 / GEDULD</span><h2>Bitte nehmen Sie eine Nummer.</h2><p>Wir bemühen uns um eine ordnungsgemäße Verzögerung.</p></div>
+<div class="leisure-waiting-board"><strong>3 PERSONEN + 1 ZUSTÄNDIGKEITSFRAGE</strong><p>Die Stühle sind virtuell. Die verlorene Zeit bestimmen Sie selbst.</p></div>
+<p>Nach 45 Sekunden dürfen Sie zu einem anderen Schalter weitergehen. Sie können jederzeit sofort gehen. Es gibt keine Folgen für andere Verfahren. Eine bereits offene Wartemarke wird wieder geöffnet.</p>
+<form th:action="@{/amt/extra/wartezimmer}" method="post"><button class="amt-button amt-primary" type="submit">Freiwillig eine Wartemarke ziehen</button></form>
+<p><a th:href="@{/amt}">Ohne Wartemarke direkt zurück ins Amt</a></p>
+</main></div><footer th:replace="~{portal/fragments :: footer}"></footer>
+</div></body></html>

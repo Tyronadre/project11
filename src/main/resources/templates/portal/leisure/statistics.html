@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{portal/fragments :: head('Persönliche Amtsstatistik')}"></head>
+<body class="amt-body"><div class="amt-wrapper">
+<header th:replace="~{portal/fragments :: header}"></header>
+<div class="amt-shell"><aside th:replace="~{portal/fragments :: sidebar}"></aside>
+<main class="amt-main leisure-main">
+<a th:href="@{/amt/extra}">← Zusatzverwaltungswesen</a>
+
+<div class="amt-page-title"><span>REFERAT ZAHL / OHNE GEWÄHR AUF SINN</span><h2>Ihre persönliche Amtsstatistik</h2><p>Leistung muss sich auch dann messen lassen, wenn sie keine ist.</p></div>
+<dl class="amt-stat-list leisure-statistics"><dt>Freiwillige Zusatzvorgänge</dt><dd th:text="${statistics.forms}"></dd><dt>Davon abgeschlossen</dt><dd th:text="${statistics.finished}"></dd><dt>Gezogene Wartemarken</dt><dd th:text="${statistics.waitingTickets}"></dd><dt>Fund- und Verlustanzeigen</dt><dd th:text="${statistics.propertyNotices}"></dd><dt>Virtuelle Büroklammern gebunden</dt><dd th:text="${statistics.paperclips}"></dd><dt>Verwaltungsaufwand</dt><dd th:text="${statistics.effort}"></dd><dt>Erkenntnisgewinn</dt><dd th:text="${statistics.insight}"></dd></dl>
+<p class="amt-rubber-stamp">ZÄHLUNG GEZÄHLT<br>BEDEUTUNG AUSSTEHEND</p>
+<p>Gezählt werden ausschließlich deine Akten in diesem Zusatzbereich und deine Fundbüroanzeigen. Pro Zusatzakte werden rechnerisch drei, pro Anzeige zwei virtuelle Büroklammern gebunden. Die Zahlen sind keine Bewertung deiner Zuverlässigkeit und haben keinerlei Auswirkungen.</p>
+</main></div><footer th:replace="~{portal/fragments :: footer}"></footer>
+</div></body></html>

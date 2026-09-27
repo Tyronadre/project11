@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{portal/fragments :: head('Freiwilliges Formular')}"></head>
+<body class="amt-body"><div class="amt-wrapper">
+<header th:replace="~{portal/fragments :: header}"></header>
+<div class="amt-shell"><aside th:replace="~{portal/fragments :: sidebar}"></aside>
+<main class="amt-main leisure-main">
+<a th:href="@{/amt/extra}">← Zusatzverwaltungswesen</a>
+
+<div class="amt-page-title"><span th:text="${procedure.code}"></span><h2 th:text="${procedure.title}"></h2><p th:text="${procedure.description}"></p></div>
+<p>Die Einreichung ist freiwillig. Der Vorgang und seine Urkunde sind für angemeldete Mitglieder lesbar.</p>
+<form class="amt-box" th:action="@{/amt/extra/formular/{slug}(slug=${procedure.slug})}" th:object="${leisureForm}" method="post"><div class="amt-box-content">
+<ul class="amt-notice" role="alert" th:if="${#fields.hasAnyErrors()}"><li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li></ul>
+<input type="hidden" th:field="*{token}">
+<p th:if="${procedure.slug == 'antragsberechtigung'}">Mit diesem Antrag beantragen Sie ausschließlich die Berechtigung zur Stellung dieses Antrags. Andere Formulare sind weiterhin ohne diese Berechtigung zugänglich.</p>
+<p th:if="${procedure.slug == 'bescheinigung'}">Das Nichtbenötigen einer Bescheinigung wird durch die Ausstellung einer Bescheinigung abschließend dokumentiert.</p>
+<div class="field" th:if="${procedure.slug == 'spitzname' or procedure.slug == 'zustaendigkeit'}"><label for="subject" th:text="${procedure.slug == 'spitzname' ? 'Gewünschte Zusatzbezeichnung' : 'Ihr Anliegen'}"></label><input id="subject" th:field="*{subject}" maxlength="120" required></div>
+<th:block th:if="${procedure.slug == 'vorfreude'}">
+<p class="amt-notice" th:if="${events.isEmpty()}">Es gibt noch kein beendetes, nicht abgesagtes Treffen aus deiner Mitgliedszeit. Die Vorfreudeverwaltung bittet um rückwirkende Geduld.</p>
+<div class="field"><label for="activityId">Vergangenes Treffen</label><select id="activityId" th:field="*{activityId}" required><option value="">Bitte auswählen</option><option th:each="event : ${events}" th:value="${event.id}" th:text="|${event.title} · ${event.ended}|"></option></select></div>
+<div class="field"><label for="enthusiasm">Rückwirkend festzusetzende Vorfreude</label><select id="enthusiasm" th:field="*{enthusiasm}"><option th:each="choice : ${enthusiasmChoices}" th:value="${choice}" th:text="${choice}"></option></select></div>
+<p>Die Urkunde behauptet keine Anwesenheit und verändert keine Teilnahmeangaben.</p>
+</th:block>
+<div class="field"><label for="explanation" th:text="${procedure.slug == 'spitzname' ? 'Übertriebene Begründung der besonderen Eignung' : 'Ergänzende Ausführungen (optional)'}"></label><textarea id="explanation" th:field="*{explanation}" rows="5" maxlength="2000" th:required="${procedure.slug == 'spitzname'}"></textarea></div>
+<button class="amt-button amt-primary" type="submit" th:disabled="${procedure.slug == 'vorfreude' and events.isEmpty()}" th:text="${procedure.slug == 'zustaendigkeit' ? 'Anliegen in den Dienstweg geben' : 'Freiwillig einreichen und Urkunde erhalten'}"></button>
+</div></form>
+</main></div><footer th:replace="~{portal/fragments :: footer}"></footer>
+</div></body></html>

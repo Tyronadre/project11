@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title th:text="|Urkunde ${record.reference} · ZFG|"></title>
+<link rel="stylesheet" th:href="@{/css/amt-notice.css}"><script defer th:src="@{/js/amt-print.js}"></script></head>
+<body><nav class="notice-tools" aria-label="Urkundenaktionen"><a th:href="@{/amt/extra/akten/{id}(id=${record.id})}">← Zur Spaßakte</a><button type="button" id="print-notice" hidden>Urkunde drucken / als PDF speichern</button><p>Im Druckdialog „Als PDF speichern“ auswählen. Ohne JavaScript: Strg+P bzw. ⌘P.</p></nav>
+<main class="notice-paper"><header class="notice-letterhead"><span class="notice-seal" aria-hidden="true">§</span><div><strong>ZFG · Referat für unnötige Angelegenheiten</strong><p>Zentralstelle für freundschaftsbezogene<br>Gruppenaktivitätsanwesenheitsregelungsangelegenheiten</p><small>Freiwillige Freizeitverwaltung · Spaßurkunde</small></div></header>
+<p class="notice-reference" th:text="|Aktenzeichen: ${record.reference}|"></p><h1 th:text="${record.kind.slug == 'spitzname' ? 'Ernennungsurkunde' : 'Amtliche Bescheinigung'}"></h1><p class="notice-subtitle" th:text="${record.kind.title}"></p>
+<dl class="notice-metadata"><dt>Ausgestellt für</dt><dd th:text="${record.applicant}"></dd><dt>Betreff</dt><dd th:text="${record.subject}"></dd><dt>Eingang</dt><dd th:text="|${record.created} Uhr (Berlin)|"></dd><dt>Ausfertigung</dt><dd th:text="|${record.completed} Uhr (Berlin)|"></dd></dl>
+<section><h2>Hiermit wird feierlich festgestellt</h2><p class="notice-outcome" th:text="${record.outcome}"></p></section>
+<section th:if="${!record.explanation.isBlank()}"><h2>Zu Protokoll gegebene Ausführungen</h2><p class="notice-text" th:text="${record.explanation}"></p></section>
+<section th:if="${record.jurisdiction}"><h2>Nachweis des Dienstweges</h2><ol><li th:each="station : ${record.route}" th:text="${station}"></li></ol></section>
+<p><strong>§ DIENSTSIEGEL · AMTLICH FOLGENLOS §</strong></p>
+<footer><p>Maschinell erstellt und auch ohne erkennbaren Sinn gültig. Das Nichtvorliegen eines Nutzens wurde wohlwollend geprüft.</p><p>Reine Unterhaltung, keine echte Behörde. Keine Wirkung auf Kontonamen, Anwesenheit, Striche, Kosten, Fristen oder andere Verfahren.</p></footer></main></body></html>

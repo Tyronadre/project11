@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{portal/fragments :: head('Fundbüromeldung')}"></head>
+<body class="amt-body"><div class="amt-wrapper">
+<header th:replace="~{portal/fragments :: header}"></header>
+<div class="amt-shell"><aside th:replace="~{portal/fragments :: sidebar}"></aside>
+<main class="amt-main leisure-main">
+<a th:href="@{/amt/extra}">← Zusatzverwaltungswesen</a>
+
+<div class="amt-page-title"><h2>Immateriellen Vorgang melden</h2><p>Beispiel: „Ein Rest Geduld wurde im Referat B abgegeben.“</p></div>
+<p><a th:href="@{/amt/extra/fundbuero}">← Zum Fundbüro</a></p>
+<form class="amt-box" th:action="@{/amt/extra/fundbuero}" th:object="${lostPropertyForm}" method="post"><div class="amt-box-content">
+<ul role="alert" class="amt-notice" th:if="${#fields.hasAnyErrors()}"><li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li></ul>
+<input type="hidden" th:field="*{parentId}">
+<div class="field" th:if="${lostPropertyForm.parentId == null}"><label for="kind">Art der Meldung</label><select id="kind" th:field="*{kind}"><option value="LOST">Verloren</option><option value="FOUND">Gefunden</option></select></div>
+<th:block th:if="${lostPropertyForm.parentId != null}"><input type="hidden" th:field="*{kind}"><p>Du meldest einen passenden Fund zu <a th:href="@{/amt/extra/fundbuero/{id}(id=${lostPropertyForm.parentId})}">dieser Verlustanzeige</a>.</p></th:block>
+<div class="field"><label for="subject">Bezeichnung, zum Beispiel „der rote Faden“</label><input id="subject" th:field="*{subject}" required maxlength="120"></div>
+<div class="field"><label for="description">Umstände, letzter Sichtkontakt und sonstige Hinweise</label><textarea id="description" th:field="*{description}" required rows="6" maxlength="2000"></textarea></div>
+<p>Die Meldung ist für angemeldete Gruppenmitglieder lesbar.</p><button class="amt-button amt-primary" type="submit">Meldung am schwarzen Brett anheften</button>
+</div></form>
+</main></div><footer th:replace="~{portal/fragments :: footer}"></footer>
+</div></body></html>

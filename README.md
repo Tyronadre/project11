@@ -26,6 +26,8 @@ The first build needs internet to download Gradle and dependencies. After prepar
 
 ## What is implemented
 
+- Acht freiwillige Spaßverfahren im Amt: Antragsberechtigung, Spitznamenurkunde, rückwirkende Vorfreude, Nichtbedarfsbescheinigung, Zuständigkeitsprüfung, digitales Wartezimmer, immaterielles Fundbüro und persönliche Amtsstatistik. Siehe [Zusatzverwaltungswesen](doc/leisure-office.md).
+
 - Strichverlauf im Profil, freiwillige Anwesenheitshinweise (AFeA), folgenlose Beschwerden (BüB) und wechselnde Dienstmeldungen: [Optionale Amtsverfahren](doc/optional-office.md). Terminabstimmungen lassen sich auch ohne Event schließen: [Terminabstimmungen](doc/date-polls.md).
 
 - A personal **Für dich offen** area on the overview, combining unpaid shares and reimbursements, missing AaAs, travel-report deadlines, and unread application decisions. See [personal overview](doc/personal-overview.md).

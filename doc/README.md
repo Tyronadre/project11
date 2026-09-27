@@ -5,6 +5,8 @@ The examples are local and self-contained; reference links are optional reading 
 
 ## Find what you need
 
+- **Acht freiwillige Spaßverfahren, Urkunden, Wartezimmer und Fundbüro:** [Zusatzverwaltungswesen](leisure-office.md).
+
 - **Strichverlauf, freiwilliger AFeA und folgenlose Beschwerden:** [Optionale Amtsverfahren](optional-office.md).
 
 - **Find a date together and create an event:** [Terminabstimmungen](date-polls.md).

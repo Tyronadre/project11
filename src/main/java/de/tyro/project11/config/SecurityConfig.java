@@ -46,6 +46,12 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/events/*/costs", "/events/*/costs/*", "/events/*/costs/*/reopen",
                         "/events/*/costs/*/shares/*/paid", "/events/*/costs/*/shares/*/unpaid").authenticated()
                 .requestMatchers(HttpMethod.GET, "/amt/bub", "/amt/bub/neu", "/amt/bub/*").authenticated()
+                .requestMatchers(HttpMethod.GET, "/amt/extra", "/amt/extra/formular/*", "/amt/extra/akten/*",
+                        "/amt/extra/akten/*/urkunde", "/amt/extra/wartezimmer", "/amt/extra/statistik",
+                        "/amt/extra/fundbuero", "/amt/extra/fundbuero/neu", "/amt/extra/fundbuero/*", "/js/amt-waiting.js").authenticated()
+                .requestMatchers(HttpMethod.POST, "/amt/extra/formular/*", "/amt/extra/wartezimmer",
+                        "/amt/extra/akten/*/weiter", "/amt/extra/akten/*/verlassen", "/amt/extra/akten/*/schalter",
+                        "/amt/extra/fundbuero", "/amt/extra/fundbuero/*/erledigt").authenticated()
                 .requestMatchers(HttpMethod.POST, "/amt/bub", "/amt/bub/*/close", "/amt/bub/*/rate").authenticated()
                 .requestMatchers(HttpMethod.GET, "/amt", "/amt/", "/amt/akten", "/amt/mitglieder/*", "/amt/antraege/*",
                         "/amt/antraege/*/bescheid", "/amt/reisen/*/bescheid", "/js/amt-print.js",
