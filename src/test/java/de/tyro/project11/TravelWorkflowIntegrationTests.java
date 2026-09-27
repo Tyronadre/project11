@@ -47,6 +47,7 @@ class TravelWorkflowIntegrationTests {
     @Autowired TravelDecisionMailDelivery delivery;
     @Autowired TravelApplicationRepository applications;
     @Autowired TravelPhotoRepository photos;
+    @Autowired TravelPhotoService photoService;
     @Autowired TravelDayPenaltyRepository days;
     @Autowired TravelDecisionEmailRepository emails;
     @Autowired UserRepository users;
@@ -238,8 +239,6 @@ class TravelWorkflowIntegrationTests {
         assertThatThrownBy(() -> travel.submit(draft, owner.getEmail())).isInstanceOf(ResponseStatusException.class).hasMessageContaining("letzten Urlaubstag");
         clock.set(Instant.parse("2026-01-02T12:00:00Z"));
         assertThatThrownBy(() -> travel.submit(draft, other.getEmail())).isInstanceOf(ResponseStatusException.class).hasMessageContaining("eigenen Beurlaubungen");
-        var noPhotos = reportDraft(holiday(leave));
-        assertThatThrownBy(() -> travel.submit(noPhotos, owner.getEmail())).isInstanceOf(ResponseStatusException.class).hasMessageContaining("Fotos");
         long id = travel.submit(draft, owner.getEmail());
         assertThat(travel.submit(draft, owner.getEmail())).isEqualTo(id);
         assertThat(photos.findByApplicationIdOrderByIdAsc(id)).hasSize(3);
@@ -248,14 +247,74 @@ class TravelWorkflowIntegrationTests {
     }
 
     @Test
-    void oldPortalShowsComicDelaysInsteadOfClaimingRecognition() throws Exception {
+    void reportSubmitsTextOnlyWithoutTermsOrConfirmation() throws Exception {
+        long leave = leave("2025-12-30", "2026-01-01", true);
+        clock.set(Instant.parse("2026-01-02T12:00:00Z"));
+        var page = mvc.perform(get("/amt/eer").with(user(owner.getEmail())))
+                .andExpect(status().isOk()).andExpect(view().name("portal/report-form"))
+                .andExpect(content().string(not(containsString("name=\"acceptedTerms\""))))
+                .andExpect(content().string(not(containsString("name=\"confirmedAll\""))))
+                .andReturn();
+        var draft = (TravelDraft) page.getModelAndView().getModel().get("draft");
+        assertThat(draft.getForm().value("holidayId")).isEqualTo(Long.toString(holiday(leave).getId()));
+        var session = (org.springframework.mock.web.MockHttpSession) page.getRequest().getSession();
+        var request = multipart("/amt/eer/einreichen").session(session).with(user(owner.getEmail())).with(csrf())
+                .param("vorgang", draft.getId()).param("values[holidayId]", draft.getForm().value("holidayId"))
+                .param("values[itinerary]", "Es war schön!");
+        var result = mvc.perform(request).andExpect(status().is3xxRedirection()).andReturn();
+        assertThat(applications.count()).isEqualTo(2);
+        assertThat(photos.count()).isZero();
+        mvc.perform(get(result.getResponse().getRedirectedUrl()).with(user(other.getEmail())))
+                .andExpect(status().isOk()).andExpect(content().string(containsString("Es war schön!")));
+        mvc.perform(request).andExpect(redirectedUrl(result.getResponse().getRedirectedUrl()));
+        assertThat(applications.count()).isEqualTo(2);
+    }
+
+    @Test
+    void photoUploadsHaveNoCountLimitAndInvalidBatchesAreAtomic() throws Exception {
+        long leave = leave("2025-12-30", "2026-01-01", true);
+        clock.set(Instant.parse("2026-01-02T12:00:00Z"));
+        var draft = reportDraft(holiday(leave));
+        var output = new java.io.ByteArrayOutputStream();
+        javax.imageio.ImageIO.write(new java.awt.image.BufferedImage(2, 2, java.awt.image.BufferedImage.TYPE_INT_RGB), "png", output);
+        var image = new org.springframework.mock.web.MockMultipartFile("photos", "trip.png", "image/png", output.toByteArray());
+        var errors = new org.springframework.validation.BeanPropertyBindingResult(draft.getForm(), "travelForm");
+        photoService.stage(draft, owner.getEmail(), Collections.nCopies(9, image), errors);
+        assertThat(errors.hasErrors()).isFalse();
+        assertThat(photoService.draftPhotos(draft.getId(), owner.getEmail())).hasSize(9);
+        photoService.stage(draft, owner.getEmail(), List.of(image,
+                new org.springframework.mock.web.MockMultipartFile("photos", "bad.png", "image/png", new byte[]{1, 2, 3})), errors);
+        assertThat(errors.hasErrors()).isTrue();
+        assertThat(photoService.draftPhotos(draft.getId(), owner.getEmail())).hasSize(9);
+        long report = travel.submit(draft, owner.getEmail());
+        assertThat(photos.findByApplicationIdOrderByIdAsc(report)).hasSize(9);
+        String html = mvc.perform(get("/amt/reisen/{id}", report).with(user(other.getEmail())))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertThat(html.indexOf("amt-photo-evidence")).isGreaterThan(html.indexOf("Ausführliche Antwort für die Akte"));
+    }
+
+    @Test
+    void photoQuotaRejectsAggregateOverOneGbBeforeReadingUploads() throws Exception {
+        var draft = new TravelDraft(TravelKind.REPORT);
+        var large = mock(org.springframework.web.multipart.MultipartFile.class);
+        when(large.getSize()).thenReturn(600_000_000L);
+        var errors = new org.springframework.validation.BeanPropertyBindingResult(draft.getForm(), "travelForm");
+        photoService.stage(draft, owner.getEmail(), List.of(large, large), errors);
+        assertThat(errors.getAllErrors()).extracting(org.springframework.validation.ObjectError::getDefaultMessage)
+                .anyMatch(message -> message.contains("1 GB"));
+        verify(large, never()).getInputStream();
+        assertThat(photos.count()).isZero();
+    }
+
+    @Test
+    void portalStatusRemainsStableUntilAnActualChange() throws Exception {
         var leave = leave("2025-12-30", "2026-01-01", true);
         String first = travel.file(leave, owner.getEmail()).summary().status();
         clock.set(clock.instant().plusSeconds(180));
-        assertThat(travel.file(leave, owner.getEmail()).summary().status()).isNotEqualTo(first);
+        assertThat(travel.file(leave, owner.getEmail()).summary().status()).isEqualTo(first);
         mvc.perform(get("/amt/reisen/{id}", leave).with(user(owner.getEmail())))
-                .andExpect(status().isOk()).andExpect(content().string(containsString("Statusautomaten")))
-                .andExpect(content().string(containsString("Fehler 1024")))
+                .andExpect(status().isOk()).andExpect(content().string(containsString("Bearbeitungsverlauf")))
+                .andExpect(content().string(containsString("Angenommen")))
                 .andExpect(content().string(not(containsString("endgültig anerkannt"))));
     }
 

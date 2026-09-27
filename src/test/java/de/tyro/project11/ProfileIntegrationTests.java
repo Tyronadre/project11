@@ -32,6 +32,8 @@ class ProfileIntegrationTests {
     @Autowired HolidayRepository holidays;
     @Autowired TravelApplicationRepository travel;
     @Autowired AttendanceRepository attendance;
+    @Autowired AbsenceApplicationRepository absences;
+    @Autowired TravelPhotoRepository photos;
     @Autowired JdbcClient jdbc;
     @Autowired Clock clock;
     AppUser owner, other;
@@ -243,6 +245,91 @@ class ProfileIntegrationTests {
                     .andExpect(status().isOk()).andExpect(content().string(containsString("Bitte prüfe deinen Beitrag")));
         }
         assertThat(blogs.findByAuthorIdOrderByCreatedAtDescIdDesc(owner.getId())).isEmpty();
+    }
+
+    @Test
+    void holidayAndSubmittedReportAreReadableInlineByOrdinaryMembersWithOnlyFiledPhotos() throws Exception {
+        var reader = users.save(new AppUser("Leserin", UUID.randomUUID() + "@example.com", "hash"));
+        var today = LocalDate.now(clock.withZone(CalendarTime.BERLIN));
+        var holiday = holidays.save(new Holiday(owner, "Bergsommer", "Eine Woche in den Bergen", today.minusDays(10), today.minusDays(3), now.minusDays(20)));
+        travel.save(new TravelApplication(TravelKind.LEAVE, UUID.randomUUID().toString(), owner, holiday, "Die Reise in die Berge", now.minusDays(20),
+                List.of(new ApplicationAnswer("Reisepläne", "Wohin?", "Unser Ausgangspunkt ist Innsbruck."))));
+        var report = travel.save(new TravelApplication(TravelKind.REPORT, UUID.randomUUID().toString(), owner, holiday, "Sonnenaufgang am Gipfel", now,
+                List.of(new ApplicationAnswer("Reisebericht", "Dein Bericht", "Am Morgen ging es los.\nOben gab es Kaffee. <script>unsafe()</script>"))));
+        String draft = UUID.randomUUID().toString();
+        var image = photos.save(new TravelPhoto(owner, draft, "Gipfel.png", "image/png", new byte[]{1}, now));
+        jdbc.sql("update travel_photos set application_id = :application where id = :id").param("application", report.getId()).param("id", image.getId()).update();
+        var privateImage = photos.save(new TravelPhoto(owner, UUID.randomUUID().toString(), "Entwurf-geheim.png", "image/png", new byte[]{1}, now));
+        mvc.perform(get("/users/{id}", owner.getId()).with(user(reader.getEmail())))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Unser Ausgangspunkt ist Innsbruck.")))
+                .andExpect(content().string(containsString("Am Morgen ging es los.")))
+                .andExpect(content().string(containsString("Oben gab es Kaffee. &lt;script&gt;unsafe()&lt;/script&gt;")))
+                .andExpect(content().string(not(containsString("<script>unsafe()"))))
+                .andExpect(content().string(containsString("src=\"/amt/fotos/" + image.getId() + "\"")))
+                .andExpect(content().string(not(containsString("/amt/fotos/" + privateImage.getId() + "\""))))
+                .andExpect(content().string(not(containsString("Entwurf-geheim"))));
+        var story = profiles.load(owner.getId(), reader.getEmail()).timeline().stream().filter(i -> i.kind().equals("holiday") && i.id() == holiday.getId()).findFirst().orElseThrow();
+        assertThat(story.report().passages()).hasSize(1);
+        assertThat(story.report().photos()).hasSize(1);
+    }
+
+    @Test
+    void aaaIsAttachedToItsEventAndDoesNotReplaceActualAttendanceOrLeakAnotherUsersApplication() throws Exception {
+        var event = event("Abend am See", 2); record(event, Set.of(owner, other), Set.of(owner));
+        absences.save(new AbsenceApplication(owner, event, now.minusDays(1), List.of(
+                new ApplicationAnswer("Begründung", "Warum?", "Ich hatte ursprünglich einen anderen Termin."),
+                new ApplicationAnswer("Erklärung", "Genauer?", "Der Termin wurde später verschoben."))));
+        absences.save(new AbsenceApplication(other, event, now.minusDays(1), List.of(new ApplicationAnswer("Grund", "Warum?", "FremderAntragNurImAnderenProfil"))));
+        var item = profiles.load(owner.getId(), other.getEmail()).timeline().stream().filter(i -> i.kind().equals("event") && i.id() == event.getId()).findFirst().orElseThrow();
+        assertThat(item.status()).isEqualTo("Teilgenommen");
+        assertThat(item.absence().passages()).hasSize(2);
+        mvc.perform(get("/users/{id}", owner.getId()).with(user(other.getEmail())))
+                .andExpect(status().isOk()).andExpect(content().string(containsString("Ich hatte ursprünglich einen anderen Termin.")))
+                .andExpect(content().string(containsString("Der Termin wurde später verschoben.")))
+                .andExpect(content().string(containsString("Teilgenommen")))
+                .andExpect(content().string(not(containsString("FremderAntragNurImAnderenProfil"))));
+    }
+
+    @Test
+    void submittedAaasRemainReadableForUpcomingAndCancelledEvents() throws Exception {
+        var upcoming = event("Nächste Woche", -7);
+        var cancelled = event("Abgesagtes Treffen", -6); cancelled.cancel("Regen", now); activities.save(cancelled);
+        absences.save(new AbsenceApplication(owner, upcoming, now, List.of(new ApplicationAnswer("A", "Grund", "Bereits eingereichte Erklärung für nächste Woche"))));
+        absences.save(new AbsenceApplication(owner, cancelled, now, List.of(new ApplicationAnswer("A", "Grund", "Erklärung bleibt trotz Eventabsage lesbar"))));
+        mvc.perform(get("/users/{id}", owner.getId()).with(user(other.getEmail())))
+                .andExpect(status().isOk()).andExpect(content().string(containsString("Bereits eingereichte Erklärung für nächste Woche")))
+                .andExpect(content().string(containsString("Erklärung bleibt trotz Eventabsage lesbar")))
+                .andExpect(content().string(containsString("Event noch nicht beendet")))
+                .andExpect(content().string(containsString("Event abgesagt")));
+    }
+
+    @Test
+    void applicationsAndReportsStartCollapsedAndTermsAreSummarizedWithoutChangingStoredDocuments() throws Exception {
+        var today = LocalDate.now(clock.withZone(CalendarTime.BERLIN));
+        var holiday = holidays.save(new Holiday(owner, "Kurze Reise", "Meer", today.minusDays(5), today.minusDays(2), now.minusDays(8)));
+        var leave = travel.save(new TravelApplication(TravelKind.LEAVE, UUID.randomUUID().toString(), owner, holiday, "Reiseantrag", now.minusDays(8),
+                List.of(new ApplicationAnswer("Reise", "Ziel", "Küste"), PortalTerms.acceptedSnapshot())));
+        travel.save(new TravelApplication(TravelKind.REPORT, UUID.randomUUID().toString(), owner, holiday, "Mein Reisebericht", now,
+                List.of(new ApplicationAnswer("Bericht", "Dein Bericht", "Wir waren am Strand."))));
+        var activity = event("Abendessen", 3);
+        var absence = absences.save(new AbsenceApplication(owner, activity, now.minusDays(4), List.of(
+                new ApplicationAnswer("Begründung", "Warum?", "War auf Reisen."), PortalTerms.acceptedSnapshot())));
+        String html = mvc.perform(get("/users/{id}", owner.getId()).with(user(other.getEmail())))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Akzeptiert.")))
+                .andExpect(content().string(not(containsString(PortalTerms.CURRENT.clauses().getFirst().text()))))
+                .andReturn().getResponse().getContentAsString();
+        var disclosures = java.util.regex.Pattern.compile("<details\\b[^>]*>").matcher(html).results()
+                .map(java.util.regex.MatchResult::group).filter(tag -> tag.contains("profile-story")).toList();
+        assertThat(disclosures).hasSize(3).allSatisfy(tag -> assertThat(tag).doesNotContain(" open"));
+        assertThat(java.util.regex.Pattern.compile("<summary class=\"profile-story-heading\">").matcher(html).results().count()).isEqualTo(3);
+        assertThat(profiles.load(owner.getId(), other.getEmail()).timeline().stream()
+                .filter(i -> i.leave() != null && i.leave().id() == leave.getId()).findFirst().orElseThrow().leave().passages())
+                .anySatisfy(p -> { assertThat(p.question()).startsWith("Allgemeine Gruppenbedingungen"); assertThat(p.text()).isEqualTo("Akzeptiert."); });
+        String retained = jdbc.sql("select answer_text from absence_application_answers where application_id = :id and question_text like 'Allgemeine Gruppenbedingungen%'")
+                .param("id", absence.getId()).query(String.class).single();
+        assertThat(retained).contains(PortalTerms.CURRENT.clauses().getFirst().text());
     }
 
     private Activity event(String title, int daysAgo) {

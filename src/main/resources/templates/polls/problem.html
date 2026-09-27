@@ -1,5 +1,5 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{polls/fragments :: head}"></head>
-<body><div class="page"><header th:replace="~{polls/fragments :: header}"></header>
+<body><div class="page"><header th:replace="~{fragments/navigation :: header}"></header>
 <main class="message-layout"><section class="form-card message-card"><h1>Bitte noch einmal prüfen.</h1><p role="alert" th:text="${problem}"></p><a class="button" th:href="@{/polls}">Zurück zu den Abstimmungen →</a></section></main>
 </div></body></html>

@@ -1,33 +1,20 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title th:text="|${event.title} · Project 11|">Event · Project 11</title><link rel="stylesheet" th:href="@{/css/app.css}"><link rel="stylesheet" th:href="@{/css/costs.css}"></head>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title th:text="|${event.title} · ZFG|">Event · ZFG</title><link rel="stylesheet" th:href="@{/css/app.css}"><link rel="stylesheet" th:href="@{/css/costs.css}"></head>
 <body class="dashboard-body"><div class="page dashboard-page">
-    <header class="site-header dashboard-header">
-        <a class="brand" th:href="@{/}"><span class="brand-mark" aria-hidden="true">11</span> Project 11</a>
-        <nav class="page-nav" aria-label="Main navigation">
-            <a th:href="@{/welcome}">Overview</a>
-            <a th:href="@{/calendar}" aria-current="page">Calendar</a>
-            <a th:href="@{/amt}">Applications</a>
-            <a th:href="@{/costs}">Kosten</a><a th:href="@{/users/me}">My profile</a>
-        </nav>
-        <div class="header-account">
-            <form th:action="@{/logout}" method="post">
-                <button class="header-link" type="submit">Sign out <span aria-hidden="true">↗</span></button>
-            </form>
-        </div>
-    </header>
+    <header th:replace="~{fragments/navigation :: header}"></header>
     <main class="event-details-layout">
-        <a class="event-back" th:href="@{/calendar(month=${event.month})} + |#activity-${event.id}|">← Back to calendar</a>
-        <div class="notice notice-success" role="status" th:if="${createdEvent != null}">Your event is on the calendar and visible to the group.</div>
+        <a class="event-back" th:href="@{/calendar(month=${event.month})} + |#activity-${event.id}|">← Zurück zum Kalender</a>
+        <div class="notice notice-success" role="status" th:if="${createdEvent != null}">Dein Event steht im Kalender und ist für die Gruppe sichtbar.</div>
         <p class="notice notice-success" role="status" th:if="${eventMessage != null}" th:text="${eventMessage}"></p>
         <section class="notice notice-error" th:if="${event.cancelled}"><h2>Dieses Event wurde abgesagt.</h2><p th:if="${!event.cancellationReason.isBlank()}" th:text="${event.cancellationReason}"></p><p>Es ist kein AaA erforderlich und es gibt keine Event-Striche. Bestehende Kosten bitte mit den Erstellern klären.</p></section>
         <article class="event-details-card" aria-labelledby="event-detail-title">
-            <span class="upcoming-status" th:classappend="${event.status == 'Happening now'} ? ' upcoming-status-live' : ''" th:text="${event.status}">Upcoming event</span>
-            <h1 id="event-detail-title" th:text="${event.title}">Our next plan</h1>
-            <p class="event-detail-period"><span aria-hidden="true">◷</span><span th:text="${event.period}">Date and time</span></p>
-            <p class="event-detail-organizer">Planned by <strong th:text="${event.organizer}">Organizer</strong><span> · Berlin time</span></p>
-            <div class="event-detail-description" th:if="${!event.description.isEmpty()}"><h2>The plan</h2><p th:text="${event.description}"></p></div>
-            <p class="event-detail-location" th:if="${!event.location.isEmpty()}"><strong>Where: </strong><span th:text="${event.location}"></span></p>
+            <span class="upcoming-status" th:classappend="${event.status == 'Findet gerade statt'} ? ' upcoming-status-live' : ''" th:text="${event.status}">Anstehendes Event</span>
+            <h1 id="event-detail-title" th:text="${event.title}">Unser nächstes Treffen</h1>
+            <p class="event-detail-period"><span aria-hidden="true">◷</span><span th:text="${event.period}">Datum und Uhrzeit</span></p>
+            <p class="event-detail-organizer">Geplant von <strong th:text="${event.organizer}">Organisiert von</strong></p>
+            <div class="event-detail-description" th:if="${!event.description.isEmpty()}"><h2>Der Plan</h2><p th:text="${event.description}"></p></div>
+            <p class="event-detail-location" th:if="${!event.location.isEmpty()}"><strong>Ort: </strong><span th:text="${event.location}"></span></p>
         </article>
 
         <section class="event-attendance-card event-rsvp" id="rsvp" aria-labelledby="rsvp-title" lang="de">
@@ -40,7 +27,7 @@
                 <fieldset class="rsvp-choice"><legend>Deine Rückmeldung</legend><div class="rsvp-buttons">
                     <button th:each="choice : ${rsvp.choices}" class="calendar-control" type="submit" name="answer" th:value="${choice.name()}" th:attr="aria-pressed=${rsvp.mine == choice.name()}" th:text="${choice.label}"></button>
                 </div></fieldset>
-                <p class="rsvp-copy">Bis zum Beginn kannst du deine Auswahl ändern. Ohne angegebene Startzeit schließt die Rückmeldung um 00:00 Uhr am Eventtag (Berlin).</p>
+                <p class="rsvp-copy">Bis zum Beginn kannst du deine Auswahl ändern. Ohne angegebene Startzeit schließt die Rückmeldung um 00:00 Uhr am Eventtag.</p>
             </form>
             <p class="rsvp-copy" th:unless="${rsvp.open}" th:text="${rsvp.closedReason}"></p>
             <div class="rsvp-groups"><section th:each="group : ${rsvp.groups}"><h3><span th:text="${group.label}"></span> <span class="attendance-count" th:text="${group.members.size()}"></span></h3>
@@ -62,18 +49,18 @@
             </details>
         </section>
         <section class="event-attendance-card" th:if="${event.ended}" aria-labelledby="event-attendance-title">
-            <div class="event-attendance-heading"><div><p class="section-kicker">After the event</p><h2 id="event-attendance-title">Attendance</h2></div><a class="calendar-control" th:if="${event.canEditAttendance}" th:href="@{/events/{id}/attendance(id=${event.id})}" th:text="${event.recorded ? 'Edit attendance →' : 'Record attendance →'}">Record attendance</a></div>
-            <div class="event-attendance-empty" th:unless="${event.recorded}"><h3>Attendance hasn’t been recorded yet.</h3><p>An admin or the event creator can add the list now that the event has ended.</p></div>
+            <div class="event-attendance-heading"><div><p class="section-kicker">Nach dem Event</p><h2 id="event-attendance-title">Anwesenheit</h2></div><a class="calendar-control" th:if="${event.canEditAttendance}" th:href="@{/events/{id}/attendance(id=${event.id})}" th:text="${event.recorded ? 'Anwesenheit bearbeiten →' : 'Anwesenheit erfassen →'}">Anwesenheit erfassen</a></div>
+            <div class="event-attendance-empty" th:unless="${event.recorded}"><h3>Die Anwesenheit wurde noch nicht erfasst.</h3><p>Nach Ende des Events kann ein Admin oder der Ersteller die Anwesenheitsliste eintragen.</p></div>
             <div th:if="${event.recorded}">
-                <p class="event-attendance-stamp">Recorded by <strong th:text="${event.recordedBy}"></strong> · <span th:text="${event.recordedAt}"></span></p>
+                <p class="event-attendance-stamp">Erfasst von <strong th:text="${event.recordedBy}"></strong> · <span th:text="${event.recordedAt}"></span></p>
                 <div class="event-attendance-columns">
-                    <section class="event-attendance-group"><h3><span class="attendance-status-dot" aria-hidden="true"></span>Attended <span class="attendance-count" th:text="${event.attendees.size()}">0</span></h3><p class="event-attendance-zero" th:if="${event.attendees.isEmpty()}">No attendees recorded.</p><ul><li th:each="member : ${event.attendees}"><a th:href="@{/users/{id}(id=${member.id})}" th:text="${member.name}">Member</a><span class="attendance-present-icon" aria-hidden="true">✓</span></li></ul></section>
-                    <section class="event-attendance-group event-attendance-absent"><h3><span class="attendance-status-dot" aria-hidden="true"></span>Did not attend <span class="attendance-count" th:text="${event.absent.size()}">0</span></h3><p class="event-attendance-zero" th:if="${event.absent.isEmpty()}">Nobody recorded as absent.</p><ul><li th:each="member : ${event.absent}"><a th:href="@{/users/{id}(id=${member.id})}" th:text="${member.name}">Member</a></li></ul></section>
+                    <section class="event-attendance-group"><h3><span class="attendance-status-dot" aria-hidden="true"></span>Anwesend <span class="attendance-count" th:text="${event.attendees.size()}">0</span></h3><p class="event-attendance-zero" th:if="${event.attendees.isEmpty()}">Keine Anwesenden erfasst.</p><ul><li th:each="member : ${event.attendees}"><a th:href="@{/users/{id}(id=${member.id})}" th:text="${member.name}">Mitglied</a><span class="attendance-present-icon" aria-hidden="true">✓</span></li></ul></section>
+                    <section class="event-attendance-group event-attendance-absent"><h3><span class="attendance-status-dot" aria-hidden="true"></span>Abwesend <span class="attendance-count" th:text="${event.absent.size()}">0</span></h3><p class="event-attendance-zero" th:if="${event.absent.isEmpty()}">Niemand als abwesend erfasst.</p><ul><li th:each="member : ${event.absent}"><a th:href="@{/users/{id}(id=${member.id})}" th:text="${member.name}">Mitglied</a></li></ul></section>
                 </div>
             </div>
         </section>
         <section th:replace="~{costs/fragments :: summary(${eventCosts})}"></section>
-        <a class="event-cancel" th:href="@{/welcome}">Back to overview</a>
+        <a class="event-cancel" th:href="@{/welcome}">Zurück zur Übersicht</a>
     </main>
-    <footer class="site-footer dashboard-footer"><span>Project 11 · better together</span><span>Good plans. Better company.</span></footer>
+    <footer class="site-footer dashboard-footer"><span>ZFG · gemeinsam ist es schöner</span><span>Gute Pläne. Gute Gesellschaft.</span></footer>
 </div></body></html>

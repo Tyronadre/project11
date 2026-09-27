@@ -11,20 +11,20 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.imageio.ImageIO;
-import javax.imageio.stream.MemoryCacheImageInputStream;
-import java.io.ByteArrayInputStream;
+import javax.imageio.stream.FileCacheImageInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 @Service
 public class TravelPhotoService {
-    public static final long MAX_PHOTO_BYTES = 4 * 1024 * 1024 * 1024L;
-    private static final long MAX_TOTAL_BYTES = 12 * 1024 * 1024 * 1024L;
+    public static final long MAX_TOTAL_BYTES = 1_000_000_000L;
+    public static final long MAX_PHOTO_BYTES = MAX_TOTAL_BYTES;
+    @jakarta.persistence.PersistenceContext
+    private jakarta.persistence.EntityManager entityManager;
     private final TravelPhotoRepository photos;
     private final UserRepository users;
     private final Clock clock;
@@ -45,18 +45,24 @@ public class TravelPhotoService {
         var owner = user(email);
         var existing = photos.findByDraftKeyAndOwnerIdAndApplicationIsNullOrderByIdAsc(draft.getId(), owner.getId());
         var uploads = files == null ? List.<MultipartFile>of() : files.stream().filter(file -> !file.isEmpty()).toList();
-        if (existing.size() + uploads.size() > 6) {
-            errors.reject("photos", "Höchstens sechs Fotos pro Bericht. Entfernen Sie bei Bedarf ein Entwurfsfoto.");
-            return;
-        }
-        List<TravelPhoto> prepared = new ArrayList<>();
         long bytes = existing.stream().mapToLong(TravelPhotoRepository.Info::getSizeBytes).sum();
+        long incoming = bytes;
+        for (var upload : uploads) {
+            if (upload.getSize() > MAX_TOTAL_BYTES - incoming) {
+                errors.reject("photos", "Die Fotos dürfen zusammen höchstens 1 GB umfassen.");
+                return;
+            }
+            incoming += upload.getSize();
+        }
         for (var upload : uploads) {
             try {
                 var picture = normalize(upload);
-                bytes += picture.content().length;
+                // Count original or normalized bytes, whichever is larger.
+                long accountedBytes = Math.max(upload.getSize(), picture.content().length);
+                bytes += accountedBytes;
                 if (bytes > MAX_TOTAL_BYTES) {
-                    errors.reject("photos", "Die Fotos dürfen zusammen höchstens 1 GiB umfassen. Bitte kleinere Bilder auswählen.");
+                    errors.reject("photos", "Die Fotos dürfen zusammen höchstens 1 GB umfassen. Bitte kleinere Bilder auswählen.");
+                    org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                     return;
                 }
                 String name = upload.getOriginalFilename() == null ? "Reisefoto" : upload.getOriginalFilename();
@@ -64,13 +70,17 @@ public class TravelPhotoService {
                 name = name.substring(name.lastIndexOf('/') + 1).replaceAll("[\\p{Cntrl}]", "");
                 if (name.isBlank()) name = "Reisefoto";
                 if (name.length() > 200) name = name.substring(0, 200);
-                prepared.add(new TravelPhoto(owner, draft.getId(), name, picture.type(), picture.content(), OffsetDateTime.now(clock)));
+                var photo = new TravelPhoto(owner, draft.getId(), name, picture.type(), picture.content(), OffsetDateTime.now(clock));
+                photo.accountForUpload(accountedBytes);
+                photos.saveAndFlush(photo);
+                // Release each image before decoding the next: never retain a 1 GB batch in heap.
+                entityManager.clear();
             } catch (IOException | IllegalArgumentException exception) {
-                errors.reject("photos", "Ein Foto ist ungültig: nur lesbare JPEG-/PNG-Bilder bis 4 MiB und 20 Megapixel sind erlaubt. Bitte erneut auswählen.");
+                errors.reject("photos", "Ein Foto ist ungültig: Bitte lesbare JPEG-/PNG-Bilder mit höchstens 20 Megapixeln auswählen.");
+                org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return;
             }
         }
-        photos.saveAll(prepared);
     }
 
     @Transactional
@@ -95,7 +105,7 @@ public class TravelPhotoService {
 
     private Image normalize(MultipartFile file) throws IOException {
         if (file.getSize() > MAX_PHOTO_BYTES) throw new IllegalArgumentException();
-        try (var input = new MemoryCacheImageInputStream(new ByteArrayInputStream(file.getBytes()))) {
+        try (var stream = file.getInputStream(); var input = new FileCacheImageInputStream(stream, null)) {
             var readers = ImageIO.getImageReaders(input);
             if (!readers.hasNext()) throw new IllegalArgumentException();
             var reader = readers.next();

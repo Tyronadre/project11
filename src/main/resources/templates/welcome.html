@@ -1,71 +1,29 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Our group · Project 11</title>
+    <title>Unsere Gruppe · ZFG</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <link rel="stylesheet" th:href="@{/css/open-items.css}">
+    <link rel="stylesheet" th:href="@{/css/tallies.css}">
 </head>
 <body class="dashboard-body">
 <div class="page dashboard-page">
-    <header class="site-header dashboard-header">
-        <a class="brand" th:href="@{/}"><span class="brand-mark" aria-hidden="true">11</span> Project 11</a>
-        <nav class="page-nav" aria-label="Main navigation">
-            <a th:href="@{/welcome}" aria-current="page">Overview</a>
-            <a th:href="@{/calendar}">Calendar</a>
-            <a th:href="@{/polls}">Abstimmungen</a>
-            <a th:href="@{/amt}">Applications</a>
-            <a th:href="@{/costs}">Kosten</a><a th:href="@{/users/me}">My profile</a>
-        </nav>
-        <div class="header-account">
-            <div class="signed-in-as">
-                <a class="account-settings-link" th:href="@{/account}" th:text="${dashboard.currentUserName}" title="Kontoeinstellungen">Alex Morgan</a>
-                <span class="mini-admin-badge" th:if="${dashboard.admin}">Admin</span>
-            </div>
-            <form th:action="@{/logout}" method="post">
-                <button class="header-link" type="submit">Sign out <span aria-hidden="true">↗</span></button>
-            </form>
-        </div>
-    </header>
+    <header th:replace="~{fragments/navigation :: header}"></header>
 
     <main class="dashboard-layout">
-        <section th:replace="~{fragments/open-items :: section}"></section>
-        <section class="upcoming-section" aria-labelledby="dashboard-title">
-            <div class="upcoming-heading">
-                <div><p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> More time together</p><h1 id="dashboard-title">What’s coming up.</h1><p>Our next plans, all in one place. Times are shown in Berlin time.</p></div>
-                <a class="button event-create-link" th:href="@{/events/new}"><span aria-hidden="true">＋</span> New event</a>
-            </div>
-            <div class="upcoming-empty" th:if="${upcomingEvents.isEmpty()}"><span aria-hidden="true">✳</span><h2>A little room for plans.</h2><p>No upcoming events yet. Pick a day and bring everyone together.</p><a class="calendar-control" th:href="@{/events/new}">Make the first plan ↗</a></div>
-            <div class="upcoming-grid" th:unless="${upcomingEvents.isEmpty()}">
-                <a class="upcoming-card" th:each="event : ${upcomingEvents}" th:href="@{/events/{id}(id=${event.id})}">
-                    <div class="upcoming-card-top"><time class="upcoming-date" th:datetime="${event.date}"><span th:text="${event.month}">SEP</span><strong th:text="${event.day}">13</strong></time><span class="upcoming-status" th:classappend="${event.status == 'Happening now'} ? ' upcoming-status-live' : ''" th:text="${event.status}">Coming up</span></div>
-                    <h2 th:text="${event.title}">Our next plan</h2>
-                    <p class="upcoming-period" th:text="${event.period}">Date and time</p>
-                    <p class="upcoming-description" th:if="${!event.description.isEmpty()}" th:text="${event.description}">The details</p>
-                    <div class="upcoming-card-bottom"><span th:text="|Planned by ${event.owner}|"></span><span aria-hidden="true">↗</span></div>
-                </a>
-            </div>
-            <a class="upcoming-calendar-link" th:href="@{/calendar}">View the full calendar <span aria-hidden="true">→</span></a>
-        </section>
-
-        <section class="attendance-admin-section" th:if="${!attendanceEvents.isEmpty()}" aria-labelledby="attendance-admin-title">
-            <div class="section-heading"><div><p class="section-kicker">Your events · attendance</p><h2 id="attendance-admin-title">Attendance</h2></div><a class="header-link" th:href="@{/calendar}">Older events in the calendar →</a></div>
-            <div class="attendance-event-list"><a th:each="event : ${attendanceEvents}" th:href="@{/events/{id}/attendance(id=${event.id})}"><div><strong th:text="${event.title}">Event</strong><span th:text="${event.ended}">Ended</span></div><span class="attendance-action" th:text="${event.recorded ? 'Review attendance →' : 'Record attendance →'}">Record attendance</span></a></div>
-        </section>
-
-        <section th:if="${dashboard.admin}" class="attendance-admin-section"><a class="calendar-control" th:href="@{/admin/aaa}">AaAs prüfen und entscheiden →</a> <a class="calendar-control" th:href="@{/admin/travel}">AaBs und Reiseberichte prüfen →</a></section>
-        <section class="tally-section" aria-labelledby="tallies-heading">
+        <section class="tally-section tally-board" id="tallies" th:classappend="${editingTallies} ? 'is-editing' : ''" aria-labelledby="tallies-heading">
             <div class="section-heading">
                 <div>
-                    <p class="section-kicker">Live count</p>
-                    <h2 id="tallies-heading">The tallies</h2>
+                    <p class="section-kicker">Unsere Runde · Strich für Strich</p>
+                    <h2 id="tallies-heading">Die Strichliste</h2>
                 </div>
-                <p class="admin-note" th:if="${dashboard.admin}"><span aria-hidden="true">✦</span> Admin mode · you can edit</p>
-                <p class="admin-note admin-note--view" th:unless="${dashboard.admin}"><span aria-hidden="true">◎</span> View only</p>
+                <a class="tally-edit-toggle" th:if="${dashboard.admin}" th:href="${editingTallies} ? @{/welcome#tallies} : @{/welcome(editTallies=true)} + '#tallies'" th:text="${editingTallies} ? '✓ Bearbeitung beenden' : 'Striche bearbeiten ↗'">Striche bearbeiten ↗</a>
             </div>
-
+            <p class="tally-edit-notice" th:if="${editingTallies}">Bearbeitungsmodus aktiv · Änderungen werden direkt gespeichert.</p>
             <div class="tally-grid">
+                <div class="tally-overview"><span class="tally-overview-label">AUF EINEN BLICK</span><strong th:text="${dashboard.totalTallies}">0</strong><span>Striche in unserer Runde</span><div class="tally-overview-bottom"><span th:text="|${dashboard.users.size()} Personen|"></span><span aria-hidden="true">↗</span></div></div>
                 <article class="tally-card" th:each="user : ${dashboard.users}"
                          th:id="|user-${user.id}|"
                          th:classappend="${user.admin} ? ' tally-card--admin' : ''">
@@ -75,9 +33,9 @@
                             <div>
                                 <div class="member-name-line">
                                     <h3><a th:href="@{/users/{id}(id=${user.id})}" th:text="${user.displayName}">Alex Morgan</a></h3>
-                                    <span class="you-badge" th:if="${user.id == dashboard.currentUserId}">You</span>
+                                    <span class="you-badge" th:if="${user.id == dashboard.currentUserId}">Du</span>
                                 </div>
-                                <p th:text="${user.email}">alex@example.com</p>
+                                <a class="tally-profile-link" th:href="@{/users/{id}(id=${user.id})}">Zum Profil ↗</a>
                             </div>
                         </div>
                         <span class="admin-badge" th:if="${user.admin}"><span aria-hidden="true">✦</span> Admin</span>
@@ -85,12 +43,12 @@
 
                     <div class="tally-number-row">
                         <strong class="tally-number" th:text="${user.tallyCount}">0</strong>
-                        <span th:text="${user.tallyCount == 1 ? 'mark' : 'marks'}">marks</span>
+                        <span th:text="${user.tallyCount == 1 ? 'Strich' : 'Striche'}">Striche</span>
                     </div>
 
-                    <p class="tally-pending" th:if="${pendingAttendance.counts.containsKey(user.id)}"><span class="pending-mark-badge" th:text="|${pendingAttendance.counts.get(user.id)} ${pendingAttendance.counts.get(user.id) == 1 ? 'Strich' : 'Striche'} vorgemerkt|"></span><small>Not yet included in the tally</small></p>
+                    <p class="tally-pending" th:if="${pendingAttendance.counts.containsKey(user.id)}"><span class="pending-mark-badge" th:text="|${pendingAttendance.counts.get(user.id)} ${pendingAttendance.counts.get(user.id) == 1 ? 'Strich' : 'Striche'} vorgemerkt|"></span><small>Noch nicht in der Strichzahl enthalten</small></p>
 
-                    <div class="tally-paper" role="img" th:aria-label="|${user.tallyCount} tally marks for ${user.displayName}|">
+                    <div class="tally-paper" role="img" th:aria-label="|${user.tallyCount} Striche für ${user.displayName}|">
                         <div class="tally-groups" th:if="${user.tallyCount > 0}">
                             <div class="tally-group tally-group--complete" th:each="ignored : ${user.fullGroups}" aria-hidden="true">
                                 <span></span><span></span><span></span><span></span><span class="tally-cross"></span>
@@ -98,62 +56,99 @@
                             <div class="tally-group tally-group--partial" th:if="${user.remainder > 0}" aria-hidden="true">
                                 <span th:each="ignored : ${#numbers.sequence(1, user.remainder)}"></span>
                             </div>
-                            <span class="hidden-marks" th:if="${user.hiddenCount > 0}" th:text="|+${user.hiddenCount} more|">+10 more</span>
+                            <span class="hidden-marks" th:if="${user.hiddenCount > 0}" th:text="|+${user.hiddenCount} weitere|">+10 weitere</span>
                         </div>
                         <div class="empty-tally" th:if="${user.tallyCount == 0}">
-                            <span class="first-mark" aria-hidden="true"></span>
-                            <span>Waiting for the first mark</span>
+                            <span class="tally-clean" aria-hidden="true">✳</span>
+                            <span>Noch kein Strich</span>
                         </div>
                     </div>
 
-                    <div class="admin-controls" th:if="${dashboard.admin}">
-                        <div class="quick-actions" aria-label="Quick tally actions">
+                    <div class="admin-controls" th:if="${editingTallies}">
+                        <div class="quick-actions" aria-label="Schnellaktionen für die Strichliste">
                             <form th:action="@{/users/{id}/tally(id=${user.id})}" method="post">
                                 <input type="hidden" name="change" value="DECREMENT">
-                                <button class="count-button" type="submit" th:disabled="${user.tallyCount == 0}" th:aria-label="|Remove one mark from ${user.displayName}|">−1</button>
+                                <input type="hidden" name="editTallies" value="true">
+                                <button class="count-button" type="submit" th:disabled="${user.tallyCount == 0}" th:aria-label="|Einen Strich entfernen bei ${user.displayName}|">−1</button>
                             </form>
                             <form th:action="@{/users/{id}/tally(id=${user.id})}" method="post">
                                 <input type="hidden" name="change" value="INCREMENT">
-                                <button class="count-button count-button--primary" type="submit" th:disabled="${user.tallyCount >= 999}" th:aria-label="|Add one mark to ${user.displayName}|">+1</button>
+                                <input type="hidden" name="editTallies" value="true">
+                                <button class="count-button count-button--primary" type="submit" th:disabled="${user.tallyCount >= 999}" th:aria-label="|Einen Strich hinzufügen bei ${user.displayName}|">+1</button>
                             </form>
                             <form th:action="@{/users/{id}/tally(id=${user.id})}" method="post">
                                 <input type="hidden" name="change" value="ADD_FIVE">
-                                <button class="count-button" type="submit" th:disabled="${user.tallyCount >= 999}" th:aria-label="|Add five marks to ${user.displayName}|">+5</button>
+                                <input type="hidden" name="editTallies" value="true">
+                                <button class="count-button" type="submit" th:disabled="${user.tallyCount >= 999}" th:aria-label="|Fünf Striche hinzufügen bei ${user.displayName}|">+5</button>
                             </form>
                             <form th:action="@{/users/{id}/tally(id=${user.id})}" method="post">
                                 <input type="hidden" name="change" value="RESET">
-                                <button class="count-button count-button--quiet" type="submit" th:disabled="${user.tallyCount == 0}" th:aria-label="|Reset ${user.displayName}'s tally|">Reset</button>
+                                <input type="hidden" name="editTallies" value="true">
+                                <button class="count-button count-button--quiet" type="submit" th:disabled="${user.tallyCount == 0}" th:aria-label="|Strichzahl von ${user.displayName} zurücksetzen|">Zurücksetzen</button>
                             </form>
                         </div>
 
                         <div class="fine-controls">
                             <form class="exact-form" th:action="@{/users/{id}/tally(id=${user.id})}" method="post">
                                 <input type="hidden" name="change" value="SET">
-                                <label th:for="|exact-${user.id}|">Set exact count</label>
+                                <input type="hidden" name="editTallies" value="true">
+                                <label th:for="|exact-${user.id}|">Genaue Anzahl festlegen</label>
                                 <div>
                                     <input th:id="|exact-${user.id}|" name="value" type="number" min="0" max="999" required th:value="${user.tallyCount}">
-                                    <button type="submit">Set</button>
+                                    <button type="submit">Festlegen</button>
                                 </div>
                             </form>
 
                             <form class="role-form" th:action="@{/users/{id}/admin(id=${user.id})}" method="post">
                                 <input type="hidden" name="admin" th:value="${!user.admin}">
-                                <span>Account role</span>
+                                <input type="hidden" name="editTallies" value="true">
+                                <span>Kontorolle</span>
                                 <button type="submit"
                                         th:disabled="${user.admin && dashboard.adminCount == 1}"
-                                        th:title="${user.admin && dashboard.adminCount == 1} ? 'The last admin cannot be removed' : null"
-                                        th:text="${user.admin} ? 'Remove admin' : 'Make admin'">Make admin</button>
+                                        th:title="${user.admin && dashboard.adminCount == 1} ? 'Der letzte Admin kann nicht entfernt werden' : null"
+                                        th:text="${user.admin} ? 'Adminrechte entziehen' : 'Zum Admin ernennen'">Zum Admin ernennen</button>
                             </form>
                         </div>
                     </div>
                 </article>
             </div>
         </section>
+
+        <section class="for-you" id="pending-reviews" th:if="${dashboard.admin and !pendingReviews.empty}" aria-labelledby="pending-reviews-title">
+            <header class="for-you-heading"><div><p class="section-kicker">Für Admins</p><h2 id="pending-reviews-title">Entscheidungen offen</h2><p>Diese Anträge und Anwesenheitslisten warten auf deine Prüfung.</p></div></header>
+            <a class="calendar-control" th:each="event : ${pendingReviews.attendance}" th:href="@{/events/{id}/attendance(id=${event.id})}" th:text="|Anwesenheit bestätigen: ${event.title} →|"></a>
+            <a class="calendar-control" th:if="${pendingReviews.absences > 0}" th:href="@{/admin/aaa}" th:text="|${pendingReviews.absences} AaAs prüfen und entscheiden →|"></a>
+            <a class="calendar-control" th:if="${pendingReviews.travel > 0}" th:href="@{/admin/travel}" th:text="|${pendingReviews.travel} AaBs und Reiseberichte prüfen →|"></a>
+        </section>
+        <section class="upcoming-section" aria-labelledby="dashboard-title">
+            <div class="upcoming-heading">
+                <div><p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> Mehr Zeit miteinander</p><h1 id="dashboard-title">Das steht als Nächstes an.</h1><p>Unsere nächsten Pläne an einem Ort.</p></div>
+                <a class="button event-create-link" th:href="@{/events/new}"><span aria-hidden="true">＋</span> Neues Event</a>
+            </div>
+            <div class="upcoming-empty" th:if="${upcomingEvents.isEmpty()}"><span aria-hidden="true">✳</span><h2>Platz für neue Pläne.</h2><p>Noch keine anstehenden Events. Wähle einen Tag und bring die Gruppe zusammen.</p><a class="calendar-control" th:href="@{/events/new}">Das erste Treffen planen ↗</a></div>
+            <div class="upcoming-grid" th:unless="${upcomingEvents.isEmpty()}">
+                <a class="upcoming-card" th:each="event : ${upcomingEvents}" th:href="@{/events/{id}(id=${event.id})}">
+                    <div class="upcoming-card-top"><time class="upcoming-date" th:datetime="${event.date}"><span th:text="${event.month}">SEP</span><strong th:text="${event.day}">13</strong></time><span class="upcoming-status" th:classappend="${event.status == 'Findet gerade statt'} ? ' upcoming-status-live' : ''" th:text="${event.status}">Demnächst</span></div>
+                    <h2 th:text="${event.title}">Unser nächstes Treffen</h2>
+                    <p class="upcoming-period" th:text="${event.period}">Datum und Uhrzeit</p>
+                    <p class="upcoming-description" th:if="${!event.description.isEmpty()}" th:text="${event.description}">Die Einzelheiten</p>
+                    <div class="upcoming-card-bottom"><span th:text="|Geplant von ${event.owner}|"></span><span aria-hidden="true">↗</span></div>
+                </a>
+            </div>
+            <a class="upcoming-calendar-link" th:href="@{/calendar}">Den ganzen Kalender ansehen <span aria-hidden="true">→</span></a>
+        </section>
+
+        <section th:replace="~{fragments/open-items :: section}"></section>
+
+        <section class="attendance-admin-section" th:if="${!attendanceEvents.isEmpty()}" aria-labelledby="attendance-admin-title">
+            <div class="section-heading"><div><p class="section-kicker">Deine Events · Anwesenheit</p><h2 id="attendance-admin-title">Anwesenheit</h2></div><a class="header-link" th:href="@{/calendar}">Ältere Events im Kalender →</a></div>
+            <div class="attendance-event-list"><a th:each="event : ${attendanceEvents}" th:href="@{/events/{id}/attendance(id=${event.id})}"><div><strong th:text="${event.title}">Event</strong><span th:text="${event.ended}">Beendet</span></div><span class="attendance-action" th:text="${event.recorded ? 'Anwesenheit prüfen →' : 'Anwesenheit erfassen →'}">Anwesenheit erfassen</span></a></div>
+        </section>
     </main>
 
     <footer class="site-footer dashboard-footer">
-        <span>Project 11 · one mark at a time</span>
-        <span th:text="|${dashboard.users.size()} tallies, always in sync|">Always in sync</span>
+        <span>ZFG · Strich für Strich</span>
+        <span th:text="|${dashboard.users.size()} Strichlisten, immer auf dem gleichen Stand|">Immer auf dem gleichen Stand</span>
     </footer>
 </div>
 </body>

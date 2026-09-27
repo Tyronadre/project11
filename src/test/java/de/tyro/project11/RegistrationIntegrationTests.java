@@ -51,7 +51,7 @@ class RegistrationIntegrationTests {
                 .andExpect(redirectedUrl("/signin"));
         mvc.perform(get("/register"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Create your account")))
+                .andExpect(content().string(containsString("Konto erstellen")))
                 .andExpect(content().string(containsString("name=\"_csrf\"")));
         mvc.perform(get("/css/app.css")).andExpect(status().isOk());
     }
@@ -81,7 +81,7 @@ class RegistrationIntegrationTests {
 
         mvc.perform(get("/register/success").flashAttrs(result.getFlashMap()))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Account created.")))
+                .andExpect(content().string(containsString("Konto erstellt")))
                 .andExpect(content().string(not(containsString(PASSWORD))));
     }
 
@@ -124,7 +124,7 @@ class RegistrationIntegrationTests {
                         .param("password", "another good password").param("confirmPassword", "another good password"))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeHasFieldErrors("registrationForm", "email"))
-                .andExpect(content().string(containsString("This email address is already registered.")));
+                .andExpect(content().string(containsString("Diese E-Mail-Adresse ist bereits registriert.")));
         assertThat(countUsers()).isEqualTo(1);
         assertThat(passwords.matches(PASSWORD, jdbc.sql("SELECT password_hash FROM app_users").query(String.class).single())).isTrue();
     }

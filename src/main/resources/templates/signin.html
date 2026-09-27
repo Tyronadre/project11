@@ -1,27 +1,24 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sign in · Project 11</title>
+    <title>Anmelden · ZFG</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
 <div class="page">
-    <header class="site-header">
-        <a class="brand" th:href="@{/}"><span class="brand-mark" aria-hidden="true">11</span> Project 11</a>
-        <a class="header-link" th:href="@{/register}">Create account <span aria-hidden="true">↗</span></a>
-    </header>
+    <header th:replace="~{fragments/navigation :: header}"></header>
     <main class="message-layout">
         <section class="form-card message-card" aria-labelledby="signin-title">
-            <span class="eyebrow">Good to see you again</span>
-            <h1 id="signin-title">Welcome back.</h1>
-            <p class="card-copy">Sign in to your account.</p>
+            <span class="eyebrow">Schön, dich wiederzusehen</span>
+            <h1 id="signin-title">Willkommen zurück.</h1>
+            <p class="card-copy">Melde dich bei deinem Konto an.</p>
             <div class="notice notice-error" role="alert" th:if="${param.error != null}">
-                Invalid email or password. Please try again.
+                E-Mail-Adresse oder Passwort stimmen nicht. Bitte versuche es erneut.
             </div>
             <div class="notice notice-success" role="status" th:if="${param.logout != null}">
-                You have been signed out.
+                Du wurdest abgemeldet.
             </div>
             <div class="notice notice-success" role="status" th:if="${param.passwordReset != null}">
                 Dein Passwort wurde zurückgesetzt. Du kannst dich jetzt anmelden.
@@ -38,22 +35,22 @@
             <!-- Spring Security handles this POST, including CSRF and password verification. -->
             <form th:action="@{/signin}" method="post">
                 <div class="field">
-                    <label for="email">Email address</label>
+                    <label for="email">E-Mail-Adresse</label>
                     <input id="email" name="email" type="email" autocomplete="username"
                            placeholder="alex@example.com" required maxlength="254">
                 </div>
                 <div class="field">
-                    <label for="password">Password</label>
+                    <label for="password">Passwort</label>
                     <input id="password" name="password" type="password" autocomplete="current-password"
-                           placeholder="Your password" required maxlength="72">
+                           placeholder="Dein Passwort" required maxlength="72">
                 </div>
-                <button class="button" type="submit">Sign in <span aria-hidden="true">↗</span></button>
+                <button class="button" type="submit">Anmelden <span aria-hidden="true">↗</span></button>
             </form>
             <p class="forgot-link"><a th:href="@{/forgot-password}">Passwort vergessen?</a></p>
-            <p class="account-switch">New here? <a th:href="@{/register}">Create an account</a></p>
+            <p class="account-switch">Neu hier? <a th:href="@{/register}">Konto erstellen</a></p>
         </section>
     </main>
-    <footer class="site-footer"><span>Project 11</span><span>Good things start small.</span></footer>
+    <footer class="site-footer"><span>ZFG</span><span>Gutes beginnt im Kleinen.</span></footer>
 </div>
 </body>
 </html>

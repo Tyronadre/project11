@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{polls/fragments :: head}"></head>
-<body class="dashboard-body"><div class="page dashboard-page"><header th:replace="~{polls/fragments :: header}"></header>
+<body class="dashboard-body"><div class="page dashboard-page"><header th:replace="~{fragments/navigation :: header}"></header>
 <main class="account-layout"><a class="event-back" th:href="@{/polls}">← Alle Abstimmungen</a>
-<div class="calendar-intro"><div><p class="eyebrow">Ein Plan, mehrere Möglichkeiten</p><h1>Termine vorschlagen</h1><p>Zwei bis sechs Termine. Alle Uhrzeiten gelten für Berlin.</p></div></div>
+<div class="calendar-intro"><div><p class="eyebrow">Ein Plan, mehrere Möglichkeiten</p><h1>Termine vorschlagen</h1><p>Zwei bis sechs Termine.</p></div></div>
 <form class="form-card event-card" th:action="@{/polls}" th:object="${pollForm}" method="post">
 <div class="notice notice-error" role="alert" th:if="${#fields.hasAnyErrors()}">Bitte prüfe deine Angaben.<ul><li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li></ul></div>
 <p class="notice notice-error" role="alert" th:if="${problem}" th:text="${problem}"></p>

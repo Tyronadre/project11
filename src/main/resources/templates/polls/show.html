@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{polls/fragments :: head}"></head>
-<body class="dashboard-body"><div class="page dashboard-page"><header th:replace="~{polls/fragments :: header}"></header>
+<body class="dashboard-body"><div class="page dashboard-page"><header th:replace="~{fragments/navigation :: header}"></header>
 <main class="account-layout"><a class="event-back" th:href="@{/polls}">← Alle Abstimmungen</a>
 <div class="calendar-intro"><div><p class="eyebrow" th:text="${poll.eventId == null ? 'Gemeinsam einen Termin finden' : 'Abstimmung abgeschlossen'}"></p><h1 th:text="${poll.title}"></h1>
-<p th:text="|Von ${poll.owner} · ${poll.duration} Minuten · Europe/Berlin|"></p><p th:if="${!poll.location.isBlank()}" th:text="${poll.location}"></p><p class="poll-description" th:text="${poll.description}"></p></div></div>
+<p th:text="|Von ${poll.owner} · ${poll.duration} Minuten|"></p><p th:if="${!poll.location.isBlank()}" th:text="${poll.location}"></p><p class="poll-description" th:text="${poll.description}"></p></div></div>
 <p class="notice notice-success" role="status" th:if="${param.saved != null}">Deine Auswahl wurde gespeichert.</p>
 <a class="button" th:if="${poll.eventId != null}" th:href="@{/events/{id}(id=${poll.eventId})}">Geplantes Event öffnen →</a>
 <section class="form-card poll-ballot">

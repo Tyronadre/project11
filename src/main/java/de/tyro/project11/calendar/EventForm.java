@@ -25,12 +25,12 @@ public class EventForm {
     public void setCostSelectedOnly(boolean value) { costSelectedOnly = value; }
     public java.util.Set<Long> getCostSelectedUserIds() { return costSelectedUserIds; }
     public void setCostSelectedUserIds(java.util.Set<Long> value) { costSelectedUserIds = value == null ? new java.util.HashSet<>() : new java.util.HashSet<>(value); }
-    @NotBlank(message = "Give your event a name.")
-    @Size(max = 120, message = "Keep the name within 120 characters.")
+    @NotBlank(message = "Bitte gib deinem Event einen Namen.")
+    @Size(max = 120, message = "Der Name darf höchstens 120 Zeichen enthalten.")
     private String name;
-    @Size(max = 2000, message = "Keep the description within 2,000 characters.")
+    @Size(max = 2000, message = "Die Beschreibung darf höchstens 2.000 Zeichen enthalten.")
     private String description = "";
-    @NotNull(message = "Choose a date for your event.")
+    @NotNull(message = "Bitte wähle ein Datum für dein Event.")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate date;
     @DateTimeFormat(pattern = "HH:mm")
@@ -40,7 +40,7 @@ public class EventForm {
     @Size(max = 20, message = "Bitte einen gültigen Eurobetrag eingeben.")
     private String costAmount = "";
 
-    @AssertTrue(message = "Choose a date between years 0001 and 9998.")
+    @AssertTrue(message = "Bitte wähle ein Datum zwischen den Jahren 0001 und 9998.")
     public boolean isDateInRange() { return date == null || (date.getYear() >= 1 && date.getYear() <= 9998); }
 
     public String getName() { return name; }

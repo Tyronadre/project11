@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{costs/fragments :: head('Eventkosten')}"></head>
 <body class="dashboard-body"><div class="page dashboard-page">
-<header th:replace="~{profile/fragments :: header}"></header>
+<header th:replace="~{fragments/navigation :: header}"></header>
 <main class="cost-layout">
     <div class="cost-links cost-back"><a class="event-back" th:href="@{/costs}">← Kostenübersicht</a><a th:href="@{/events/{id}(id=${eventCosts.id})}">Zum Event →</a></div>
     <div class="cost-intro"><p class="eyebrow" th:text="${eventCosts.date}"></p><h1 th:text="${eventCosts.title}">Eventkosten</h1><p>Wer hat etwas ausgelegt, wer zahlt welchen Anteil? Alle Kostenanfragen für dieses Event.</p></div>
@@ -11,7 +11,7 @@
     <p class="cost-empty" th:if="${eventCosts.requests.isEmpty()}">Für dieses Event gibt es noch keine Kostenanfragen.</p>
     <article class="cost-card cost-request" th:each="request : ${eventCosts.requests}" th:id="|cost-${request.id}|">
         <div class="cost-heading"><div><span class="cost-status" th:classappend="${request.paid ? ' cost-paid' : (request.partiallyPaid ? ' cost-partial' : '')}" th:text="${request.paid ? 'Bezahlt' : (request.partiallyPaid ? 'Teilweise bezahlt' : (!request.allocated ? 'Wartet auf Teilnehmende' : (request.requiresPayments ? 'Offen' : 'Keine Erstattung nötig')))}">Offen</span><h2 th:text="${request.description}">Eventkosten</h2><p class="cost-muted">Ausgelegt von <a th:href="@{/users/{id}(id=${request.creatorId})}" th:text="${request.creator}"></a></p></div><strong class="cost-amount" th:text="${request.amount()}"></strong></div>
-        <p class="cost-muted" th:text="${request.selectedOnly ? 'Aufteilung: nur ausgewählte, bestätigte Teilnehmende' : 'Aufteilung: alle bestätigten Teilnehmenden'}"></p>
+        <p class="cost-muted" th:text="${request.selectedOnly ? 'Aufteilung: ausgewählte Personen, unabhängig von ihrer Teilnahme' : 'Aufteilung: alle bestätigten Teilnehmenden'}"></p>
         <div th:if="${request.allocated}">
             <ul class="cost-shares">
                 <li th:each="share : ${request.shares}" th:classappend="|${share.mine ? ' cost-mine' : ''}${share.paid ? ' cost-share-paid' : ''}|">
@@ -19,7 +19,7 @@
                         <a th:href="@{/users/{id}(id=${share.userId})}" th:text="${share.name}"></a><span class="cost-share-note" th:if="${share.mine}"> · Du</span>
                         <span class="cost-share-note" th:if="${share.ownShare}"> · eigener Anteil</span>
                         <span class="cost-share-note" th:if="${!share.ownShare and !share.paymentRequired}"> · kein Betrag fällig</span>
-                        <span class="cost-share-note cost-payment-paid" th:if="${share.paid}"> · bezahlt <span th:if="${share.paidAt != null}" th:text="|am ${share.paidAt} Uhr (Berlin)|">am 01.01.2026 Uhr (Berlin)</span></span>
+                        <span class="cost-share-note cost-payment-paid" th:if="${share.paid}"> · bezahlt <span th:if="${share.paidAt != null}" th:text="|am ${share.paidAt} Uhr|">am 01.01.2026 Uhr</span></span>
                         <span class="cost-share-note cost-payment-open" th:if="${share.paymentRequired and !share.paid}" th:text="| · offen · an ${request.creator}|"> · offen</span>
                     </div>
                     <div class="cost-share-side">
@@ -37,12 +37,12 @@
             </ul>
             <p class="cost-muted">Erstattung an <span th:text="${request.creator}"></span>: <strong th:text="${request.reimbursement()}"></strong> · noch offen: <strong th:text="${request.openReimbursement()}"></strong></p>
         </div>
-        <p class="cost-pending" th:unless="${request.allocated}">Der Betrag ist gespeichert. Sobald anwesende Personen aus der gewählten Gruppe bestätigt sind, wird er gleichmäßig aufgeteilt.</p>
+        <p class="cost-pending" th:unless="${request.allocated}">Der Betrag ist gespeichert. Für die automatische Aufteilung auf alle Teilnehmenden muss die Anwesenheit bestätigt sein.</p>
         <p class="cost-muted" th:if="${request.paymentTracking}">Die Aufteilung ist seit dem ersten erfassten Zahlungsstand eingefroren und bleibt bei späteren Änderungen der Teilnehmerliste erhalten.</p>
-        <p class="cost-muted" th:if="${request.paid}">Alle erforderlichen Zahlungen sind seit <span th:text="${request.paidAt}"></span> Uhr (Berlin) beglichen.</p>
+        <p class="cost-muted" th:if="${request.paid}">Alle erforderlichen Zahlungen sind seit <span th:text="${request.paidAt}"></span> Uhr beglichen.</p>
         <div class="cost-actions" th:if="${request.editable}">
             <a class="calendar-control" th:unless="${request.paymentTracking}" th:href="@{/events/{event}/costs/{cost}/edit(event=${eventCosts.id},cost=${request.id})}">Bearbeiten</a>
-            <details th:if="${request.paymentTracking}" class="cost-reopen"><summary>Alle Zahlungsstände zurücksetzen</summary><p>Danach gilt wieder die aktuelle bestätigte Teilnehmerliste und alle Anteile dieser Anfrage sind offen.</p><form th:action="@{/events/{event}/costs/{cost}/reopen(event=${eventCosts.id},cost=${request.id})}" method="post"><input type="hidden" name="version" th:value="${request.version}"><button class="calendar-control" type="submit">Alle zurücksetzen</button></form></details>
+            <details th:if="${request.paymentTracking}" class="cost-reopen"><summary>Alle Zahlungsstände zurücksetzen</summary><p>Danach gilt wieder die gewählte Personenauswahl beziehungsweise die aktuelle bestätigte Teilnehmerliste. Alle Anteile dieser Anfrage sind offen.</p><form th:action="@{/events/{event}/costs/{cost}/reopen(event=${eventCosts.id},cost=${request.id})}" method="post"><input type="hidden" name="version" th:value="${request.version}"><button class="calendar-control" type="submit">Alle zurücksetzen</button></form></details>
         </div>
     </article>
     <p class="cost-muted">Der Ersteller hakt die Zahlungen pro Person ab. Zahlungen werden außerhalb dieser Seite abgewickelt; Zahlungsdaten findest du auf dem jeweiligen Profil.</p>

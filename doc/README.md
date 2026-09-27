@@ -29,29 +29,5 @@ The examples are local and self-contained; reference links are optional reading 
 - **Find SQL syntax:** [CRUD](sql-cheatsheet.md#read-create-update-delete), [joins](sql-cheatsheet.md#relationships-and-joins), [transactions](sql-cheatsheet.md#transactions).
 - **Run on the Raspberry Pi:** [Deployment guide](raspberry-pi.md).
 
-## Before disconnecting
 
-Run from the project directory while you still have internet:
-
-```powershell
-.\gradlew.bat clean test bootJar copyDatabaseTools
-.\gradlew.bat --offline clean test bootJar copyDatabaseTools
-```
-
-On Linux, use `./gradlew` instead of `.\gradlew.bat`.
-The second command proves the wrapper distribution, dependencies, test tooling, and JDK are available locally.
-Keep your Gradle user cache (normally `~/.gradle`) and installed JDK. `clean` removes only this project's `build/` outputs.
-
-Also import the project into your IDE while online and download source/Javadoc attachments if you want offline completion and library documentation.
-New dependencies or changed versions may still need internet. A built JAR needs only a compatible Java runtime to run.
-
-## A small development loop
-
-1. Find the closest existing example in `src/main`.
-2. Make one change.
-3. Run the relevant test or `gradlew test`.
-4. Start the app and try both valid and invalid input.
-5. Inspect logs and the browser Network tab if behavior differs from expectations.
-6. Add any newly learned project-specific detail to these notes.
-
-Use a separate practice database for destructive SQL exercises. Do not commit database files or passwords.
+- [Aktenzeichen, Bearbeitungsverlauf und druckbare Bescheide](case-notices.md)

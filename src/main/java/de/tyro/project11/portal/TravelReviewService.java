@@ -25,7 +25,7 @@ public class TravelReviewService {
         this.applications = applications; this.photos = photos; this.users = users;
         this.penalties = penalties; this.emails = emails; this.clock = clock;
     }
-    public record Review(long id, String kind, String applicant, String title, String submitted, String deadline,
+    public record Review(long id, String reference, String kind, String applicant, String title, String submitted, String deadline,
                          String decision, String reason, String leaveDecision, boolean late, boolean invalidated,
                          List<ApplicationAnswer> answers, List<TravelPhotoRepository.Info> photos, Long relatedId) {
         public boolean pending() { return decision.equals("PENDING"); }
@@ -68,9 +68,9 @@ public class TravelReviewService {
         var leave = applications.findByKindAndHolidayId(TravelKind.LEAVE, holiday.getId());
         var related = applications.findByKindAndHolidayId(a.getKind() == TravelKind.LEAVE ? TravelKind.REPORT : TravelKind.LEAVE, holiday.getId());
         var stamp = DateTimeFormatter.ofPattern("dd.MM.uuuu, HH:mm z", Locale.GERMAN);
-        return new Review(a.getId(), a.getKind().code, a.getApplicant().getDisplayName(), a.getSubject(),
+        return new Review(a.getId(), CaseReference.of(a), a.getKind().code, a.getApplicant().getDisplayName(), a.getSubject(),
                 a.getSubmittedAt().atZoneSameInstant(CalendarTime.BERLIN).format(stamp),
-                holiday.getEndsOn().plusDays(7).format(DateTimeFormatter.ofPattern("dd.MM.uuuu")) + ", einschließlich (Berlin)",
+                holiday.getEndsOn().plusDays(7).format(DateTimeFormatter.ofPattern("dd.MM.uuuu")) + ", einschließlich",
                 a.getDecision().name(), a.getDecisionReason(), leave.map(l -> l.getDecision().name()).orElse("ACCEPTED"),
                 a.getKind() == TravelKind.REPORT && !TravelRules.timely(a), holiday.isInvalidated(),
                 full ? a.getAnswers() : List.of(), full ? photos.findByApplicationIdOrderByIdAsc(a.getId()) : List.of(),

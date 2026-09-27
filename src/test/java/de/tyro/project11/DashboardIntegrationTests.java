@@ -67,20 +67,49 @@ class DashboardIntegrationTests {
 
         mvc.perform(get("/welcome").with(user("ada@example.com")))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("What’s coming up.")))
+                .andExpect(content().string(containsString("Das steht als Nächstes an.")))
                 .andExpect(content().string(containsString("Ada Admin")))
                 .andExpect(content().string(containsString("Mina Member")))
-                .andExpect(content().string(containsString("Admin mode · you can edit")))
+                .andExpect(content().string(containsString("Striche bearbeiten")))
                 .andExpect(content().string(containsString("name=\"_csrf\"")))
-                .andExpect(content().string(containsString("Set exact count")));
+                .andExpect(content().string(not(containsString("class=\"admin-controls\""))))
+                .andExpect(content().string(containsString("href=\"/users/" + memberId + "\"")));
+    }
+
+    @Test
+    void editModeIsExplicitAndRestrictedToAdmins() throws Exception {
+        mvc.perform(get("/welcome").param("editTallies", "true").with(user("ada@example.com")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Bearbeitung beenden")))
+                .andExpect(content().string(containsString("class=\"admin-controls\"")))
+                .andExpect(content().string(containsString("Genaue Anzahl festlegen")))
+                .andExpect(content().string(containsString("name=\"editTallies\" value=\"true\"")));
+        mvc.perform(get("/welcome").param("editTallies", "true").with(user("mina@example.com").roles("ADMIN")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("class=\"admin-controls\""))))
+                .andExpect(content().string(not(containsString("Bearbeitung beenden"))));
+        mvc.perform(post("/users/{id}/tally", memberId).with(user("ada@example.com")).with(csrf())
+                        .param("change", "INCREMENT").param("editTallies", "true"))
+                .andExpect(redirectedUrl("/welcome?editTallies=true#user-" + memberId));
+        assertThat(users.findById(memberId).orElseThrow().getTallyCount()).isEqualTo(1);
+    }
+
+    @Test
+    void sevenMembersHaveProfileLinksAndAGroupOverview() throws Exception {
+        for (int i = 0; i < 5; i++) registrations.register(form("Person " + i, "person" + i + "@example.com"));
+        var html = mvc.perform(get("/welcome").with(user("ada@example.com")))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertThat(html).contains("7 Personen", "tally-overview");
+        for (var account : users.findAll()) assertThat(html).contains("href=\"/users/" + account.getId() + "\"");
+        assertThat(html).doesNotContain("class=\"admin-controls\"");
     }
 
     @Test
     void regularUsersSeeTalliesButCannotEditThem() throws Exception {
         mvc.perform(get("/welcome").with(user("mina@example.com")))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("View only")))
-                .andExpect(content().string(not(containsString("Set exact count"))));
+                .andExpect(content().string(not(containsString("Striche bearbeiten"))))
+                .andExpect(content().string(not(containsString("class=\"admin-controls\""))));
 
         mvc.perform(post("/users/{id}/tally", memberId)
                         .with(user("mina@example.com").roles("ADMIN"))

@@ -42,8 +42,12 @@ public class SignInController {
     }
 
     @GetMapping("/welcome")
-    public String welcome(Principal principal, Model model) {
-        model.addAttribute("dashboard", dashboard.load(principal.getName()));
+    public String welcome(Principal principal, Model model,
+                          @org.springframework.web.bind.annotation.RequestParam(defaultValue = "false") boolean editTallies) {
+        var view = dashboard.load(principal.getName());
+        model.addAttribute("dashboard", view);
+        model.addAttribute("editingTallies", view.admin() && editTallies);
+        model.addAttribute("pendingReviews", openItems.pendingReviews(principal.getName()));
         model.addAttribute("upcomingEvents", calendar.upcoming());
         var pending = attendance.pending(principal.getName());
         model.addAttribute("pendingAttendance", pending);

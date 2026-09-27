@@ -2,12 +2,12 @@
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{profile/fragments :: head(${profile.name})}"></head>
 <body class="dashboard-body"><div class="page dashboard-page profile-page" th:style="|--profile-color: ${profile.color}|">
-<header th:replace="~{profile/fragments :: header}"></header>
+<header th:replace="~{fragments/navigation :: header}"></header>
 <main>
 <a class="event-back" th:href="@{/welcome}">← Zur Gruppe</a>
 <div class="notice notice-success" th:if="${saved}" th:text="${saved}" role="status"></div>
 <section class="profile-hero">
-<div><p class="eyebrow">Menschen &amp; Erinnerungen</p><h1 th:text="${profile.name}">Dein Name</h1><p>Die kleinen Geschichten. Die großen Reisen. Die Zeit zusammen.</p><span class="profile-meta" th:text="|Mitglied seit ${profile.joined}|"></span></div>
+<div><p class="eyebrow">Ein persönliches Journal</p><h1 th:text="${profile.name}">Dein Name</h1><p>Die kleinen Geschichten. Die großen Reisen. Die Zeit zusammen.</p><span class="profile-meta" th:text="|Mitglied seit ${profile.joined}|"></span></div>
 <div class="profile-actions" th:if="${profile.owner}"><a class="button" th:href="@{/users/{id}/blog/new(id=${profile.id})}">＋ Beitrag schreiben</a><a class="calendar-control" th:href="@{/users/{id}/edit(id=${profile.id})}">Profil bearbeiten</a><a class="header-link" th:href="@{/account}">Kontoeinstellungen →</a></div>
 </section>
 <div class="profile-columns">
@@ -24,18 +24,33 @@
 </section>
 </aside>
 <section class="profile-timeline" aria-labelledby="timeline-heading">
-<div class="profile-timeline-heading"><div><p class="section-kicker">Das war bisher</p><h2 id="timeline-heading">Geschichten &amp; Erlebnisse</h2></div><span class="profile-muted">Neueste zuerst</span></div>
+<div class="profile-timeline-heading"><div><p class="section-kicker">Aus dem Leben</p><h2 id="timeline-heading">Geschichten &amp; Erlebnisse</h2></div><span class="profile-muted">Geschichten, Reisen &amp; gemeinsame Zeit</span></div>
 <div class="profile-card profile-empty" th:if="${profile.timeline.isEmpty()}"><h3>Hier beginnt deine Geschichte.</h3><p>Vergangene Gruppenereignisse, Urlaube und eigene Beiträge finden hier ihren Platz.</p><a th:if="${profile.owner}" th:href="@{/users/{id}/blog/new(id=${profile.id})}">Den ersten Beitrag schreiben →</a></div>
-<article class="profile-card timeline-card" th:each="item : ${profile.timeline}" th:id="|${item.kind}-${item.id}|" th:classappend="|timeline-${item.kind}|">
+<article class="profile-card timeline-card" th:each="item : ${profile.timeline}" th:id="|${item.kind}-${item.id}|" th:classappend="|timeline-${item.kind}${item.absence != null ? ' timeline-event-with-story' : ''}|">
+<div class="timeline-event-summary" th:if="${item.kind == 'event'}">
+    <time th:text="${item.date}"></time>
+    <h2><a th:href="@{${item.url}}" th:text="${item.title}"></a></h2>
+    <span class="attendance-label" th:classappend="${item.status == 'Teilgenommen'} ? 'attendance-yes' : ''" th:text="${item.status}"></span>
+</div>
+<th:block th:if="${item.kind == 'event' and item.absence != null}">
+    <p class="timeline-description" th:if="${!item.description.isBlank()}" th:text="${item.description}"></p>
+    <section th:replace="~{profile/fragments :: story(${item.absence}, 'Mein Antrag auf Abwesenheit · AaA')}"></section>
+    <div class="timeline-links"><a th:href="@{/amt/antraege/{id}(id=${item.absence.id})}">Originalantrag im Amt →</a></div>
+</th:block>
+<th:block th:unless="${item.kind == 'event'}">
 <div class="timeline-meta"><span class="timeline-kind" th:text="${item.kind == 'holiday' ? 'Urlaub' : (item.kind == 'event' ? 'Gruppenereignis' : 'Persönlicher Beitrag')}"></span><time th:text="${item.date}"></time></div>
 <h2 th:text="${item.title}"></h2>
-<div class="attendance-label" th:if="${item.kind == 'event'}" th:classappend="${item.status == 'Teilgenommen'} ? 'attendance-yes' : ''" th:text="${item.status}"></div>
 <p class="timeline-description" th:if="${!item.description.isEmpty()}" th:text="${item.description}"></p>
+<th:block th:if="${item.kind == 'holiday'}">
+    <th:block th:if="${item.leave != null}"><section th:replace="~{profile/fragments :: story(${item.leave}, 'Die Reisepläne · AaB')}"></section></th:block>
+    <th:block th:if="${item.report != null}"><section th:replace="~{profile/fragments :: story(${item.report}, 'Aus dem Reisetagebuch')}"></section></th:block>
+</th:block>
 <div th:if="${item.kind == 'blog'}" th:insert="~{profile/fragments :: blocks(${item.blocks})}"></div>
-<div class="timeline-links" th:if="${item.kind != 'blog'}"><a th:href="${item.url}" th:text="${item.kind == 'event' ? 'Ereignis ansehen →' : 'Im Kalender ansehen →'}"></a><a th:if="${item.reportId != null}" th:href="@{/amt/reisen/{id}(id=${item.reportId})}">Reisebericht lesen ↗</a><span th:if="${item.kind == 'holiday' and item.reportId == null}" class="profile-muted">Noch kein Reisebericht</span></div>
+<div class="timeline-links" th:if="${item.kind != 'blog'}"><a th:href="${item.url}" th:text="${item.kind == 'event' ? 'Ereignis ansehen →' : 'Im Kalender ansehen →'}"></a><a th:if="${item.reportId != null}" th:href="@{/amt/reisen/{id}(id=${item.reportId})}">Originalbericht im Amt →</a><span th:if="${item.kind == 'holiday' and item.reportId == null}" class="profile-muted">Noch kein Reisebericht</span></div>
 <div class="timeline-links" th:if="${item.kind == 'blog'}"><span class="profile-muted" th:if="${item.edited != null}" th:text="|Bearbeitet am ${item.edited}|"></span><a th:if="${profile.owner}" th:href="@{/users/{id}/blog/{entryId}/edit(id=${profile.id},entryId=${item.id})}">Beitrag bearbeiten →</a></div>
+</th:block>
 </article>
 </section>
 </div>
-</main><footer class="site-footer"><span>Project 11 · Geschichten aus unserem Kreis</span></footer>
+</main><footer class="site-footer"><span>ZFG · Geschichten aus unserem Kreis</span></footer>
 </div><script defer th:src="@{/js/profile.js}"></script></body></html>

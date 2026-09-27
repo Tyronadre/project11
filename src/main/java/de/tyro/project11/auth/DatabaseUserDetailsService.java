@@ -23,7 +23,7 @@ public class DatabaseUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         // Apply the same email normalization as registration.
         var user = users.findByEmail(email.strip().toLowerCase(Locale.ROOT))
-                .orElseThrow(() -> new UsernameNotFoundException("Invalid email or password."));
+                .orElseThrow(() -> new UsernameNotFoundException("E-Mail-Adresse oder Passwort stimmen nicht."));
         // Spring Security verifies the submitted password with our BCrypt encoder.
         // Keep the JPA entity out of the HTTP session.
         return new AppUserPrincipal(

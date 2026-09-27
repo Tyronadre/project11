@@ -66,6 +66,11 @@ public class TravelController {
                 if (drafts.size() >= 8) drafts.remove(drafts.keySet().iterator().next());
                 drafts.put(draft.getId(), draft);
             }
+            if (draft.getKind() == TravelKind.REPORT) {
+                model.addAttribute("travelForm", draft.getForm());
+                formModel(draft, principal, model);
+                return "portal/report-form";
+            }
             return formRedirect(draft);
         }
         var draft = draft(session, vorgang, type);
@@ -74,11 +79,11 @@ public class TravelController {
             draft.edit();
             model.addAttribute("travelForm", draft.getForm());
             formModel(draft, principal, model);
-            return "portal/travel-form";
+            return draft.getKind() == TravelKind.REPORT ? "portal/report-form" : "portal/travel-form";
         }
     }
 
-    @PostMapping("/{type:aab|eer}/pruefen")
+    @PostMapping("/{type:aab}/pruefen")
     public String prepare(@PathVariable String type, @RequestParam String vorgang,
                           @Valid @ModelAttribute("travelForm") TravelForm form, BindingResult errors,
                           @RequestParam(name = "photos", required = false) List<MultipartFile> uploads,
@@ -98,7 +103,7 @@ public class TravelController {
         }
     }
 
-    @GetMapping("/{type:aab|eer}/pruefung")
+    @GetMapping("/{type:aab}/pruefung")
     public String review(@PathVariable String type, @RequestParam String vorgang, HttpSession session, Principal principal, Model model) {
         var draft = draft(session, vorgang, type);
         synchronized (draft) {
@@ -111,7 +116,7 @@ public class TravelController {
         }
     }
 
-    @PostMapping("/{type:aab|eer}/bestaetigen")
+    @PostMapping("/{type:aab}/bestaetigen")
     public String confirm(@PathVariable String type, @RequestParam String vorgang, HttpSession session) {
         var draft = draft(session, vorgang, type);
         synchronized (draft) {
@@ -122,7 +127,7 @@ public class TravelController {
         }
     }
 
-    @GetMapping("/{type:aab|eer}/freigabe")
+    @GetMapping("/{type:aab}/freigabe")
     public String confirmation(@PathVariable String type, @RequestParam String vorgang, HttpSession session, Model model) {
         var draft = draft(session, vorgang, type);
         synchronized (draft) {
@@ -133,13 +138,34 @@ public class TravelController {
         }
     }
 
-    @PostMapping("/{type:aab|eer}/einreichen")
+    @PostMapping("/{type:aab}/einreichen")
     public String submit(@PathVariable String type, @RequestParam String vorgang, HttpSession session,
                          Principal principal, RedirectAttributes redirect) {
         var draft = draft(session, vorgang, type);
         synchronized (draft) {
             if (draft.getSubmittedId() != null) return filed(draft);
             requireStage(draft, AbsenceDraft.Stage.FINAL);
+            draft.submitted(travel.submit(draft, principal.getName()));
+            redirect.addFlashAttribute("newlySubmitted", true);
+            return filed(draft);
+        }
+    }
+
+    @PostMapping("/eer/einreichen")
+    public String submitReport(@RequestParam String vorgang,
+                               @ModelAttribute("travelForm") TravelForm form, BindingResult errors,
+                               @RequestParam(name = "photos", required = false) List<MultipartFile> uploads,
+                               HttpSession session, Principal principal, Model model, RedirectAttributes redirect) {
+        var draft = draft(session, vorgang, "eer");
+        synchronized (draft) {
+            if (draft.getSubmittedId() != null) return filed(draft);
+            draft.update(form);
+            travel.validate(draft, principal.getName(), errors);
+            if (!errors.hasErrors()) photos.stage(draft, principal.getName(), uploads, errors);
+            if (errors.hasErrors()) {
+                formModel(draft, principal, model);
+                return "portal/report-form";
+            }
             draft.submitted(travel.submit(draft, principal.getName()));
             redirect.addFlashAttribute("newlySubmitted", true);
             return filed(draft);
@@ -184,7 +210,11 @@ public class TravelController {
         model.addAttribute("draft", draft);
         model.addAttribute("fields", TravelFields.forKind(draft.getKind()));
         model.addAttribute("loyaltyOptions", PortalQuestions.LOYALTY_OPTIONS);
-        model.addAttribute("holidays", draft.getKind() == TravelKind.REPORT ? travel.reportableHolidays(principal.getName()) : List.of());
+        var holidays = draft.getKind() == TravelKind.REPORT ? travel.reportableHolidays(principal.getName()) : List.<TravelService.HolidayOption>of();
+        if (holidays.size() == 1 && draft.getForm().value("holidayId").isBlank()) {
+            draft.getForm().getValues().put("holidayId", Long.toString(holidays.getFirst().id()));
+        }
+        model.addAttribute("holidays", holidays);
         model.addAttribute("photos", photos.draftPhotos(draft.getId(), principal.getName()));
     }
 

@@ -89,8 +89,7 @@ class CalendarIntegrationTests {
         mvc.perform(get("/calendar").with(user(mina.getEmail())))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("September 2026")))
-                .andExpect(content().string(containsString("A little room for plans.")))
-                .andExpect(content().string(containsString("Europe/Berlin")))
+                .andExpect(content().string(not(containsString("Europe/Berlin"))))
                 .andExpect(content().string(not(containsString("Add activity"))))
                 .andExpect(content().string(not(containsString("Submit holiday"))));
     }
@@ -107,12 +106,12 @@ class CalendarIntegrationTests {
                 .andExpect(content().string(containsString("Mina&#39;s holiday")))
                 .andExpect(content().string(containsString("&lt;script&gt;")))
                 .andExpect(content().string(not(containsString("<script>alert"))))
-                .andExpect(content().string(containsString("10 Sep 2026, 18:00 CEST")))
+                .andExpect(content().string(containsString("10 Sept. 2026, 18:00 MESZ")))
                 .andExpect(content().string(containsString("href=\"/events/" + activity.getId() + "\"")))
                 .andExpect(content().string(containsString("id=\"activity-" + activity.getId() + "\""))).andReturn();
         String grid = response.getResponse().getContentAsString().split("<div class=\"calendar-caption\">")[0];
         assertThat(grid).contains("class=\"holiday-name\">Mina&#39;s holiday</span>", "--holiday-color: #52734d",
-                        "title=\"Mina&#39;s holiday", "Mina Member", "11 Sep 2026 – 13 Sep 2026", "Away with friends.")
+                        "title=\"Mina&#39;s holiday", "Mina Member", "11 Sept. 2026 – 13 Sept. 2026", "Away with friends.")
                 .doesNotContain("class=\"holiday-name\">Mina Member</span>", "Mina Member · all day");
         mvc.perform(get("/welcome").with(user(mina.getEmail())))
                 .andExpect(content().string(containsString("href=\"/calendar\"")));
@@ -173,9 +172,9 @@ class CalendarIntegrationTests {
         activity("Autumn clock change", "2026-10-25T00:30:00Z", "2026-10-25T01:30:00Z");
 
         assertThat(calendar.load("2026-03", CalendarFilter.ALL).entries().getFirst().period())
-                .isEqualTo("29 Mar 2026, 01:30 CET – 29 Mar 2026, 03:30 CEST");
+                .isEqualTo("29 März 2026, 01:30 MEZ – 29 März 2026, 03:30 MESZ");
         assertThat(calendar.load("2026-10", CalendarFilter.ALL).entries().getFirst().period())
-                .isEqualTo("25 Oct 2026, 02:30 CEST – 25 Oct 2026, 02:30 CET");
+                .isEqualTo("25 Okt. 2026, 02:30 MESZ – 25 Okt. 2026, 02:30 MEZ");
     }
 
     @Test

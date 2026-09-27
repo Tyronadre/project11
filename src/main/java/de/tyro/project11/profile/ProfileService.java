@@ -25,19 +25,24 @@ public class ProfileService {
     private final ActivityRepository activities;
     private final AttendanceRepository attendance;
     private final TravelApplicationRepository travel;
+    private final AbsenceApplicationRepository absences;
+    private final TravelPhotoRepository photos;
     private final Clock clock;
     private final Validator validator;
 
     public ProfileService(UserRepository users, UserProfileRepository profiles, BlogEntryRepository blogs,
                           HolidayRepository holidays, ActivityRepository activities, AttendanceRepository attendance,
-                          TravelApplicationRepository travel, Clock clock, Validator validator) {
+                          TravelApplicationRepository travel, Clock clock, Validator validator, AbsenceApplicationRepository absences, TravelPhotoRepository photos) {
         this.users = users; this.profiles = profiles; this.blogs = blogs; this.holidays = holidays;
         this.activities = activities; this.attendance = attendance; this.travel = travel;
-        this.clock = clock; this.validator = validator;
+        this.clock = clock; this.validator = validator; this.absences = absences; this.photos = photos;
     }
     public record Fact(String section, String question, String answer) {}
+    public record Passage(String section, String question, String text) {}
+    public record Photo(long id, String name) {}
+    public record Story(long id, String title, String submitted, List<Passage> passages, List<Photo> photos) {}
     public record TimelineItem(long id, String kind, String title, String date, Instant sortAt, String description,
-                               String status, String url, Long reportId, List<BlogBlock> blocks, String edited) {}
+                               String status, String url, Long reportId, List<BlogBlock> blocks, String edited, Story report, Story absence, Story leave) {}
     // Deliberately excludes payment values from the regular page model.
     public record Profile(long id, String name, boolean owner, String color, String birthday, String joined,
                           boolean hasPayments, List<Fact> facts, List<TimelineItem> timeline) {}
@@ -52,34 +57,46 @@ public class ProfileService {
                 profile.getAnswers().getOrDefault(q.key(), "Noch nicht ausgefüllt"))).toList();
         List<TimelineItem> timeline = new ArrayList<>();
         var reports = travel.findByApplicantIdAndKind(id, TravelKind.REPORT).stream()
-                .collect(Collectors.toMap(r -> r.getHoliday().getId(), TravelApplication::getId));
+                .collect(Collectors.toMap(r -> r.getHoliday().getId(), r -> r));
+        var leaves = travel.findByApplicantIdAndKind(id, TravelKind.LEAVE).stream()
+                .collect(Collectors.toMap(r -> r.getHoliday().getId(), r -> r));
         for (var holiday : holidays.findByUserIdAndEndsOnBeforeOrderByEndsOnDesc(id, LocalDate.now(clock.withZone(CalendarTime.BERLIN)))) {
             timeline.add(new TimelineItem(holiday.getId(), "holiday", holiday.getTitle(),
                     holiday.getStartsOn().format(DAY) + " – " + holiday.getEndsOn().format(DAY),
                     holiday.getEndsOn().plusDays(1).atStartOfDay(CalendarTime.BERLIN).toInstant(),
                     holiday.getDescription(), "Urlaub", "/calendar?month=" + YearMonth.from(holiday.getStartsOn()) + "#holiday-" + holiday.getId(),
-                    reports.get(holiday.getId()), List.of(), null));
+                    reports.containsKey(holiday.getId()) ? reports.get(holiday.getId()).getId() : null, List.of(), null,
+                    travelStory(reports.get(holiday.getId())), null, travelStory(leaves.get(holiday.getId()))));
         }
         var sheets = attendance.findAllByOrderBySavedAtDesc().stream()
                 .collect(Collectors.toMap(s -> s.getActivity().getId(), s -> s));
-        for (var event : activities.findByEndsAtLessThanEqualOrderByEndsAtDescIdDesc(OffsetDateTime.now(clock))) {
-            if (event.isCancelled()) continue;
+        var filedAbsences = absences.findByApplicantIdOrderBySubmittedAtDescIdDesc(id).stream()
+                .collect(Collectors.toMap(a -> a.getActivity().getId(), a -> a));
+        var eventItems = new LinkedHashMap<Long, Activity>();
+        activities.findByEndsAtLessThanEqualOrderByEndsAtDescIdDesc(OffsetDateTime.now(clock)).forEach(e -> eventItems.put(e.getId(), e));
+        filedAbsences.values().forEach(a -> eventItems.put(a.getActivity().getId(), a.getActivity()));
+        for (var event : eventItems.values()) {
+            var absence = filedAbsences.get(event.getId());
+            if (event.isCancelled() && absence == null) continue;
             var sheet = sheets.get(event.getId());
             String status;
-            if (sheet == null) status = "Teilnahme noch nicht erfasst";
+            if (event.isCancelled()) status = "Event abgesagt";
+            else if (event.getEndsAt().toInstant().isAfter(clock.instant())) status = "Event noch nicht beendet";
+            else if (sheet == null) status = "Teilnahme noch nicht erfasst";
             else if (!contains(sheet.getRoster(), id)) status = "Nicht im damaligen Teilnehmerkreis";
             else status = contains(sheet.getAttendees(), id) ? "Teilgenommen" : "Nicht teilgenommen";
             // Membership is taken from the saved roster; no absent status is inferred from a missing sheet.
-            if (sheet == null && event.getEndsAt().isBefore(member.getCreatedAt())) continue;
+            if (absence == null && sheet == null && event.getEndsAt().isBefore(member.getCreatedAt())) continue;
             timeline.add(new TimelineItem(event.getId(), "event", event.getTitle(),
-                    event.getStartsAt().atZoneSameInstant(CalendarTime.BERLIN).format(DAY), event.getEndsAt().toInstant(),
-                    event.getDescription(), status, "/events/" + event.getId(), null, List.of(), null));
+                    event.getStartsAt().atZoneSameInstant(CalendarTime.BERLIN).format(DAY), absence == null ? event.getEndsAt().toInstant() : absence.getSubmittedAt().toInstant(),
+                    event.getDescription(), status, "/events/" + event.getId(), null, List.of(), null, null, absence == null ? null : new Story(absence.getId(), "Antrag auf Abwesenheit",
+                            absence.getSubmittedAt().atZoneSameInstant(CalendarTime.BERLIN).format(DAY), passages(absence.getAnswers()), List.of()), null));
         }
         for (var blog : blogs.findByAuthorIdOrderByCreatedAtDescIdDesc(id)) {
             timeline.add(new TimelineItem(blog.getId(), "blog", blog.getTitle(),
                     blog.getCreatedAt().atZoneSameInstant(CalendarTime.BERLIN).format(DAY), blog.getCreatedAt().toInstant(),
                     "", "Blogbeitrag", null, null, blog.getBlocks(), blog.getUpdatedAt().equals(blog.getCreatedAt()) ? null
-                    : blog.getUpdatedAt().atZoneSameInstant(CalendarTime.BERLIN).format(DAY)));
+                    : blog.getUpdatedAt().atZoneSameInstant(CalendarTime.BERLIN).format(DAY), null, null, null));
         }
         timeline.sort(Comparator.comparing(TimelineItem::sortAt).reversed()
                 .thenComparing(TimelineItem::kind).thenComparing(TimelineItem::id, Comparator.reverseOrder()));
@@ -87,6 +104,19 @@ public class ProfileService {
                 profile.getBirthday() == null ? null : profile.getBirthday().format(DAY),
                 member.getCreatedAt().atZoneSameInstant(CalendarTime.BERLIN).format(DAY),
                 !profile.getPaypal().isBlank() || !profile.getIban().isBlank(), facts, List.copyOf(timeline));
+    }
+
+    private List<Passage> passages(List<ApplicationAnswer> answers) {
+        return answers.stream().map(a -> new Passage(a.getSection(), a.getQuestion(),
+                a.getSection().equals("E. Bestätigungswesen") && a.getQuestion().startsWith("Allgemeine Gruppenbedingungen")
+                        ? "Akzeptiert." : a.getAnswer())).toList();
+    }
+    private Story travelStory(TravelApplication application) {
+        if (application == null) return null;
+        var pictures = application.getKind() == TravelKind.REPORT ? photos.findByApplicationIdOrderByIdAsc(application.getId()).stream()
+                .map(p -> new Photo(p.getId(), p.getOriginalName())).toList() : List.<Photo>of();
+        return new Story(application.getId(), application.getSubject(), application.getSubmittedAt().atZoneSameInstant(CalendarTime.BERLIN).format(DAY),
+                passages(application.getAnswers()), pictures);
     }
 
     @Transactional(readOnly = true)

@@ -1,10 +1,10 @@
 <!DOCTYPE html><html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{costs/fragments :: head(${costId == null ? 'Kosten eintragen' : 'Kosten bearbeiten'})}"></head>
 <body class="dashboard-body"><div class="page dashboard-page">
-<header th:replace="~{profile/fragments :: header}"></header>
+<header th:replace="~{fragments/navigation :: header}"></header>
 <main class="cost-layout cost-form-layout">
     <a class="event-back" th:href="@{/events/{id}/costs(id=${eventCosts.id})}">← Zur Eventabrechnung</a>
-    <div class="cost-intro"><p class="eyebrow" th:text="|${eventCosts.date} · ${eventCosts.title}|"></p><h1 th:text="${costId == null ? 'Was hast du ausgelegt?' : 'Kosten bearbeiten'}"></h1><p>Trage den Gesamtbetrag ein. Dein eigener Anteil zählt mit, falls du zur ausgewählten Gruppe gehörst und teilgenommen hast.</p></div>
+    <div class="cost-intro"><p class="eyebrow" th:text="|${eventCosts.date} · ${eventCosts.title}|"></p><h1 th:text="${costId == null ? 'Was hast du ausgelegt?' : 'Kosten bearbeiten'}"></h1><p>Trage den Gesamtbetrag ein. Dein eigener Anteil zählt mit, falls du zur Gruppe gehörst, auf die diese Kosten aufgeteilt werden.</p></div>
     <form class="cost-card" th:object="${costForm}" th:action="${costId == null} ? @{/events/{id}/costs(id=${eventCosts.id})} : @{/events/{id}/costs/{cost}(id=${eventCosts.id},cost=${costId})}" method="post">
         <p class="notice notice-error" th:if="${#fields.hasAnyErrors()}" role="alert">Bitte prüfe deine Angaben. Deine Eingaben bleiben erhalten.</p>
         <input type="hidden" th:field="*{requestKey}"><input type="hidden" th:field="*{version}">
@@ -14,13 +14,12 @@
             <legend>Kosten aufteilen auf</legend>
             <label><input type="radio" th:field="*{selectedOnly}" value="false"> Alle bestätigten Teilnehmenden</label>
             <label><input type="radio" th:field="*{selectedOnly}" value="true"> Nur ausgewählte Personen</label>
-            <p class="field-hint" id="selectedUserIds-hint">Die folgende Auswahl gilt nur bei „Nur ausgewählte Personen“. Wähle mindestens eine Person. Abgerechnet werden ausschließlich ausgewählte Personen, deren Anwesenheit bestätigt ist.</p>
+            <p class="field-hint" id="selectedUserIds-hint">Die folgende Auswahl gilt nur bei „Nur ausgewählte Personen“. Wähle mindestens eine Person. Alle ausgewählten Personen tragen ihren Anteil – unabhängig davon, ob sie teilgenommen haben.</p>
             <div class="cost-selection-members"><label th:each="member : ${costMembers}"><input type="checkbox" th:field="*{selectedUserIds}" th:value="${member.id}" aria-describedby="selectedUserIds-hint selectedUserIds-error"><span th:text="${member.name}"></span></label></div>
             <p class="field-error" id="selectedUserIds-error" th:errors="*{selectedUserIds}"></p>
         </fieldset>
         <p class="cost-muted" th:text="${eventCosts.distributionStatus}"></p>
-        <p class="cost-muted" th:if="${eventCosts.ready}">Offene Anfragen folgen der aktuellen bestätigten Teilnehmerliste. Dein Betrag wird gleichmäßig auf diese Teilnehmenden aufgeteilt.</p>
-        <p class="cost-pending" th:unless="${eventCosts.ready}">Du kannst die Kosten schon speichern. Die Aufteilung folgt, sobald die Teilnehmerliste mit mindestens einer anwesenden Person bestätigt ist.</p>
+        <p class="cost-muted">Bei „Nur ausgewählte Personen“ wird der Betrag sofort gleichmäßig auf deine Auswahl aufgeteilt, auch ohne bestätigte Teilnehmerliste. Bei „Alle bestätigten Teilnehmenden“ folgt die Aufteilung der bestätigten Anwesenheit.</p>
         <div class="cost-actions"><button class="button" type="submit" th:text="${costId == null ? 'Kosten speichern' : 'Änderungen speichern'}"></button><a th:href="@{/events/{id}/costs(id=${eventCosts.id})}">Abbrechen</a></div>
     </form>
 </main></div></body></html>

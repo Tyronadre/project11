@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org"><body>
+<!-- The single source of truth for the site header and its menu links. -->
+<header class="app-header" th:fragment="header" th:with="navigation=${@siteNavigation.current()}">
+    <a class="app-brand" th:href="@{/}"><span th:replace="~{fragments/brand :: identity}"></span></a>
+    <nav class="app-menu" aria-label="Hauptnavigation" th:if="${navigation.signedIn}">
+        <a th:href="@{/welcome}" th:attr="aria-current=${navigation.active == 'welcome' ? 'page' : null}">Übersicht</a>
+        <a th:href="@{/calendar}" th:attr="aria-current=${navigation.active == 'calendar' ? 'page' : null}">Kalender</a>
+        <a th:href="@{/polls}" th:attr="aria-current=${navigation.active == 'polls' ? 'page' : null}">Abstimmungen</a>
+        <a th:href="@{/amt}" th:attr="aria-current=${navigation.active == 'applications' ? 'page' : null}">Anträge</a>
+        <a th:href="@{/costs}" th:attr="aria-current=${navigation.active == 'costs' ? 'page' : null}">Kosten</a>
+        <a th:href="@{/users/me}" th:attr="aria-current=${navigation.active == 'profile' ? 'page' : null}">Mein Profil</a>
+        <a th:href="@{/account}" th:attr="aria-current=${navigation.active == 'account' ? 'page' : null}">Konto</a>
+    </nav>
+    <form class="app-session" th:if="${navigation.signedIn}" th:action="@{/logout}" method="post">
+        <button type="submit">Abmelden ↗</button>
+    </form>
+    <nav class="app-guest" aria-label="Konto" th:unless="${navigation.signedIn}">
+        <a th:href="@{/signin}" th:attr="aria-current=${navigation.active == 'signin' ? 'page' : null}">Anmelden</a>
+        <a th:href="@{/register}" th:attr="aria-current=${navigation.active == 'register' ? 'page' : null}">Konto erstellen</a>
+    </nav>
+</header>
+</body></html>

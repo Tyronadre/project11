@@ -9,6 +9,11 @@ import java.util.Optional;
 import java.util.List;
 
 public interface AbsenceApplicationRepository extends JpaRepository<AbsenceApplication, Long> {
+    @EntityGraph(attributePaths = "activity")
+    List<AbsenceApplication> findByApplicantIdOrderBySubmittedAtDescIdDesc(long applicantId);
+    long countByDecision(AbsenceApplication.Decision decision);
+    @org.springframework.data.jpa.repository.Query("select count(a) from AbsenceApplication a where a.decision is null or a.decision = de.tyro.project11.portal.AbsenceApplication.Decision.PENDING")
+    long countPending();
     List<AbsenceApplication> findByApplicantIdAndDecidedAtIsNotNullOrderByDecidedAtDescIdDesc(long applicantId);
     @org.springframework.data.jpa.repository.Query("select a.activity.id from AbsenceApplication a where a.id = :id")
     Optional<Long> findActivityIdById(long id);

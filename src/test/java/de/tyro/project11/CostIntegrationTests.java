@@ -332,21 +332,49 @@ class CostIntegrationTests {
     }
 
     @Test
-    void selectedAbsenteesAreExcludedAndNewAttendeesAreNotAutomaticallyAdded() {
+    void selectedAbsenteesKeepTheirSharesAndAttendanceChangesDoNotBlockPayment() {
         var form = form("10"); form.setSelectedOnly(true); form.setSelectedUserIds(Set.of(creator.getId(), member.getId()));
         long id = costs.create(event.getId(), form, creator.getEmail());
-        assertThat(row(id).allocated()).isFalse();
+        assertThat(row(id).allocated()).isTrue();
+        var original = row(id);
+        long originalAttendance = view().attendanceVersion();
         record(true, admin);
-        assertThat(row(id).allocated()).isFalse();
-        assertThatThrownBy(() -> pay(id, member)).hasMessageContaining("409");
-        record(true, admin, member);
-        assertThat(row(id).shares()).extracting(CostService.Share::userId).containsExactly(member.getId());
-        assertThat(row(id).shares()).extracting(CostService.Share::cents).containsExactly(1000L);
-        pay(id, member);
+        assertThat(row(id).shares()).extracting(CostService.Share::userId).containsExactly(creator.getId(), member.getId());
+        assertThat(row(id).shares()).extracting(CostService.Share::cents).containsExactly(500L, 500L);
+        costs.markSharePaid(event.getId(), id, member.getId(), original.version(), originalAttendance, creator.getEmail());
         record(true, admin, member, creator);
-        assertThat(row(id).shares()).extracting(CostService.Share::userId).containsExactly(member.getId());
+        assertThat(row(id).shares()).extracting(CostService.Share::userId).containsExactly(creator.getId(), member.getId());
         costs.reopen(event.getId(), id, row(id).version(), creator.getEmail());
         assertThat(row(id).shares()).extracting(CostService.Share::userId).containsExactly(creator.getId(), member.getId());
+    }
+
+    @Test
+    void selectedPeopleCanPayWithoutAnyAttendanceSheet() throws Exception {
+        var form = form("10,01"); form.setSelectedOnly(true); form.setSelectedUserIds(Set.of(admin.getId(), member.getId()));
+        long id = costs.create(event.getId(), form, creator.getEmail());
+        assertThat(row(id).shares()).extracting(CostService.Share::cents).containsExactly(501L, 500L);
+        assertThat(costs.event(event.getId(), member.getEmail()).myDueCents()).isEqualTo(500);
+        assertThat(view().awaitingDistribution()).isFalse();
+        mvc.perform(post("/events/{event}/costs/{cost}/shares/{person}/paid", event.getId(), id, member.getId())
+                        .with(user(creator.getEmail())).with(csrf())
+                        .param("version", Long.toString(row(id).version())).param("attendanceVersion", "-1"))
+                .andExpect(status().is3xxRedirection());
+        pay(id, admin);
+        assertThat(row(id).paid()).isTrue();
+    }
+
+    @Test
+    void selectedPeopleCanPayWithUnconfirmedOrEmptyAttendance() {
+        record(false, creator);
+        var form = form("10"); form.setSelectedOnly(true); form.setSelectedUserIds(Set.of(member.getId()));
+        long id = costs.create(event.getId(), form, creator.getEmail());
+        pay(id, member);
+        assertThat(row(id).paid()).isTrue();
+        costs.reopen(event.getId(), id, row(id).version(), creator.getEmail());
+        record(true);
+        assertThat(row(id).shares()).extracting(CostService.Share::userId).containsExactly(member.getId());
+        pay(id, member);
+        assertThat(row(id).paid()).isTrue();
     }
 
     @Test

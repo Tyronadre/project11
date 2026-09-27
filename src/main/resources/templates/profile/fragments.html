@@ -1,20 +1,33 @@
 <!DOCTYPE html>
-<html lang="de" xmlns:th="http://www.thymeleaf.org"><head th:fragment="head(title)">
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title th:text="|${title} · Project 11|">Profil · Project 11</title>
-<link rel="stylesheet" th:href="@{/css/app.css}"><link rel="stylesheet" th:href="@{/css/profile.css}">
-</head><body>
-<header class="site-header dashboard-header" th:fragment="header">
-<a class="brand" th:href="@{/welcome}"><span class="brand-mark" aria-hidden="true">11</span> Project 11</a>
-<nav class="page-nav" aria-label="Hauptnavigation"><a th:href="@{/welcome}">Übersicht</a><a th:href="@{/calendar}">Kalender</a><a th:href="@{/amt}">Anträge</a><a th:href="@{/costs}">Kosten</a><a th:href="@{/users/me}">Mein Profil</a></nav>
-<form th:action="@{/logout}" method="post"><button class="header-link" type="submit">Abmelden ↗</button></form>
-</header>
-<th:block th:fragment="runs(runs)"><span th:each="run : ${runs}" th:class="|font-${run.font}${run.bold ? ' text-bold' : ''}${run.italic ? ' text-italic' : ''}${run.underline ? ' text-underline' : ''}${run.strike ? ' text-strike' : ''}|" th:style="|color: ${run.color}|" th:text="${run.text}"></span></th:block>
-<div th:fragment="blocks(blocks)" class="blog-body">
-<div class="blog-block" th:each="block : ${blocks}">
-<h3 th:if="${block.kind == 'heading'}" th:insert="~{profile/fragments :: runs(${block.runs})}"></h3>
-<blockquote th:if="${block.kind == 'quote'}" th:insert="~{profile/fragments :: runs(${block.runs})}"></blockquote>
-<p th:if="${block.kind == 'paragraph'}" th:insert="~{profile/fragments :: runs(${block.runs})}"></p>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title th:text="|${title} · ZFG|">Profil · ZFG</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
+</head>
+<body>
+
+<th:block th:fragment="runs(runs)"><span th:class="|font-${run.font}${run.bold ? ' text-bold' : ''}${run.italic ? ' text-italic' : ''}${run.underline ? ' text-underline' : ''}${run.strike ? ' text-strike' : ''}|"
+                                         th:each="run : ${runs}"
+                                         th:style="|color: ${run.color}|" th:text="${run.text}"></span></th:block>
+<div class="blog-body" th:fragment="blocks(blocks)">
+    <div class="blog-block" th:each="block : ${blocks}">
+        <h3 th:if="${block.kind == 'heading'}" th:insert="~{profile/fragments :: runs(${block.runs})}"></h3>
+        <blockquote th:if="${block.kind == 'quote'}"
+                    th:insert="~{profile/fragments :: runs(${block.runs})}"></blockquote>
+        <p th:if="${block.kind == 'paragraph'}" th:insert="~{profile/fragments :: runs(${block.runs})}"></p>
+    </div>
 </div>
-</div>
-</body></html>
+<details th:fragment="story(story, label)" class="profile-story">
+    <summary class="profile-story-heading"><span class="section-kicker" th:text="${label}"></span><span class="story-title" th:text="${story.title}"></span><span class="profile-muted" th:text="|Eingereicht am ${story.submitted}|"></span><span class="story-toggle"><span class="story-expand">Lesen ↓</span><span class="story-collapse">Schließen ↑</span></span></summary>
+    <div class="story-passage" th:each="passage, position : ${story.passages}">
+        <p class="story-section" th:if="${story.passages.size() > 1 and (position.first or passage.section != story.passages[position.index - 1].section)}" th:text="${passage.section}"></p>
+        <h4 th:if="${story.passages.size() > 1}" th:text="${passage.question}"></h4><p class="story-text" th:text="${passage.text}"></p>
+    </div>
+    <p class="profile-muted" th:if="${story.passages.isEmpty()}">Zu diesem eingereichten Beitrag ist kein Text gespeichert.</p>
+    <div class="story-photos" th:if="${!story.photos.isEmpty()}"><figure th:each="photo : ${story.photos}"><a th:href="@{/amt/fotos/{id}(id=${photo.id})}"><img th:src="@{/amt/fotos/{id}(id=${photo.id})}" th:alt="${photo.name}" loading="lazy" decoding="async"></a><figcaption th:text="${photo.name}"></figcaption></figure></div>
+</details>
+</body>
+</html>

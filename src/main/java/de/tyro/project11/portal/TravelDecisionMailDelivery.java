@@ -53,11 +53,13 @@ public class TravelDecisionMailDelivery {
                         : "Ohne fristgerechten, bestätigten Reisebericht wird der angenommene Urlaub nach Ablauf der Berichtsfrist ungültig: ein Strich pro Urlaubstag, ohne zusätzliche Event-Striche im abgedeckten Zeitraum. Eine verspätete Bestätigung hebt dies nicht auf.";
             }
             if (holiday.isInvalidated()) consequence += "\nDieser Urlaub ist bereits wegen der abgelaufenen Berichtsfrist ungültig. Die Tagesstriche bleiben bestehen.";
-            helper.setSubject("Project 11 · " + application.getKind().code + " " + decision);
+            helper.setSubject("Project 11 · " + application.getKind().code + " " + decision + " · " + CaseReference.of(application));
             helper.setText("Hallo " + owner.getDisplayName() + ",\n\ndein " + application.getKind().code + " zu „" + application.getSubject()
                     + "“ wurde " + decision + ".\n\n"
                     + (application.getDecisionReason().isBlank() ? "" : "Begründung: " + application.getDecisionReason() + "\n\n")
-                    + consequence + "\n\nReiseakte: " + settings.baseUrl() + "/amt/reisen/" + applicationId
+                    + consequence + "\n\nAktenzeichen: " + CaseReference.of(application)
+                    + "\nBescheid: " + settings.baseUrl() + "/amt/reisen/" + applicationId + "/bescheid"
+                    + "\nReiseakte: " + settings.baseUrl() + "/amt/reisen/" + applicationId
                     + (application.getKind() == TravelKind.LEAVE && accepted ? "\nBericht einreichen: " + settings.baseUrl() + "/amt/eer?holiday=" + holiday.getId() : "")
                     + "\n\nViele Grüße\nProject 11", false);
             sender.send(message); email.sent(clock.instant());

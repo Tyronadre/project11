@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class AttendanceService {
-    private static final DateTimeFormatter STAMP = DateTimeFormatter.ofPattern("d MMM uuuu, HH:mm z", Locale.ENGLISH);
+    private static final DateTimeFormatter STAMP = DateTimeFormatter.ofPattern("d MMM uuuu, HH:mm z", Locale.GERMAN);
     private final ActivityRepository activities;
     private final AttendanceRepository sheets;
     private final UserRepository users;
@@ -62,10 +62,10 @@ public class AttendanceService {
         var members = roster.stream().sorted(Comparator.comparing(AppUser::getDisplayName).thenComparing(AppUser::getId))
                 .map(member -> {
                     String excuse = excuses.getOrDefault(member.getId(), "");
-                    String notification = attended.contains(member.getId()) ? "Attended · no email"
-                            : !excuse.isEmpty() ? excuse + " · no reminder"
-                            : sent.contains(member.getId()) ? "Already emailed · no duplicate"
-                            : expired ? "Deadline expired · no reminder" : "Will receive an AaA reminder";
+                    String notification = attended.contains(member.getId()) ? "Anwesend · keine E-Mail"
+                            : !excuse.isEmpty() ? excuse + " · keine Erinnerung"
+                            : sent.contains(member.getId()) ? "Bereits benachrichtigt · keine erneute E-Mail"
+                            : expired ? "Frist abgelaufen · keine Erinnerung" : "Erhält eine AaA-Erinnerung";
                     boolean notify = !attended.contains(member.getId()) && excuse.isEmpty() && !sent.contains(member.getId()) && !expired;
                     return new Member(member.getId(), member.getDisplayName(), member.getEmail(), attended.contains(member.getId()), excuse, notify, notification);
                 }).toList();
@@ -83,7 +83,7 @@ public class AttendanceService {
         var sheet = sheets.findById(id).orElse(null);
         if (expectedVersion != (sheet == null ? -1 : sheet.getVersion())) throw conflict();
         var roster = sheet == null ? eligibleMembers(activity) : sheet.getRoster();
-        if (!ids(roster).containsAll(attendeeIds)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Choose attendees from this event's member list.");
+        if (!ids(roster).containsAll(attendeeIds)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bitte wähle Anwesende aus der Mitgliederliste dieses Events.");
         if (sheet == null) sheet = new AttendanceSheet(activity, roster);
         sheet.record(roster.stream().filter(member -> attendeeIds.contains(member.getId())).collect(Collectors.toSet()), editor, OffsetDateTime.now(clock));
         sheets.saveAndFlush(sheet);
@@ -95,14 +95,14 @@ public class AttendanceService {
     public void confirm(long id, long expectedVersion, Set<Long> expectedRecipientIds, String email) {
         var activity = activities.findLockedById(id).orElseThrow(this::missing);
         var admin = user(email);
-        if (!admin.isAdmin()) throw new AccessDeniedException("Only admins can confirm attendance and email recipients.");
+        if (!admin.isAdmin()) throw new AccessDeniedException("Nur Admins können Anwesenheit und E-Mail-Empfänger bestätigen.");
         requireEnded(activity);
         var sheet = sheets.findById(id).orElseThrow(this::missing);
         if (sheet.getVersion() != expectedVersion) throw conflict();
         // An AaA/holiday or sent email may have changed the recipient list since the review page opened.
         var recipients = new HashSet<>(page(id, email).recipientIds());
         if (!recipients.equals(expectedRecipientIds)) throw new ResponseStatusException(HttpStatus.CONFLICT,
-                "The email recipients changed. Reload and check the recipient list before confirming.");
+                "Die E-Mail-Empfänger haben sich geändert. Lade die Seite neu und prüfe die Empfängerliste vor der Bestätigung.");
         if (sheet.isConfirmed()) return;
         sheet.confirm(admin, OffsetDateTime.now(clock));
         sheets.saveAndFlush(sheet);
@@ -173,11 +173,11 @@ public class AttendanceService {
         Map<Long, String> result = new HashMap<>();
         absences.findByActivityId(activity.getId()).stream().filter(AttendanceRules::timely).forEach(application ->
                 result.put(application.getApplicant().getId(), switch (application.getDecision()) {
-                    case PENDING -> "AaA awaiting review";
-                    case ACCEPTED -> "AaA accepted";
-                    case REJECTED -> "AaA rejected";
+                    case PENDING -> "AaA wartet auf Prüfung";
+                    case ACCEPTED -> "AaA angenommen";
+                    case REJECTED -> "AaA abgelehnt";
                 }));
-        rules.holidayMembers(activity).forEach(id -> result.put(id, "Covered by holiday"));
+        rules.holidayMembers(activity).forEach(id -> result.put(id, "Durch Urlaub abgedeckt"));
         return result;
     }
     private Set<AppUser> eligibleMembers(Activity activity) {
@@ -188,16 +188,16 @@ public class AttendanceService {
     private boolean expired(Activity activity) { return !clock.instant().isBefore(AttendanceRules.deadline(activity).toInstant()); }
     private String month(Activity activity) { return YearMonth.from(activity.getStartsAt().atZoneSameInstant(CalendarTime.BERLIN)).toString(); }
     private String stamp(OffsetDateTime time) { return time.atZoneSameInstant(CalendarTime.BERLIN).format(STAMP); }
-    private AppUser user(String email) { return users.findByEmail(email.strip().toLowerCase(Locale.ROOT)).orElseThrow(() -> new AccessDeniedException("Account not found.")); }
+    private AppUser user(String email) { return users.findByEmail(email.strip().toLowerCase(Locale.ROOT)).orElseThrow(() -> new AccessDeniedException("Konto nicht gefunden.")); }
     private AppUser requireEditor(Activity activity, String email) {
         var editor = user(email);
-        if (!editor.isAdmin() && !activity.getCreatedBy().getId().equals(editor.getId())) throw new AccessDeniedException("Only admins and the event creator can record attendance.");
+        if (!editor.isAdmin() && !activity.getCreatedBy().getId().equals(editor.getId())) throw new AccessDeniedException("Nur Admins und der Eventersteller können die Anwesenheit erfassen.");
         return editor;
     }
     private void requireEnded(Activity activity) {
         if (activity.isCancelled()) throw new ResponseStatusException(HttpStatus.CONFLICT, "Für abgesagte Events wird keine Anwesenheit erfasst.");
-        if (activity.getEndsAt().toInstant().isAfter(clock.instant())) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Attendance can be recorded after the event has ended.");
+        if (activity.getEndsAt().toInstant().isAfter(clock.instant())) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Die Anwesenheit kann nach Ende des Events erfasst werden.");
     }
-    private ResponseStatusException conflict() { return new ResponseStatusException(HttpStatus.CONFLICT, "Attendance changed. Reload before saving or confirming."); }
-    private ResponseStatusException missing() { return new ResponseStatusException(HttpStatus.NOT_FOUND, "Event or attendance not found."); }
+    private ResponseStatusException conflict() { return new ResponseStatusException(HttpStatus.CONFLICT, "Die Anwesenheit wurde geändert. Lade die Seite vor dem Speichern oder Bestätigen neu."); }
+    private ResponseStatusException missing() { return new ResponseStatusException(HttpStatus.NOT_FOUND, "Event oder Anwesenheitsliste nicht gefunden."); }
 }

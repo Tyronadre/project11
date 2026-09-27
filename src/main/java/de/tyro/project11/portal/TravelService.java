@@ -66,6 +66,13 @@ public class TravelService {
     @Transactional(readOnly = true)
     public void validate(TravelDraft draft, String email, BindingResult errors) {
         var form = draft.getForm();
+        if (draft.getKind() == TravelKind.REPORT) {
+            if (form.value("itinerary").isEmpty() || form.value("itinerary").length() > 6000)
+                errors.rejectValue("values[itinerary]", "text", "Bitte einen Reisebericht mit 1 bis 6.000 Zeichen eingeben.");
+            try { reportHoliday(form, email); }
+            catch (ResponseStatusException exception) { errors.rejectValue("values[holidayId]", "holiday", exception.getReason()); }
+            return;
+        }
         for (var field : TravelFields.forKind(draft.getKind())) {
             String value = form.value(field.key());
             String path = "values[" + field.key() + "]";
@@ -109,7 +116,7 @@ public class TravelService {
         var alreadyFiled = applications.findByFilingKeyAndApplicantId(draft.getId(), owner.getId());
         if (alreadyFiled.isPresent()) return alreadyFiled.get().getId();
         var form = draft.getForm();
-        if (!form.isAcceptedTerms()) throw badRequest("Bitte die Allgemeinen Gruppenbedingungen im Entwurf akzeptieren und erneut prüfen.");
+        if (draft.getKind() == TravelKind.LEAVE && !form.isAcceptedTerms()) throw badRequest("Bitte die Allgemeinen Gruppenbedingungen im Entwurf akzeptieren und erneut prüfen.");
         var now = OffsetDateTime.now(clock.withZone(CalendarTime.BERLIN));
         Holiday holiday;
         if (draft.getKind() == TravelKind.LEAVE) {
@@ -120,14 +127,16 @@ public class TravelService {
             var existing = applications.findByKindAndHolidayId(TravelKind.REPORT, holidayId);
             if (existing.isPresent() && existing.get().getApplicant().getId().equals(owner.getId())) return existing.get().getId();
             holiday = reportHoliday(form, email);
-            int count = photos.findByDraftKeyAndOwnerIdAndApplicationIsNullOrderByIdAsc(draft.getId(), owner.getId()).size();
-            if (count < 3 || count > 6) throw badRequest("Der Bericht benötigt drei bis sechs Fotos. Bitte den Entwurf erneut prüfen.");
+            if (form.value("itinerary").isEmpty() || form.value("itinerary").length() > 6000)
+                throw badRequest("Bitte einen Reisebericht mit 1 bis 6.000 Zeichen eingeben.");
+            long bytes = photos.findByDraftKeyAndOwnerIdAndApplicationIsNullOrderByIdAsc(draft.getId(), owner.getId())
+                    .stream().mapToLong(TravelPhotoRepository.Info::getSizeBytes).sum();
+            if (bytes > TravelPhotoService.MAX_TOTAL_BYTES) throw badRequest("Die Fotos dürfen zusammen höchstens 1 GB umfassen.");
         }
         var application = applications.saveAndFlush(new TravelApplication(draft.getKind(), draft.getId(), owner, holiday,
                 holiday.getTitle() + " · " + period(holiday), now, answers(draft, holiday)));
         if (draft.getKind() == TravelKind.REPORT) {
-            int filedPhotos = photos.fileDraft(draft.getId(), owner.getId(), application);
-            if (filedPhotos < 3 || filedPhotos > 6) throw badRequest("Entwurfsfotos sind inzwischen abgelaufen. Bitte den Entwurf erneut prüfen und Fotos ergänzen.");
+            photos.fileDraft(draft.getId(), owner.getId(), application);
             penalties.reconcile(owner.getId());
         }
         return application.getId();
@@ -163,6 +172,9 @@ public class TravelService {
     private List<ApplicationAnswer> answers(TravelDraft draft, Holiday holiday) {
         var form = draft.getForm();
         List<ApplicationAnswer> result = new ArrayList<>();
+        if (draft.getKind() == TravelKind.REPORT) {
+            return List.of(new ApplicationAnswer("Reisebericht", "Dein Bericht", form.value("itinerary")));
+        }
         String main = draft.getKind() == TravelKind.LEAVE ? "A. Beurlaubungsangelegenheiten" : "A. Reiseberichterstattung";
         if (holiday != null) result.add(new ApplicationAnswer(main, "Zugeordnete Beurlaubung", holiday.getTitle() + " · " + period(holiday)));
         TravelFields.forKind(draft.getKind()).forEach(field -> result.add(new ApplicationAnswer(main, field.label(), form.value(field.key()))));
@@ -215,7 +227,7 @@ public class TravelService {
                 .map(a -> a.getDecision() != TravelApplication.Decision.REJECTED).orElse(true);
     }
     private ZonedDateTime deadline(Holiday holiday) { return TravelRules.deadline(holiday); }
-    private String deadlineLabel(Holiday holiday) { return holiday.getEndsOn().plusDays(7).format(DAY) + ", 23:59 Uhr (Berlin)"; }
+    private String deadlineLabel(Holiday holiday) { return holiday.getEndsOn().plusDays(7).format(DAY) + ", 23:59 Uhr"; }
     private String period(Holiday holiday) { return holiday.getStartsOn().format(DAY) + " – " + holiday.getEndsOn().format(DAY); }
     private ResponseStatusException badRequest(String reason) { return new ResponseStatusException(HttpStatus.BAD_REQUEST, reason); }
     private AppUser user(String email) { return users.findByEmail(email.strip().toLowerCase(Locale.ROOT)).orElseThrow(() -> new AccessDeniedException("Konto nicht gefunden.")); }

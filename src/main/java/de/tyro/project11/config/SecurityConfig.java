@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/polls", "/polls/new", "/polls/*").authenticated()
                 .requestMatchers(HttpMethod.POST, "/polls", "/polls/*/vote", "/polls/*/finish").authenticated()
                 .requestMatchers(HttpMethod.POST, "/welcome/decisions/*/*/read").authenticated()
-                .requestMatchers(HttpMethod.POST, "/account/email", "/account/password").authenticated()
+                .requestMatchers(HttpMethod.POST, "/account/name", "/account/email", "/account/password").authenticated()
                 .requestMatchers(HttpMethod.GET, "/welcome", "/calendar", "/js/calendar.js", "/events/new", "/events/*/edit", "/events/*", "/events/*/attendance").authenticated()
                 .requestMatchers(HttpMethod.GET, "/admin/aaa", "/admin/aaa/*", "/admin/travel", "/admin/travel/*").authenticated()
                 .requestMatchers(HttpMethod.POST, "/admin/aaa/*", "/admin/travel/*", "/events/*/attendance/confirm").authenticated()

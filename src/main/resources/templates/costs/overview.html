@@ -1,13 +1,31 @@
-<!DOCTYPE html><html lang="de" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{costs/fragments :: head('Kostenübersicht')}"></head>
-<body class="dashboard-body"><div class="page dashboard-page">
-<header th:replace="~{profile/fragments :: header}"></header>
-<main class="cost-layout">
-    <div class="cost-intro"><p class="eyebrow">Gemeinsam unterwegs. Gemeinsam geteilt.</p><h1>Kosten im Blick.</h1><p>Alle Ausgaben, nach Events geordnet. Jeder kann Kosten eintragen; geteilt wird gleichmäßig unter allen oder ausgewählten bestätigten Teilnehmenden.</p></div>
-    <form class="cost-picker" th:if="${!costs.choices.isEmpty()}" th:action="@{/costs/new}" method="get">
-        <div class="field"><label for="eventId">Für welches Event hast du etwas ausgelegt?</label><select id="eventId" name="eventId" required><option value="" disabled selected>Event auswählen</option><option th:each="event : ${costs.choices}" th:value="${event.id}" th:text="|${event.date} · ${event.title}|"></option></select></div>
-        <button class="calendar-control" type="submit">Kosten eintragen +</button>
-    </form>
-    <section class="cost-card cost-empty" th:if="${costs.events.isEmpty()}"><h2>Noch keine Kosten eingetragen.</h2><p>Eine gemeinsame Rechnung, Snacks oder Tickets? Wähle ein Event und trage den ausgelegten Gesamtbetrag ein.</p><a th:if="${costs.choices.isEmpty()}" th:href="@{/events/new}">Erstes Event erstellen →</a></section>
-    <th:block th:each="event : ${costs.events}"><section th:replace="~{costs/fragments :: summary(${event})}"></section></th:block>
-</main></div></body></html>
+<body class="dashboard-body">
+<div class="page dashboard-page">
+    <header th:replace="~{fragments/navigation :: header}"></header>
+    <main class="cost-layout">
+        <div class="cost-intro"><p class="eyebrow">Gemeinsam unterwegs. Gemeinsam geteilt.</p>
+            <h1>Kosten im Blick.</h1>
+            <p>Alle Ausgaben, nach Events geordnet. Jeder kann Kosten eintragen; geteilt wird gleichmäßig unter allen
+                oder ausgewählten Personen unabhängig von ihrer Teilnahme.</p></div>
+        <form class="cost-picker" method="get" th:action="@{/costs/new}" th:if="${!costs.choices.isEmpty()}">
+            <div class="field"><label for="eventId">Für welches Event hast du etwas ausgelegt?</label><select
+                    id="eventId" name="eventId" required>
+                <option disabled selected value="">Event auswählen</option>
+                <option th:each="event : ${costs.choices}" th:text="|${event.date} · ${event.title}|"
+                        th:value="${event.id}"></option>
+            </select></div>
+            <button class="calendar-control" type="submit">Kosten eintragen +</button>
+        </form>
+        <section class="cost-card cost-empty" th:if="${costs.events.isEmpty()}"><h2>Noch keine Kosten eingetragen.</h2>
+            <p>Eine gemeinsame Rechnung, Snacks oder Tickets? Wähle ein Event und trage den ausgelegten Gesamtbetrag
+                ein.</p><a th:href="@{/events/new}" th:if="${costs.choices.isEmpty()}">Erstes Event erstellen →</a>
+        </section>
+        <th:block th:each="event : ${costs.events}">
+            <section th:replace="~{costs/fragments :: summary(${event})}"></section>
+        </th:block>
+    </main>
+</div>
+</body>
+</html>

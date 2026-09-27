@@ -125,10 +125,12 @@ public class CostService {
         List<CostShare> shares = List.of();
         if (!cost.hasPaymentTracking()) {
             var distribution = distribution(eventId);
-            if (!distribution.ready()) throw conflict("Zuerst muss eine Teilnehmerliste mit mindestens einer anwesenden Person bestätigt werden.");
-            if (distribution.version() != attendanceVersion) throw conflict("Die Teilnehmerliste hat sich geändert. Bitte die neue Aufteilung prüfen.");
+            if (!cost.isSelectedOnly()) {
+                if (!distribution.ready()) throw conflict("Zuerst muss eine Teilnehmerliste mit mindestens einer anwesenden Person bestätigt werden.");
+                if (distribution.version() != attendanceVersion) throw conflict("Die Teilnehmerliste hat sich geändert. Bitte die neue Aufteilung prüfen.");
+            }
             var participants = participants(cost, distribution);
-            if (participants.isEmpty()) throw conflict("Keine der ausgewählten Personen ist als anwesend bestätigt. Bitte die Auswahl prüfen.");
+            if (participants.isEmpty()) throw conflict("Keine Personen für die Aufteilung vorhanden. Bitte die Auswahl prüfen.");
             shares = split(cost.getAmountCents(), participants);
         }
         requirePayableShare(cost, shares, participantId);
@@ -205,9 +207,9 @@ public class CostService {
         catch (ResponseStatusException exception) { errors.rejectValue(field, "selection", exception.getReason()); }
     }
     private List<AppUser> participants(EventCost cost, Distribution distribution) {
-        var selectedIds = cost.getSelectedUserIds();
-        return distribution.participants().stream()
-                .filter(u -> !cost.isSelectedOnly() || selectedIds.contains(u.getId())).toList();
+        if (!cost.isSelectedOnly()) return distribution.participants();
+        return users.findAllById(cost.getSelectedUserIds()).stream()
+                .sorted(Comparator.comparing(AppUser::getId)).toList();
     }
     private Distribution distribution(long eventId) {
         var sheet = attendance.findById(eventId).orElse(null);

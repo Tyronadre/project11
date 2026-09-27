@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{profile/fragments :: head('Profil bearbeiten')}"></head>
-<body class="dashboard-body"><div class="page dashboard-page"><header th:replace="~{profile/fragments :: header}"></header>
+<body class="dashboard-body"><div class="page dashboard-page"><header th:replace="~{fragments/navigation :: header}"></header>
 <main class="profile-editor"><a class="event-back" th:href="@{/users/{id}(id=${userId})}">← Zum Profil</a><p class="eyebrow">Ganz du selbst</p><h1>Dein Profil</h1><p class="profile-muted" th:text="|${profileName}, erzähl der Gruppe ein bisschen von dir.|"></p>
 <form class="profile-card profile-form" th:action="@{/users/{id}/profile(id=${userId})}" method="post" th:object="${profileForm}">
 <div class="notice notice-error" role="alert" th:if="${#fields.hasAnyErrors()}"><strong>Bitte prüfe deine Angaben.</strong><ul><li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li></ul></div>

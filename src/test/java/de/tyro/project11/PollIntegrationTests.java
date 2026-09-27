@@ -149,4 +149,13 @@ class PollIntegrationTests {
         assertThat(polls.load(id, owner).responses()).isEqualTo(2);
         assertThat(polls.load(id, owner).slots()).allMatch(slot -> slot.votes() == 1);
     }
+    @Test void validationRemainsGermanForEnglishBrowserLanguage() throws Exception {
+        mvc.perform(post("/polls").with(user(owner)).with(csrf())
+                .header("Accept-Language", "en-US,en;q=0.9")
+                .param("title", "").param("durationMinutes", "120")
+                .param("slots[0]", "2090-06-12T18:00").param("slots[1]", "2090-06-13T18:00"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("lang=\"de\"")))
+                .andExpect(content().string(containsString("darf nicht leer sein")));
+    }
 }

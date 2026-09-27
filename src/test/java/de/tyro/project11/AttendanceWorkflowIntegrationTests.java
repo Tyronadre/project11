@@ -93,9 +93,9 @@ class AttendanceWorkflowIntegrationTests {
         var page = attendance.page(event.getId(), admin.getEmail());
         assertThat(page.members()).hasSize(4);
         assertThat(page.recipientIds()).containsExactly(absent.getId());
-        assertThat(page.members().stream().filter(m -> m.id() == vacation.getId()).findFirst().orElseThrow().notification()).contains("Covered by holiday");
+        assertThat(page.members().stream().filter(m -> m.id() == vacation.getId()).findFirst().orElseThrow().notification()).contains("Durch Urlaub abgedeckt");
         mvc.perform(get("/events/{id}/attendance", event.getId()).with(user(admin.getEmail())))
-                .andExpect(status().isOk()).andExpect(content().string(containsString("Review recipients and confirm")))
+                .andExpect(status().isOk()).andExpect(content().string(containsString("Empfänger prüfen und bestätigen")))
                 .andExpect(content().string(containsString(absent.getEmail())));
         mvc.perform(get("/events/{id}/attendance", event.getId()).with(user(absent.getEmail()).roles("ADMIN")))
                 .andExpect(status().isForbidden());
@@ -136,7 +136,7 @@ class AttendanceWorkflowIntegrationTests {
         var message = ArgumentCaptor.forClass(MimeMessage.class);
         verify(sender).send(message.capture());
         assertThat(message.getValue().getAllRecipients()[0].toString()).isEqualTo(absent.getEmail());
-        assertThat(message.getValue().getContent().toString()).contains("/amt/aaa?activity=" + event.getId(), "8 Jan 2026");
+        assertThat(message.getValue().getContent().toString()).contains("/amt/aaa?activity=" + event.getId(), "8 Jan. 2026");
     }
 
     @Test
@@ -263,7 +263,7 @@ class AttendanceWorkflowIntegrationTests {
     }
 
     @Test
-    void adminsCanReviewAnswersWhileOldPortalKeepsComicStatus() throws Exception {
+    void adminsCanReviewAnswersAndPortalShowsRecordedDecision() throws Exception {
         var application = application(absent, event, OffsetDateTime.now(clock));
         mvc.perform(get("/admin/aaa").with(user(admin.getEmail())))
                 .andExpect(status().isOk()).andExpect(content().string(containsString("Neujahr")));
@@ -282,8 +282,8 @@ class AttendanceWorkflowIntegrationTests {
                 .andExpect(status().isOk()).andExpect(content().string(containsString("Angenommen")));
         clock.set(DEADLINE.plus(Duration.ofDays(90)));
         mvc.perform(get("/amt/antraege/{id}", application.getId()).with(user(absent.getEmail())))
-                .andExpect(status().isOk()).andExpect(content().string(containsString("Statusautomaten")))
-                .andExpect(content().string(containsString("E-Mail")));
+                .andExpect(status().isOk()).andExpect(content().string(containsString("Bearbeitungsverlauf")))
+                .andExpect(content().string(containsString("Bescheid öffnen / drucken")));
     }
 
     @Test

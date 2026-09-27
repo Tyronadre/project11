@@ -25,7 +25,7 @@
             <header><h3 id="open-deadlines-title">Anträge &amp; Fristen</h3><span th:text="${openItems.deadlines.size()}">0</span></header>
             <p class="for-you-empty" th:if="${openItems.deadlines.isEmpty()}">Kein AaA oder Reisebericht offen.</p>
             <div class="for-you-list"><th:block th:each="item : ${openItems.deadlines}"><article th:replace="~{fragments/open-items :: item(${item})}"></article></th:block></div>
-            <p class="for-you-footnote">Nach Frist sortiert · Alle Zeiten gelten für Berlin.</p>
+            <p class="for-you-footnote">Nach Frist sortiert</p>
         </section>
         <section class="for-you-panel" id="open-decisions" aria-labelledby="open-decisions-title">
             <header><h3 id="open-decisions-title">Entscheidungen</h3><span th:text="${openItems.decisions.size()}">0</span></header>

@@ -32,3 +32,12 @@ sollte der vorgeschaltete Proxy zusätzlich Anfragen pro IP begrenzen.
 
 Hibernate ergänzt die Token-Tabelle und die Versionsspalte für den
 Sitzungswiderruf beim Start über die vorhandene Schema-Aktualisierung.
+
+## Namen ändern
+
+Unter `/account` kann jedes Mitglied seinen eigenen Anzeigenamen ändern.
+Der Name muss nach Entfernen äußerer Leerzeichen 1 bis 80 Zeichen lang sein.
+Gespeichert wird nach `/account/name` mit Anmeldung und CSRF-Schutz; eine
+mitgesendete fremde Benutzer-ID hat keine Wirkung. Die Sitzung bleibt bestehen.
+Profil und Teilnehmerlisten verwenden anschließend den aktuellen Namen.
+Bereits eingereichte Formularantworten und versandte E-Mails bleiben erhalten.

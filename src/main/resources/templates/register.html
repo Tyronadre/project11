@@ -1,80 +1,77 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Create an account · Project 11</title>
+    <title>Konto erstellen · ZFG</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
 <div class="page">
-    <header class="site-header">
-        <a class="brand" th:href="@{/}"><span class="brand-mark" aria-hidden="true">11</span> Project 11</a>
-        <a class="header-link" th:href="@{/signin}">Sign in <span aria-hidden="true">↗</span></a>
-    </header>
+    <header th:replace="~{fragments/navigation :: header}"></header>
     <main class="registration-layout">
         <section class="intro" aria-labelledby="intro-title">
-            <span class="eyebrow"><span class="status-dot" aria-hidden="true"></span> Welcome aboard</span>
-            <h1 id="intro-title">Make yourself<br> at home.</h1>
-            <p class="intro-copy">Every good thing starts somewhere.<br>Create your account and take the first step.</p>
+            <span class="eyebrow"><span class="status-dot" aria-hidden="true"></span> Schön, dass du dabei bist</span>
+            <h1 id="intro-title">Fühl dich<br> wie zu Hause.</h1>
+            <p class="intro-copy">Alles Gute hat einen Anfang.<br>Erstelle dein Konto und mach den ersten Schritt.</p>
             <div class="illustration" aria-hidden="true">
                 <div class="orbit orbit-one"></div>
                 <div class="orbit orbit-two"></div>
                 <div class="tile tile-back"></div>
-                <div class="tile tile-front"><span>11</span><span class="tile-spark">✳</span></div>
+                <div class="tile tile-front"><span>ZFG</span><span class="tile-spark">✳</span></div>
                 <span class="little-spark">+</span>
             </div>
-            <p class="intro-caption">One small step. A place of your own.</p>
+            <p class="intro-caption">Ein kleiner Schritt. Dein Platz in der Gruppe.</p>
         </section>
         <section class="form-card" aria-labelledby="form-title">
-            <span class="eyebrow">Let’s get started</span>
-            <h2 id="form-title">Create your account</h2>
-            <p class="card-copy">A few details, and you’re on your way.</p>
+            <span class="eyebrow">Los geht’s</span>
+            <h2 id="form-title">Erstelle dein Konto</h2>
+            <p class="card-copy">Ein paar Angaben und schon bist du dabei.</p>
             <form th:action="@{/register}" th:object="${registrationForm}" method="post">
                 <div class="notice notice-error" role="alert" th:if="${#fields.hasAnyErrors()}">
-                    Please check the details below. For your privacy, enter your passwords again.
+                    Bitte prüfe die Angaben unten. Gib deine Passwörter aus Sicherheitsgründen erneut ein.
                 </div>
                 <div class="field">
-                    <label for="displayName">Your name</label>
+                    <label for="displayName">Dein Name</label>
                     <input id="displayName" type="text" th:field="*{displayName}" autocomplete="name"
                            placeholder="Alex Morgan" required maxlength="80"
                            th:attr="aria-invalid=${#fields.hasErrors('displayName')}" aria-describedby="name-error">
                     <p class="field-error" id="name-error" th:errors="*{displayName}"></p>
                 </div>
                 <div class="field">
-                    <label for="email">Email address</label>
+                    <label for="email">E-Mail-Adresse</label>
                     <input id="email" type="email" th:field="*{email}" autocomplete="email"
                            placeholder="alex@example.com" required maxlength="254"
                            th:attr="aria-invalid=${#fields.hasErrors('email')}" aria-describedby="email-error">
                     <p class="field-error" id="email-error" th:errors="*{email}"></p>
                 </div>
                 <div class="field">
-                    <label for="password">Password</label>
+                    <label for="password">Passwort</label>
                     <!-- No th:field or value: never put a submitted password back into HTML. -->
                     <input id="password" name="password" type="password" autocomplete="new-password"
-                           placeholder="Choose a strong password" required minlength="12" maxlength="72"
+                           placeholder="Wähle ein sicheres Passwort" required minlength="4" maxlength="72"
                            th:attr="aria-invalid=${#fields.hasErrors('password') or #fields.hasErrors('passwordWithinByteLimit')}"
                            aria-describedby="password-hint password-error password-byte-error">
-                    <p class="field-hint" id="password-hint">Use 12–72 characters. A few unrelated words work well.</p>
+                    <p class="field-hint" id="password-hint">Verwende 4 –72 Zeichen. Einige zusammenhanglose Wörter eignen sich gut.</p>
                     <p class="field-error" id="password-error" th:errors="*{password}"></p>
                     <p class="field-error" id="password-byte-error" th:errors="*{passwordWithinByteLimit}"></p>
                 </div>
                 <div class="field">
-                    <label for="confirmPassword">Confirm password</label>
+                    <label for="confirmPassword">Passwort wiederholen</label>
                     <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password"
-                           placeholder="Enter your password again" required maxlength="72"
+                           placeholder="Gib dein Passwort erneut ein" required maxlength="72"
                            th:attr="aria-invalid=${#fields.hasErrors('confirmPassword') or #fields.hasErrors('passwordsMatching')}"
                            aria-describedby="confirm-error match-error">
                     <p class="field-error" id="confirm-error" th:errors="*{confirmPassword}"></p>
                     <p class="field-error" id="match-error" th:errors="*{passwordsMatching}"></p>
                 </div>
-                <button class="button" type="submit">Create account <span aria-hidden="true">↗</span></button>
-                <p class="form-footnote">Make it memorable for you, and hard to guess for anyone else.</p>
+                <button class="button" type="submit">Konto erstellen <span aria-hidden="true">↗</span></button>
+                <p class="form-footnote">Für dich leicht zu merken, für andere schwer zu erraten.</p>
             </form>
-            <p class="account-switch">Already have an account? <a th:href="@{/signin}">Sign in</a></p>
+            <p class="account-switch">Du hast schon ein Konto? <a th:href="@{/signin}">Anmelden</a></p>
         </section>
     </main>
-    <footer class="site-footer"><span>Project 11</span><span>Good things start small.</span></footer>
+    <footer class="site-footer"><span>ZFG</span><span>Gutes beginnt im Kleinen.</span></footer>
 </div>
 </body>
 </html>

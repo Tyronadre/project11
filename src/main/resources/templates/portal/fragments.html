@@ -9,7 +9,9 @@
     <script defer th:src="@{/js/amt-steps.js}"></script>
 </head>
 <body>
-<header class="amt-header" th:fragment="header">
+<th:block th:fragment="header">
+<header th:replace="~{fragments/navigation :: header}"></header>
+<header class="amt-header">
     <div class="amt-systembar"><span>AGATA • Intranet / Sozialverwaltung / Produktivbetrieb*</span><a th:href="@{/welcome}">Zurück zur modernen Oberfläche »</a></div>
     <div class="amt-masthead">
         <div class="amt-seal" aria-hidden="true"><span>§</span><small>AGATA</small></div>
@@ -17,8 +19,9 @@
         <div class="amt-version">ONLINE<br><strong>mit Einschränkungen</strong><br>Version 2.0.7b<br><span>Optimiert für Geduld.</span></div>
     </div>
     <div class="amt-warning"><strong>ACHTUNG:</strong> Dieses Portal ist ausschließlich für die ordnungsgemäße Verwaltung sozialer Anwesenheitsverhältnisse bestimmt. Eine missbräuchliche Nutzung des Systems kann zu einer vorübergehenden Einschränkung Ihrer Freizeit führen.</div>
-    <nav class="amt-topnav" aria-label="Portalnavigation"><a th:href="@{/amt}">[ Startseite ]</a><a th:href="@{/amt/aaa}">[ Neuer AaA ]</a><a th:href="@{/amt/akten}">[ Öffentliche Gruppenakten ]</a><a th:href="@{/calendar}">[ Kalender ]</a><form th:action="@{/logout}" method="post"><button type="submit">Sitzung ordnungsgemäß beenden</button></form></nav>
+    <nav class="amt-topnav" aria-label="Portalnavigation"><a th:href="@{/amt}">[ Startseite ]</a><a th:href="@{/amt/aaa}">[ Neuer AaA ]</a><a th:href="@{/amt/akten}">[ Öffentliche Gruppenakten ]</a></nav>
 </header>
+</th:block>
 
 <aside class="amt-sidebar" th:fragment="sidebar">
     <div class="amt-box"><h2>Ihre Teilnehmerkennung</h2><div class="amt-box-content"><strong class="amt-monospace" th:text="${citizen.number}">TN-000001</strong><p th:text="${citizen.name}">Antragstellende Person</p><small>Bei jeder Rückfrage unaufgefordert bereithalten.</small></div></div>

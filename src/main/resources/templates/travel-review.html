@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{profile/fragments :: head('Reiseantrag entscheiden')}"></head>
-<body class="dashboard-body"><div class="page dashboard-page"><header th:replace="~{profile/fragments :: header}"></header>
+<body class="dashboard-body"><div class="page dashboard-page"><header th:replace="~{fragments/navigation :: header}"></header>
 <main class="profile-editor">
     <a class="event-back" th:href="@{/admin/travel}">← Zu allen Reiseanträgen</a>
     <p class="eyebrow" th:text="|Administration · ${review.kind}|"></p><h1 th:text="${review.title}"></h1>
@@ -9,7 +9,7 @@
     <p class="notice notice-error" role="alert" th:if="${decisionError != null}" th:text="${decisionError}"></p>
     <p class="field-hint" th:unless="${mailEnabled}">Der E-Mail-Versand ist deaktiviert. Entscheidungsnachrichten werden gespeichert und nach Aktivierung zugestellt.</p>
     <section class="profile-card">
-        <h2 th:text="${review.applicant}"></h2><p th:text="|Eingang: ${review.submitted}|"></p><p th:text="|Berichtsfrist: ${review.deadline}|"></p>
+        <h2 th:text="${review.applicant}"></h2><p><a th:href="@{/amt/reisen/{id}(id=${review.id})}" th:text="${review.reference}"></a></p><p th:text="|Eingang: ${review.submitted}|"></p><p th:text="|Berichtsfrist: ${review.deadline}|"></p>
         <strong th:text="${review.decision == 'PENDING' ? 'Noch nicht entschieden' : (review.decision == 'ACCEPTED' ? 'Angenommen' : 'Abgelehnt')}"></strong>
         <p th:if="${!review.reason.isEmpty()}" th:text="${review.reason}"></p>
         <p class="notice notice-error" th:if="${review.late}">Dieser Bericht ist verspätet. Auch eine Bestätigung macht den Eingang nicht fristgerecht und hebt Tagesstriche nicht auf.</p>

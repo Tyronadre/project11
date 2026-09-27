@@ -27,18 +27,35 @@ public class OpenItemsService {
     private final DecisionReceiptRepository receipts;
     private final UserRepository users;
     private final Clock clock;
+    private final de.tyro.project11.attendance.AttendanceRepository attendance;
 
     public OpenItemsService(CostService costs, TravelService travel, AbsenceApplicationRepository absences,
                             TravelApplicationRepository applications, DecisionReceiptRepository receipts,
-                            UserRepository users, Clock clock) {
+                            UserRepository users, Clock clock, de.tyro.project11.attendance.AttendanceRepository attendance) {
         this.costs = costs; this.travel = travel; this.absences = absences; this.applications = applications;
         this.receipts = receipts; this.users = users; this.clock = clock;
+        this.attendance = attendance;
     }
     public record Item(String kind, String title, String detail, String meta, String badge, String tone,
                        String url, String action, Instant time, DecisionReceipt.Source source, Long applicationId) {}
     public record View(List<Item> costs, List<Item> deadlines, List<Item> decisions, String payable, String receivable) {
         public int count() { return costs.size() + deadlines.size() + decisions.size(); }
         public long urgentCount() { return deadlines.stream().filter(i -> !i.tone().equals("neutral")).count(); }
+    }
+
+    public record AttendanceReview(long id, String title) {}
+    public record Reviews(long absences, long travel, List<AttendanceReview> attendance) {
+        public boolean isEmpty() { return absences == 0 && travel == 0 && attendance.isEmpty(); }
+    }
+
+    @Transactional(readOnly = true)
+    public Reviews pendingReviews(String email) {
+        if (!user(email).isAdmin()) return new Reviews(0, 0, List.of());
+        var confirmations = attendance.findAllByOrderBySavedAtDesc().stream()
+                .filter(sheet -> !sheet.isConfirmed() && !sheet.getActivity().isCancelled())
+                .filter(sheet -> !sheet.getActivity().getEndsAt().toInstant().isAfter(clock.instant()))
+                .map(sheet -> new AttendanceReview(sheet.getActivity().getId(), sheet.getActivity().getTitle())).toList();
+        return new Reviews(absences.countPending(), applications.countPending(), confirmations);
     }
 
     @Transactional(readOnly = true)

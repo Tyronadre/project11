@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{polls/fragments :: head}"></head>
 <body class="dashboard-body"><div class="page dashboard-page">
-<header th:replace="~{polls/fragments :: header}"></header>
+<header th:replace="~{fragments/navigation :: header}"></header>
 <main class="calendar-layout">
 <div class="calendar-intro"><div><p class="eyebrow">Zusammen planen</p><h1>Wann passt’s euch?</h1><p>Termine vorschlagen, gemeinsam abstimmen und direkt ein Event planen.</p></div><a class="calendar-control" th:href="@{/polls/new}">＋ Neue Abstimmung</a></div>
 <div class="calendar-empty" th:if="${polls.isEmpty()}"><h2>Der nächste Plan beginnt hier.</h2><p>Schlage mindestens zwei Termine vor und finde heraus, wann die Gruppe Zeit hat.</p><a class="header-link" th:href="@{/polls/new}">Erste Abstimmung starten →</a></div>

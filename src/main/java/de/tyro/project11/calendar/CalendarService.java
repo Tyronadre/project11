@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
 
 @Service
 public class CalendarService {
-    private static final DateTimeFormatter MONTH_LABEL = DateTimeFormatter.ofPattern("MMMM uuuu", Locale.ENGLISH);
-    private static final DateTimeFormatter DATE_LABEL = DateTimeFormatter.ofPattern("d MMM uuuu", Locale.ENGLISH);
-    private static final DateTimeFormatter TIME_LABEL = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH);
-    private static final DateTimeFormatter DATE_TIME_LABEL = DateTimeFormatter.ofPattern("d MMM uuuu, HH:mm z", Locale.ENGLISH);
+    private static final DateTimeFormatter MONTH_LABEL = DateTimeFormatter.ofPattern("MMMM uuuu", Locale.GERMAN);
+    private static final DateTimeFormatter DATE_LABEL = DateTimeFormatter.ofPattern("d MMM uuuu", Locale.GERMAN);
+    private static final DateTimeFormatter TIME_LABEL = DateTimeFormatter.ofPattern("HH:mm", Locale.GERMAN);
+    private static final DateTimeFormatter DATE_TIME_LABEL = DateTimeFormatter.ofPattern("d MMM uuuu, HH:mm z", Locale.GERMAN);
     private static final YearMonth FIRST_MONTH = YearMonth.of(1, 1);
     private static final YearMonth LAST_MONTH = YearMonth.of(9999, 12);
 
@@ -109,9 +109,9 @@ public class CalendarService {
                     var entry = activityEntry(activity);
                     var date = entry.firstDay();
                     String status = activity.hasStartTime() && !activity.getStartsAt().toInstant().isAfter(now)
-                            ? "Happening now" : date.equals(today) ? "Today" : date.equals(today.plusDays(1)) ? "Tomorrow" : "Coming up";
+                            ? "Findet gerade statt" : date.equals(today) ? "Heute" : date.equals(today.plusDays(1)) ? "Morgen" : "Demnächst";
                     return new UpcomingEvent(activity.getId(), entry.title(), entry.description(), entry.owner(), entry.period(),
-                            date, date.format(DateTimeFormatter.ofPattern("dd")), date.format(DateTimeFormatter.ofPattern("MMM", Locale.ENGLISH)),
+                            date, date.format(DateTimeFormatter.ofPattern("dd")), date.format(DateTimeFormatter.ofPattern("MMM", Locale.GERMAN)),
                             YearMonth.from(date).toString(), status);
                 }).toList();
     }
@@ -130,33 +130,33 @@ public class CalendarService {
             }
             return month;
         } catch (IllegalArgumentException | java.time.DateTimeException exception) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Choose a valid month in YYYY-MM format.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bitte einen gültigen Monat im Format JJJJ-MM auswählen.");
         }
     }
 
     static CalendarView.Entry activityEntry(Activity activity) {
         var start = activity.getStartsAt().atZoneSameInstant(CalendarTime.BERLIN);
         var end = activity.getEndsAt().atZoneSameInstant(CalendarTime.BERLIN);
-        String period = activity.isAllDay() ? start.format(DATE_LABEL) + (end.minusNanos(1).toLocalDate().equals(start.toLocalDate()) ? "" : " – " + end.minusNanos(1).format(DATE_LABEL)) + " · all day"
-                : !activity.hasStartTime() ? start.format(DATE_LABEL) + " · until " + (end.toLocalDate().equals(start.toLocalDate())
-                    ? end.format(DateTimeFormatter.ofPattern("HH:mm z", Locale.ENGLISH)) : end.format(DATE_TIME_LABEL))
+        String period = activity.isAllDay() ? start.format(DATE_LABEL) + (end.minusNanos(1).toLocalDate().equals(start.toLocalDate()) ? "" : " – " + end.minusNanos(1).format(DATE_LABEL)) + " · ganztägig"
+                : !activity.hasStartTime() ? start.format(DATE_LABEL) + " · bis " + (end.toLocalDate().equals(start.toLocalDate())
+                    ? end.format(DateTimeFormatter.ofPattern("HH:mm z", Locale.GERMAN)) : end.format(DATE_TIME_LABEL))
                 : start.format(DATE_TIME_LABEL) + (activity.hasEndTime() ? " – " + end.format(DATE_TIME_LABEL) : "");
         return new CalendarView.Entry("activity-" + activity.getId(), "activity", (activity.isCancelled() ? "Abgesagt · " : "") + activity.getTitle(),
                 activity.getCreatedBy().getDisplayName(), period,
                 activity.getLocation(), activity.getDescription(), start.toLocalDate(),
-                end.minusNanos(1).toLocalDate(), activity.isAllDay() ? "" : !activity.hasStartTime() ? "Until " + end.format(TIME_LABEL) : start.format(TIME_LABEL));
+                end.minusNanos(1).toLocalDate(), activity.isAllDay() ? "" : !activity.hasStartTime() ? "Bis " + end.format(TIME_LABEL) : start.format(TIME_LABEL));
     }
 
     private CalendarView.Entry holidayEntry(Holiday holiday) {
         return new CalendarView.Entry("holiday-" + holiday.getId(), "holiday", holiday.getTitle(),
                 holiday.getUser().getDisplayName(), holiday.getStartsOn().format(DATE_LABEL) + " – "
-                + holiday.getEndsOn().format(DATE_LABEL) + " · all day, both dates included",
+                + holiday.getEndsOn().format(DATE_LABEL) + " · ganztägig, beide Tage einschließlich",
                 "", holiday.getDescription(), holiday.getStartsOn(), holiday.getEndsOn(), "");
     }
 
     private String daySummary(CalendarView.Entry entry, LocalDate date) {
         if (entry.kind().equals("holiday") || entry.startTime().isEmpty()) {
-            return entry.owner() + " · all day";
+            return entry.owner() + " · ganztägig";
         }
         return (date.equals(entry.firstDay()) ? entry.startTime() : "Continues") + " · " + entry.owner();
     }

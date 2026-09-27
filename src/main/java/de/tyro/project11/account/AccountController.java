@@ -27,6 +27,11 @@ public class AccountController {
         this.accounts = accounts;
     }
 
+    @InitBinder("nameChangeForm")
+    void nameBinder(WebDataBinder binder) {
+        binder.setAllowedFields("displayName");
+    }
+
     @InitBinder("emailChangeForm")
     void emailBinder(WebDataBinder binder) {
         binder.setAllowedFields("email", "currentPassword");
@@ -41,6 +46,17 @@ public class AccountController {
     public String account(Principal principal, Model model, HttpServletResponse response) {
         noStore(response);
         return accountModel(principal, model);
+    }
+
+    @PostMapping("/account/name")
+    public String changeName(Principal principal, @Valid @ModelAttribute NameChangeForm nameChangeForm,
+                             BindingResult errors, Model model, HttpServletResponse response,
+                             org.springframework.web.servlet.mvc.support.RedirectAttributes redirect) {
+        noStore(response);
+        if (errors.hasErrors()) return accountModel(principal, model);
+        boolean changed = accounts.changeName(principal.getName(), nameChangeForm);
+        redirect.addFlashAttribute("nameMessage", changed ? "Dein Name wurde geändert." : "Dein Name ist bereits so gespeichert.");
+        return "redirect:/account";
     }
 
     @PostMapping("/account/email")
@@ -95,6 +111,11 @@ public class AccountController {
     private String accountModel(Principal principal, Model model) {
         var account = accounts.load(principal.getName());
         model.addAttribute("account", account);
+        if (!model.containsAttribute("nameChangeForm")) {
+            var form = new NameChangeForm();
+            form.setDisplayName(account.displayName());
+            model.addAttribute("nameChangeForm", form);
+        }
         if (!model.containsAttribute("emailChangeForm")) {
             var form = new EmailChangeForm();
             form.setEmail(account.email());

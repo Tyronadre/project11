@@ -48,7 +48,7 @@ public class EventService {
         validateTime(form.getDate(), form.getTime(), "time", errors);
         if (form.getEndTime() != null) {
             if (form.getTime() != null && form.getTime().equals(form.getEndTime()) && endDate(form).equals(form.getDate())) {
-                errors.rejectValue("endTime", "sameTime", "End time must be different from start time.");
+                errors.rejectValue("endTime", "sameTime", "Beginn und Ende müssen unterschiedliche Uhrzeiten haben.");
             }
             validateTime(endDate(form), form.getEndTime(), "endTime", errors);
             if (!endDate(form).atTime(form.getEndTime()).isAfter(form.getDate().atTime(form.getTime() == null ? LocalTime.MIDNIGHT : form.getTime())))
@@ -58,7 +58,7 @@ public class EventService {
 
     private void validateTime(LocalDate date, LocalTime time, String field, BindingResult errors) {
         if (time != null && CalendarTime.BERLIN.getRules().getValidOffsets(date.atTime(time)).isEmpty()) {
-            errors.rejectValue(field, "clockChange", "This time does not exist in Berlin on that date because the clocks move forward. Choose another time.");
+            errors.rejectValue(field, "clockChange", "Diese Uhrzeit gibt es an diesem Tag wegen der Zeitumstellung nicht. Bitte wähle eine andere Uhrzeit.");
         }
     }
 
@@ -76,7 +76,7 @@ public class EventService {
         try { amount = Money.optionalCents(form.getCostAmount()); }
         catch (IllegalArgumentException exception) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage()); }
         var owner = users.findByEmail(email.strip().toLowerCase(Locale.ROOT))
-                .orElseThrow(() -> new AccessDeniedException("Your account is no longer available."));
+                .orElseThrow(() -> new AccessDeniedException("Dein Konto ist nicht mehr verfügbar."));
         var start = form.getDate().atTime(form.getTime() == null ? LocalTime.MIDNIGHT : form.getTime())
                 .atZone(CalendarTime.BERLIN);
         // Without an explicit end, retain the selected day's Berlin midnight boundary.

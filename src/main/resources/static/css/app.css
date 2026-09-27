@@ -1,3 +1,5 @@
+@import url("navigation.css");
+
 :root {
     color-scheme: light;
     --paper: #f5f6f0;
@@ -18,7 +20,9 @@ a { color: inherit; }
 .page { max-width: 1240px; min-height: 100svh; margin: auto; padding: 0 48px; display: flex; flex-direction: column; }
 .site-header { min-height: 112px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .brand { display: inline-flex; align-items: center; gap: 12px; font-size: 19px; font-weight: 650; letter-spacing: -.5px; text-decoration: none; }
-.brand-mark { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 11px; color: white; background: var(--green); font-size: 18px; letter-spacing: -2px; padding-right: 2px; }
+.brand-identity { display: inline-flex; align-items: center; gap: 12px; min-width: 0; }
+.brand-mark { display: grid; place-items: center; width: 44px; height: 40px; flex-shrink: 0; border-radius: 11px; color: white; background: var(--green); font-size: 16px; letter-spacing: 0; }
+.brand-name { max-width: 250px; font-size: 12px; line-height: 1.45; letter-spacing: 0; overflow-wrap: anywhere; }
 .header-note { font-size: 13px; color: var(--muted); }
 .header-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 0; border: 0; background: none; color: var(--green); font: inherit; font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; }
 .header-link:hover { text-decoration: underline; }
@@ -39,7 +43,7 @@ a { color: inherit; }
 .orbit-two { width: 290px; height: 220px; top: 10px; left: -10px; transform: rotate(30deg); }
 .tile { position: absolute; width: 140px; height: 150px; border-radius: 25px; }
 .tile-back { top: 42px; left: 104px; background: #d7e3c9; transform: rotate(15deg); border: 1px solid #c7d4b8; }
-.tile-front { top: 63px; left: 62px; background: var(--green); color: #e2edce; transform: rotate(-12deg); box-shadow: 0 14px 22px #203c3214; display: flex; align-items: center; justify-content: center; font-size: 66px; font-weight: 300; letter-spacing: -7px; }
+.tile-front { top: 63px; left: 62px; background: var(--green); color: #e2edce; transform: rotate(-12deg); box-shadow: 0 14px 22px #203c3214; display: flex; align-items: center; justify-content: center; font-size: 48px; font-weight: 500; letter-spacing: -2px; }
 .tile-spark { position: absolute; font-size: 26px; right: 17px; top: 6px; letter-spacing: 0; }
 .little-spark { position: absolute; right: 2px; bottom: 15px; font-size: 28px; font-weight: 300; color: #648169; }
 .intro-caption { color: var(--muted); font-size: 12px; margin: 20px 0 0; }

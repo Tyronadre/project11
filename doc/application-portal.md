@@ -26,7 +26,7 @@ The JavaScript shows one shared thank-you notice below section C after all three
 - At most one AaA can be filed per user/activity. Repeated final requests return the existing filing instead of duplicating it. A database uniqueness constraint also protects this relationship.
 - Every signed-in member may read all submitted applications and member archives. No edit or delete routes exist for filed applications.
 - Admins review complete applications at `/admin/aaa`, then accept or reject them. Rejection requires a reason. Each application has one final decision, with an email notification queued in the same transaction; repeated requests cannot produce duplicate decisions or notifications. Timely pending applications hold automatic marks; accepted applications excuse the absence, while rejected applications incur a mark from the cutoff if absence is confirmed and no holiday covers the event. Legacy applications filed at or after the cutoff are void and cannot be accepted.
-- The old portal cycles through eight absurd delay explanations and error messages, changing every three minutes. It never fabricates an approval. Real decisions are communicated by email; the comic status has no effect on filing time or marks.
+- The portal displays recorded submission and decision events, with timestamps and reasons. Related travel applications and later invalidations or event cancellations remain visible. Pending applications cannot issue a decision notice. Administrative humour is decorative only. See [case references, history and notices](case-notices.md).
 - The fictional reliability index starts at 87 and loses four points per filed AaA or AaB, with a floor of zero. It never changes the marks dashboard.
 
 ## Records and routes
@@ -64,7 +64,7 @@ The old portal deliberately cycles through absurd processing excuses and errors 
 
 ## EeR: Reisebericht
 
-`/amt/eer` lists the signed-in user's completed holidays that do not yet have a report, excluding rejected AaBs. Reports may already be filed while AaB review is pending, so admin delays do not prevent timely receipt; confirmation still requires acceptance of the AaB. Legacy holidays without a linked AaB can also receive a report. The form includes the actual itinerary, deviations, insight, cultural and culinary experiences, regret, a 1–10 rating, willingness to repeat the trip, and separate truth/consequences checkboxes. It also has the shared nuisance questions and repeated confirmations.
+`/amt/eer` lists the signed-in user's completed holidays that do not yet have a report, excluding rejected AaBs. Reports may already be filed while AaB review is pending, so admin delays do not prevent timely receipt; admin approval still requires acceptance of the AaB. Legacy holidays without a linked AaB can also receive a report. The form contains only the trip association, report text and optional photos. It submits directly without nuisance questions, terms or confirmation steps. Photos appear immediately after the report text on its detail page.
 
 **Confirmed deadline:** the report must arrive by the end of the seventh day after the last holiday date in `Europe/Berlin`. For example, a holiday ending on 10 September has a deadline of 17 September, 23:59:59… Berlin time. Internally, the exclusive cutoff is midnight starting 18 September, preserving calendar-day semantics across daylight-saving changes. Filing is possible starting on the day after the holiday ends. Drafts and preliminary confirmations do not preserve a deadline.
 
@@ -86,9 +86,10 @@ Decision emails use the same opt-in SMTP settings and durable retry behavior as 
 
 ### Photo attachments
 
-- Three to six photos are required. Accepted formats: JPEG and PNG; maximum 4 MiB per image, 20 megapixels, and 12 MiB total after normalization. HTTP requests are limited to 26 MiB.
+- Reports use a single text field (up to 6,000 characters) and submit directly without confirmations, questionnaires or terms acceptance. The associated completed holiday is preselected when only one is available. AaA/AaB retain their existing procedures.
+- Photos are optional, with no count limit. Accepted formats: JPEG and PNG, up to 20 megapixels each. All attachments together may use at most 1 GB (1,000,000,000 bytes), counting the larger of each original and normalized image. HTTP requests allow 10 MB extra for multipart overhead. Uploads spool to disk and images are normalized one at a time.
 - Images are decoded and re-encoded before storage; uploaded metadata and trailing content are not served. Original filenames are displayed as escaped text only.
-- Accepted uploads survive form validation errors and are attached to the session draft via a UUID. Only the owner can read or remove unfiled photos. Form text remains session-local; unsent changes are not autosaved.
+- Previously staged uploads remain attached to the session draft via a UUID; invalid upload batches roll back together. Text validation runs before uploads. Only the owner can read or remove unfiled photos. Form text remains session-local; unsent changes are not autosaved.
 - Unfiled photos older than 24 hours are cleaned up when a new travel procedure begins. A draft whose photos expired must supply the missing attachments again.
 - On final filing, photos become immutable report attachments visible to all signed-in members. They are served by the protected `/amt/fotos/{id}` route with `Cache-Control: no-store`.
 - Photos are persisted as database BLOBs; the normal H2 database backup therefore includes them.

@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface TravelApplicationRepository extends JpaRepository<TravelApplication, Long> {
+    long countByDecision(TravelApplication.Decision decision);
+    @org.springframework.data.jpa.repository.Query("select count(a) from TravelApplication a where a.decision is null or a.decision = de.tyro.project11.portal.TravelApplication.Decision.PENDING")
+    long countPending();
     java.util.List<TravelApplication> findByApplicantIdAndDecidedAtIsNotNullOrderByDecidedAtDescIdDesc(long applicantId);
     @org.springframework.data.jpa.repository.Query("select a.applicant.id from TravelApplication a where a.id = :id")
     Optional<Long> findApplicantIdById(long id);

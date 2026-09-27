@@ -47,6 +47,14 @@ public class AccountService {
     }
 
     @Transactional
+    public boolean changeName(String email, NameChangeForm form) {
+        AppUser user = lockedCurrentUser(email);
+        boolean changed = !user.getDisplayName().equals(form.getDisplayName());
+        user.changeDisplayName(form.getDisplayName());
+        return changed;
+    }
+
+    @Transactional
     public ChangeResult changeEmail(String currentEmail, EmailChangeForm form) {
         AppUser user = lockedCurrentUser(currentEmail);
         if (!passwords.matches(form.getCurrentPassword(), user.getPasswordHash())) {

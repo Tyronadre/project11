@@ -46,7 +46,7 @@ public class PollService {
                         || CalendarTime.BERLIN.getRules().getValidOffsets(date).size() != 1
                         || CalendarTime.BERLIN.getRules().getValidOffsets(date.plusMinutes(form.getDurationMinutes())).size() != 1
                         || Duration.between(date.atZone(CalendarTime.BERLIN), date.plusMinutes(form.getDurationMinutes()).atZone(CalendarTime.BERLIN)).toMinutes() != form.getDurationMinutes())
-                    throw invalid("Bitte zukünftige, eindeutige Uhrzeiten in Europe/Berlin wählen. Der Zeitraum darf keinen Zeitwechsel überschreiten.");
+                    throw invalid("Bitte zukünftige, eindeutige Uhrzeiten wählen. Der Zeitraum darf keinen Zeitwechsel überschreiten.");
                 slots.add(date);
             }
         } catch (java.time.format.DateTimeParseException exception) { throw invalid("Bitte gültige Termine eingeben."); }

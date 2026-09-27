@@ -76,7 +76,7 @@ public class AttendanceMailDelivery {
             var helper = new MimeMessageHelper(message, StandardCharsets.UTF_8.name());
             helper.setFrom(settings.from()); helper.setTo(application.getApplicant().getEmail());
             String decision = application.getDecision() == AbsenceApplication.Decision.ACCEPTED ? "angenommen" : "abgelehnt";
-            helper.setSubject("Project 11 · Dein AaA wurde " + decision);
+            helper.setSubject("Project 11 · Dein AaA wurde " + decision + " · " + de.tyro.project11.portal.CaseReference.of(application));
             helper.setText("Hallo " + application.getApplicant().getDisplayName() + ",\n\n"
                     + "dein Antrag auf Abwesenheit zum Event „" + application.getActivityTitle() + "“ wurde " + decision + ".\n\n"
                     + (application.getDecisionReason().isBlank() ? "" : "Begründung: " + application.getDecisionReason() + "\n\n")
@@ -84,6 +84,8 @@ public class AttendanceMailDelivery {
                         ? "Deine Abwesenheit ist damit entschuldigt."
                         : "Bei bestätigter Abwesenheit ohne abdeckenden Urlaub wird ab Ablauf der Einreichungsfrist ein Strich vergeben. Eine erneute Einreichung für dieses Event ist nicht möglich.")
                     + "\n\nEvent: " + settings.baseUrl() + "/events/" + activityId
+                    + "\nAktenzeichen: " + de.tyro.project11.portal.CaseReference.of(application)
+                    + "\nBescheid: " + settings.baseUrl() + "/amt/antraege/" + applicationId + "/bescheid"
                     + "\nAntragsakte: " + settings.baseUrl() + "/amt/antraege/" + applicationId
                     + "\n\nViele Grüße\nProject 11", false);
             sender.send(message); email.sent(clock.instant());

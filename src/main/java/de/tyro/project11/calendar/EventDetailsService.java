@@ -35,14 +35,14 @@ public class EventDetailsService {
     @Transactional(readOnly = true)
     public Details load(long id, String email) {
         var viewer = users.findByEmail(email.strip().toLowerCase(Locale.ROOT))
-                .orElseThrow(() -> new AccessDeniedException("Account not found."));
+                .orElseThrow(() -> new AccessDeniedException("Konto nicht gefunden."));
         var activity = activities.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event nicht gefunden."));
         var entry = CalendarService.activityEntry(activity);
         var now = clock.instant();
         boolean ended = !activity.getEndsAt().toInstant().isAfter(now);
-        String status = activity.isCancelled() ? "Abgesagt" : ended ? "Past event" : activity.hasStartTime() && !activity.getStartsAt().toInstant().isAfter(now)
-                ? "Happening now" : "Upcoming event";
+        String status = activity.isCancelled() ? "Abgesagt" : ended ? "Vergangenes Event" : activity.hasStartTime() && !activity.getStartsAt().toInstant().isAfter(now)
+                ? "Findet gerade statt" : "Anstehendes Event";
         var sheet = ended ? attendance.findById(id).orElse(null) : null;
         List<Member> attended = List.of(), absent = List.of();
         String recordedAt = null, recordedBy = null;
@@ -53,7 +53,7 @@ public class EventDetailsService {
             attended = roster.stream().filter(user -> attendeeIds.contains(user.getId())).map(this::member).toList();
             absent = roster.stream().filter(user -> !attendeeIds.contains(user.getId())).map(this::member).toList();
             recordedAt = sheet.getSavedAt().atZoneSameInstant(CalendarTime.BERLIN)
-                    .format(DateTimeFormatter.ofPattern("d MMM uuuu, HH:mm z", Locale.ENGLISH));
+                    .format(DateTimeFormatter.ofPattern("d MMM uuuu, HH:mm z", Locale.GERMAN));
             recordedBy = sheet.getReviewedBy().getDisplayName();
         }
         return new Details(id, entry.title(), entry.description(), entry.location(), entry.owner(), entry.period(),

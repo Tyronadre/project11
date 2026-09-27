@@ -55,13 +55,61 @@ class AccountIntegrationTests {
     }
 
     @Test
+    void nameChangeUpdatesOwnAccountAndKeepsCredentials() throws Exception {
+        var original = users.findByEmail(EMAIL).orElseThrow();
+        registrations.register(registration("other@example.com", PASSWORD));
+        var other = users.findByEmail("other@example.com").orElseThrow();
+        mvc.perform(get("/account").with(user(EMAIL)))
+                .andExpect(status().isOk()).andExpect(content().string(containsString("Name ändern")));
+        mvc.perform(post("/account/name").with(user(EMAIL)).with(csrf())
+                .param("displayName", "  Änne Müller  ")
+                .param("id", other.getId().toString()).param("email", other.getEmail()).param("admin", "false"))
+                .andExpect(redirectedUrl("/account"));
+        var updated = users.findByEmail(EMAIL).orElseThrow();
+        assertThat(updated.getDisplayName()).isEqualTo("Änne Müller");
+        assertThat(updated.getCredentialVersion()).isEqualTo(original.getCredentialVersion());
+        assertThat(updated.getPasswordHash()).isEqualTo(original.getPasswordHash());
+        assertThat(updated.isAdmin()).isEqualTo(original.isAdmin());
+        assertThat(users.findById(other.getId()).orElseThrow().getDisplayName()).isEqualTo(other.getDisplayName());
+        mvc.perform(get("/account").with(user(EMAIL))).andExpect(status().isOk())
+                .andExpect(content().string(containsString("Änne Müller")));
+        mvc.perform(get("/welcome").with(user(EMAIL))).andExpect(status().isOk())
+                .andExpect(content().string(containsString("Änne Müller")));
+        mvc.perform(get("/users/" + original.getId()).with(user(EMAIL))).andExpect(status().isOk())
+                .andExpect(content().string(containsString("Änne Müller")));
+    }
+
+    @Test
+    void nameChangeRejectsBlankAndOverlongNames() throws Exception {
+        String original = users.findByEmail(EMAIL).orElseThrow().getDisplayName();
+        for (String invalid : new String[]{"   ", "x".repeat(81)}) {
+            mvc.perform(post("/account/name").with(user(EMAIL)).with(csrf()).param("displayName", invalid))
+                    .andExpect(status().isOk())
+                    .andExpect(model().attributeHasFieldErrors("nameChangeForm", "displayName"));
+            assertThat(users.findByEmail(EMAIL).orElseThrow().getDisplayName()).isEqualTo(original);
+        }
+        mvc.perform(post("/account/name").with(user(EMAIL)).with(csrf()).param("displayName", "x".repeat(80)))
+                .andExpect(redirectedUrl("/account"));
+    }
+
+    @Test
+    void nameChangeRequiresAuthenticationAndCsrf() throws Exception {
+        String original = users.findByEmail(EMAIL).orElseThrow().getDisplayName();
+        mvc.perform(post("/account/name").with(csrf()).param("displayName", "Neu"))
+                .andExpect(status().is3xxRedirection());
+        mvc.perform(post("/account/name").with(user(EMAIL)).param("displayName", "Neu"))
+                .andExpect(status().isForbidden());
+        assertThat(users.findByEmail(EMAIL).orElseThrow().getDisplayName()).isEqualTo(original);
+    }
+
+    @Test
     void forgotPasswordIsPublicGenericAndCsrfProtected() throws Exception {
         mvc.perform(get("/signin"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Passwort vergessen?")));
         mvc.perform(get("/forgot-password"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Reset-Link anfordern")))
+                .andExpect(content().string(containsString("Zurücksetzen-Link anfordern")))
                 .andExpect(content().string(containsString("name=\"_csrf\"")));
 
         mvc.perform(post("/forgot-password").param("email", EMAIL))

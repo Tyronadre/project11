@@ -60,7 +60,7 @@ public class DashboardService {
         requireAdmin(editorEmail);
         AppUser user = findLockedUser(userId);
         if (!admin && user.isAdmin() && users.countByAdminTrue() <= 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one administrator is required.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Es muss mindestens einen Admin geben.");
         }
         user.setAdmin(admin);
     }
@@ -69,7 +69,7 @@ public class DashboardService {
         if (value == null || value < 0 || value > MAX_TALLY) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "The tally must be between 0 and " + MAX_TALLY + "."
+                    "Die Strichzahl muss zwischen 0 und " + MAX_TALLY + " liegen."
             );
         }
         return value;
@@ -78,14 +78,14 @@ public class DashboardService {
     private AppUser requireAdmin(String email) {
         AppUser editor = findUserByEmail(email);
         if (!editor.isAdmin()) {
-            throw new AccessDeniedException("Only administrators can edit tallies.");
+            throw new AccessDeniedException("Nur Admins dürfen Strichzahlen ändern.");
         }
         return editor;
     }
 
     private AppUser findUserByEmail(String email) {
         return users.findByEmail(email.strip().toLowerCase(Locale.ROOT))
-                .orElseThrow(() -> new AccessDeniedException("The signed-in account no longer exists."));
+                .orElseThrow(() -> new AccessDeniedException("Das angemeldete Konto besteht nicht mehr."));
     }
 
     private AppUser findLockedUser(long userId) {

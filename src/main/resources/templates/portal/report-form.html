@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{portal/fragments :: head('Reisebericht')}"></head>
+<body class="amt-body"><div class="amt-wrapper"><header th:replace="~{portal/fragments :: header}"></header>
+<div class="amt-shell"><aside th:replace="~{portal/fragments :: sidebar}"></aside>
+<main class="amt-main">
+<div class="amt-page-title"><h2>Dein Reisebericht</h2><p>Erzähl von deiner Reise. Wenn du möchtest, füge Fotos hinzu.</p></div>
+<p class="amt-notice" th:if="${holidays.isEmpty()}">Aktuell gibt es keine beendete Reise, für die du einen Bericht einreichen kannst.</p>
+<form id="report-form" th:unless="${holidays.isEmpty()}" th:action="@{/amt/eer/einreichen}" th:object="${travelForm}" method="post" enctype="multipart/form-data">
+<input type="hidden" name="vorgang" th:value="${draft.id}">
+<div class="amt-notice amt-alert" role="alert" th:if="${#fields.hasAnyErrors()}"><ul><li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li></ul></div>
+<div class="amt-field"><label for="report-holiday">Deine Reise</label>
+<select id="report-holiday" name="values[holidayId]" required><option value="">Reise auswählen</option>
+<option th:each="holiday : ${holidays}" th:value="${holiday.id}" th:selected="${travelForm.value('holidayId') == holiday.id.toString()}" th:text="${holiday.label}"></option></select></div>
+<div class="amt-field"><label for="report-text">Dein Bericht</label><textarea id="report-text" name="values[itinerary]" rows="14" maxlength="6000" required th:text="*{value('itinerary')}" placeholder="Was habt ihr erlebt?"></textarea><small>Bis zu 6.000 Zeichen.</small></div>
+<div class="amt-field"><label for="report-photos">Fotos hinzufügen (optional)</label><input id="report-photos" type="file" name="photos" accept="image/jpeg,image/png" multiple><small>Beliebig viele JPEG-/PNG-Fotos, insgesamt höchstens 1 GB. Pro Foto maximal 20 Megapixel. Die Fotos erscheinen direkt unter deinem Bericht.</small></div>
+<p th:if="${!photos.isEmpty()}">Bereits hochgeladene Fotos bleiben beigefügt.</p>
+<div th:replace="~{portal/travel-photos :: gallery(${photos})}"></div>
+<p>Dein Bericht und die Fotos sind für alle Mitglieder sichtbar.</p>
+<div class="amt-dialog-actions"><button class="amt-button amt-primary" type="submit">Reisebericht einreichen</button></div>
+</form>
+</main></div><footer th:replace="~{portal/fragments :: footer}"></footer></div></body></html>

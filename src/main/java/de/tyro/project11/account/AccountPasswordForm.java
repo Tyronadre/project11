@@ -14,7 +14,7 @@ public class AccountPasswordForm {
     private String currentPassword;
 
     @NotBlank(message = "Bitte wähle ein neues Passwort.")
-    @Size(min = 12, max = 72, message = "Das neue Passwort muss 12 bis 72 Zeichen lang sein.")
+    @Size(min = 4, max = 72, message = "Das neue Passwort muss 4 bis 72 Zeichen lang sein.")
     private String newPassword;
 
     @NotBlank(message = "Bitte wiederhole das neue Passwort.")

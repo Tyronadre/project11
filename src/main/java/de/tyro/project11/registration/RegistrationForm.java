@@ -11,29 +11,29 @@ import java.util.Objects;
 
 public class RegistrationForm {
 
-    @NotBlank(message = "Enter your name.")
-    @Size(max = 80, message = "Use no more than 80 characters for your name.")
+    @NotBlank(message = "Bitte gib deinen Namen ein.")
+    @Size(max = 80, message = "Dein Name darf höchstens 80 Zeichen enthalten.")
     private String displayName;
 
-    @NotBlank(message = "Enter your email address.")
-    @Email(message = "Enter a valid email address.")
-    @Size(max = 254, message = "Use no more than 254 characters for your email.")
+    @NotBlank(message = "Bitte gib deine E-Mail-Adresse ein.")
+    @Email(message = "Bitte gib eine gültige E-Mail-Adresse ein.")
+    @Size(max = 254, message = "Deine E-Mail-Adresse darf höchstens 254 Zeichen enthalten.")
     private String email;
 
-    @NotBlank(message = "Choose a password.")
-    @Size(min = 12, max = 72, message = "Use between 12 and 72 characters for your password.")
+    @NotBlank(message = "Bitte wähle ein Passwort.")
+    @Size(min = 4, max = 72, message = "Dein Passwort muss zwischen 4 und 72 Zeichen lang sein.")
     private String password;
 
-    @NotBlank(message = "Enter your password again.")
-    @Size(max = 72, message = "Use no more than 72 characters.")
+    @NotBlank(message = "Bitte gib dein Passwort erneut ein.")
+    @Size(max = 72, message = "Bitte verwende höchstens 72 Zeichen.")
     private String confirmPassword;
 
-    @AssertTrue(message = "Your passwords do not match.")
+    @AssertTrue(message = "Deine Passwörter stimmen nicht überein.")
     public boolean isPasswordsMatching() {
         return Objects.equals(password, confirmPassword);
     }
 
-    @AssertTrue(message = "Your password is too long in UTF-8. Use fewer accented characters or emoji (72 bytes maximum).")
+    @AssertTrue(message = "Dein Passwort ist in UTF-8 zu lang. Verwende weniger Sonderzeichen oder Emojis (höchstens 72 Bytes).")
     public boolean isPasswordWithinByteLimit() {
         // BCrypt accepts at most 72 bytes, which can be fewer than 72 characters.
         return password == null || password.getBytes(StandardCharsets.UTF_8).length <= 72;

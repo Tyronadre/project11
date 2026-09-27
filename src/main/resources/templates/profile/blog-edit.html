@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="de" xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Beitrag schreiben · Project 11</title><link rel="stylesheet" th:href="@{/css/app.css}"><link rel="stylesheet" th:href="@{/css/vendor/quill-2.0.3.snow.css}"><link rel="stylesheet" th:href="@{/css/profile.css}"></head>
-<body class="dashboard-body"><div class="page dashboard-page"><header th:replace="~{profile/fragments :: header}"></header>
+<html lang="de" xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Beitrag schreiben · ZFG</title><link rel="stylesheet" th:href="@{/css/app.css}"><link rel="stylesheet" th:href="@{/css/vendor/quill-2.0.3.snow.css}"><link rel="stylesheet" th:href="@{/css/profile.css}"></head>
+<body class="dashboard-body"><div class="page dashboard-page"><header th:replace="~{fragments/navigation :: header}"></header>
 <main class="profile-editor blog-editor"><a class="event-back" th:href="@{/users/{id}(id=${userId})}">← Zum Profil</a><p class="eyebrow">Platz für deine Gedanken</p><h1 th:text="${entryId == null ? 'Eine neue Geschichte.' : 'Deine Geschichte bearbeiten.'}"></h1><p class="profile-muted">Markiere Wörter oder ganze Passagen und gestalte sie direkt im Text. Gespeicherte Beiträge sind für die Gruppe sichtbar.</p>
 <form id="blog-form" class="profile-form" th:action="@{${saveUrl}}" method="post" th:object="${blogForm}">
 <div class="notice notice-error" role="alert" th:if="${#fields.hasAnyErrors()}"><strong>Bitte prüfe deinen Beitrag.</strong><ul><li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li></ul></div>
@@ -10,7 +10,7 @@
 <div class="rich-toolbar" id="rich-toolbar" role="group" aria-label="Textformatierung">
 <div class="rich-toolbar-group"><button type="button" data-action="undo" title="Rückgängig (Strg/⌘ Z)" aria-label="Rückgängig">↶</button><button type="button" data-action="redo" title="Wiederholen (Strg/⌘ Umschalt Z)" aria-label="Wiederholen">↷</button></div>
 <label>Absatzstil<select id="rich-kind"><option value="paragraph">Normaler Text</option><option value="heading">Überschrift</option><option value="quote">Zitat</option></select></label>
-<label>Schrift<select id="rich-font"><option value="serif">Georgia</option><option value="sans">System</option><option value="mono">Monospace</option></select></label>
+<label>Schrift<select id="rich-font"><option value="serif">Georgia</option><option value="sans">Systemschrift</option><option value="mono">Festbreitenschrift</option></select></label>
 <div class="rich-toolbar-group"><button type="button" data-format="bold" aria-label="Fett" aria-pressed="false" title="Fett (Strg/⌘ B)"><b>B</b></button><button type="button" data-format="italic" aria-label="Kursiv" aria-pressed="false" title="Kursiv (Strg/⌘ I)"><i>I</i></button><button type="button" data-format="underline" aria-label="Unterstrichen" aria-pressed="false" title="Unterstrichen (Strg/⌘ U)"><u>U</u></button><button type="button" data-format="strike" aria-label="Durchgestrichen" aria-pressed="false"><s>S</s></button></div>
 <label>Textfarbe<input id="rich-color" type="color" value="#203c32"></label>
 <button type="button" data-action="clear" aria-label="Formatierung entfernen" title="Formatierung entfernen">Tx</button>

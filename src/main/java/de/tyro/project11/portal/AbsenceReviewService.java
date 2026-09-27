@@ -29,7 +29,7 @@ public class AbsenceReviewService {
         this.applications = applications; this.activities = activities; this.users = users;
         this.penalties = penalties; this.emails = emails; this.clock = clock;
     }
-    public record Review(long id, String applicant, String title, String submitted, String deadline, boolean timely,
+    public record Review(long id, String reference, String applicant, String title, String submitted, String deadline, boolean timely,
                          String decision, String reason, List<ApplicationAnswer> answers, boolean cancelled) {
         public boolean pending() { return !cancelled && timely && decision.equals("PENDING"); }
     }
@@ -63,7 +63,7 @@ public class AbsenceReviewService {
     }
     private Review view(AbsenceApplication a) {
         var stamp = DateTimeFormatter.ofPattern("dd.MM.uuuu, HH:mm z", Locale.GERMAN);
-        return new Review(a.getId(), a.getApplicant().getDisplayName(), a.getActivityTitle(),
+        return new Review(a.getId(), CaseReference.of(a), a.getApplicant().getDisplayName(), a.getActivityTitle(),
                 a.getSubmittedAt().atZoneSameInstant(CalendarTime.BERLIN).format(stamp),
                 AttendanceRules.deadline(a.getActivity()).format(stamp), AttendanceRules.timely(a),
                 a.getDecision().name(), a.getDecisionReason(), a.getAnswers(), a.getActivity().isCancelled());

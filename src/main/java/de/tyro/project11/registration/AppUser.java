@@ -77,6 +77,13 @@ public class AppUser {
         return displayName;
     }
 
+    public void changeDisplayName(String name) {
+        if (name == null || name.isBlank() || name.strip().length() > 80) {
+            throw new IllegalArgumentException("Bitte einen Namen mit höchstens 80 Zeichen angeben.");
+        }
+        this.displayName = name.strip();
+    }
+
     public String getEmail() {
         return email;
     }
@@ -103,7 +110,7 @@ public class AppUser {
 
     public void setTallyCount(int tallyCount) {
         if (tallyCount < 0) {
-            throw new IllegalArgumentException("A tally cannot be negative.");
+            throw new IllegalArgumentException("Die Strichzahl darf nicht negativ sein.");
         }
         this.tallyCount = tallyCount;
     }

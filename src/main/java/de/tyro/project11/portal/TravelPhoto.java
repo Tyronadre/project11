@@ -23,6 +23,7 @@ public class TravelPhoto {
         this.contentType = contentType; this.content = content; this.sizeBytes = content.length; this.createdAt = now;
     }
     public Long getId() { return id; }
+    public void accountForUpload(long bytes) { sizeBytes = Math.max(sizeBytes, bytes); }
     public AppUser getOwner() { return owner; }
     public TravelApplication getApplication() { return application; }
     public String getDraftKey() { return draftKey; }

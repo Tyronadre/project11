@@ -1,0 +1,24 @@
+/* Shared header: scoped independently of the page and administrative portal theme. */
+.app-header { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; padding: 22px 0; margin: 0 0 16px; color: #203c32; font: 14px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif; }
+.app-header * { box-sizing: border-box; }
+.app-header .app-brand, .app-header .app-brand:visited { display: inline-flex; color: #203c32; text-decoration: none; background: transparent; }
+.app-header .brand-identity { display: inline-flex; align-items: center; gap: 12px; }
+.app-header .brand-mark { display: grid; place-items: center; width: 44px; height: 40px; flex-shrink: 0; border-radius: 11px; background: #285640; color: white; font-size: 16px; font-weight: 650; letter-spacing: 0; }
+.app-header .brand-name { max-width: 250px; font-size: 12px; line-height: 1.45; font-weight: 650; letter-spacing: 0; overflow-wrap: anywhere; }
+.app-header .app-menu { display: flex; flex-wrap: wrap; gap: 5px; order: 3; width: 100%; padding: 5px; border: 1px solid #d6dfcf; border-radius: 14px; background: #f8faf3; }
+.app-header .app-menu a, .app-header .app-menu a:visited { padding: 10px 16px; border-radius: 9px; background: transparent; color: #52634f; font-size: 12px; font-weight: 650; text-decoration: none; }
+.app-header .app-menu a:hover { background: #e8eddf; color: #285640; }
+.app-header .app-menu a[aria-current="page"] { background: #285640; color: white; }
+.app-header .app-session, .app-header .app-guest { margin: 0 0 0 auto; }
+.app-header .app-guest { display: flex; flex-wrap: wrap; gap: 16px; }
+.app-header .app-session button, .app-header .app-guest a, .app-header .app-guest a:visited { display: inline-block; padding: 10px 0; border: 0; background: transparent; color: #285640; font: 600 13px/1.5 "Segoe UI", system-ui, sans-serif; text-decoration: none; cursor: pointer; }
+.app-header .app-session button:hover, .app-header .app-guest a:hover, .app-header .app-guest a[aria-current="page"] { text-decoration: underline; text-underline-offset: 4px; }
+.app-header a:focus-visible, .app-header button:focus-visible { outline: 3px solid #91ae72; outline-offset: 3px; }
+.amt-wrapper > .app-header { padding: 22px; margin: 0; background: #eef0e8; }
+@media(max-width: 600px) {
+    .app-header { gap: 12px; padding: 18px 0; }
+    .app-header .brand-name { max-width: 180px; font-size: 10px; }
+    .app-header .app-menu a { flex: 1 0 auto; text-align: center; padding: 10px 12px; }
+    .app-header .app-guest { width: 100%; margin-left: 0; }
+}
+@media print { .app-header { display: none; } }

@@ -1,61 +1,48 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title th:text="|Attendance · ${attendance.title} · Project 11|">Attendance</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title th:text="|Anwesenheit · ${attendance.title} · ZFG|">Anwesenheit</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
 <body class="dashboard-body"><div class="page dashboard-page">
-    <header class="site-header dashboard-header">
-        <a class="brand" th:href="@{/}"><span class="brand-mark" aria-hidden="true">11</span> Project 11</a>
-        <nav class="page-nav" aria-label="Main navigation">
-            <a th:href="@{/welcome}">Overview</a>
-            <a th:href="@{/calendar}" aria-current="page">Calendar</a>
-            <a th:href="@{/amt}">Applications</a>
-            <a th:href="@{/costs}">Kosten</a><a th:href="@{/users/me}">My profile</a>
-        </nav>
-        <div class="header-account">
-            <form th:action="@{/logout}" method="post">
-                <button class="header-link" type="submit">Sign out <span aria-hidden="true">↗</span></button>
-            </form>
-        </div>
-    </header>
+    <header th:replace="~{fragments/navigation :: header}"></header>
     <main class="attendance-layout">
-        <a class="event-back" th:href="@{/events/{id}(id=${attendance.id})}">← Back to event</a>
-        <div class="attendance-heading"><p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> Event attendance</p><h1 th:text="${attendance.title}">Event</h1><p>Ended <span th:text="${attendance.ended}"></span></p></div>
-        <div class="notice notice-success" role="status" th:if="${attendanceSaved == true}">Attendance saved as a draft. An admin must confirm the saved list and email recipients below. No new email has been sent.</div>
+        <a class="event-back" th:href="@{/events/{id}(id=${attendance.id})}">← Zurück zum Event</a>
+        <div class="attendance-heading"><p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> Anwesenheit beim Event</p><h1 th:text="${attendance.title}">Event</h1><p>Beendet <span th:text="${attendance.ended}"></span></p></div>
+        <div class="notice notice-success" role="status" th:if="${attendanceSaved == true}">Die Anwesenheitsliste wurde als Entwurf gespeichert. Ein Admin muss die Liste und die E-Mail-Empfänger unten bestätigen. Es wurde keine neue E-Mail versandt.</div>
         <section class="form-card attendance-card" aria-labelledby="attendance-form-title">
-            <h2 id="attendance-form-title">Who was there?</h2>
-            <p class="card-copy">Select everyone who attended, including yourself if applicable. Save the list first, then have an admin review and confirm it.</p>
-            <p class="field-hint" th:if="${attendanceMailEnabled}">Saving does not send emails. The separate admin confirmation below releases the displayed recipients.</p>
-            <p class="field-hint" th:unless="${attendanceMailEnabled}">SMTP delivery is disabled. Explicitly confirmed emails are queued and will be sent when delivery is enabled, provided they are still applicable.</p>
-            <p class="attendance-saved" th:if="${attendance.savedAt != null}">Last saved by <strong th:text="${attendance.reviewedBy}"></strong> · <span th:text="${attendance.savedAt}"></span>. You can correct the selection below.</p>
-            <div class="notice notice-error" th:if="${attendance.expired}">The AaA deadline has passed. After admin confirmation, unexcused absences now receive an automatic mark. Members can no longer submit an AaA for this event. Timely applications awaiting review hold the mark until a decision.</div>
+            <h2 id="attendance-form-title">Wer war dabei?</h2>
+            <p class="card-copy">Wähle alle Anwesenden aus, gegebenenfalls auch dich selbst. Speichere zuerst die Liste und lasse sie anschließend von einem Admin prüfen und bestätigen.</p>
+            <p class="field-hint" th:if="${attendanceMailEnabled}">Beim Speichern werden keine E-Mails versandt. Erst die gesonderte Adminbestätigung unten gibt den Versand an die angezeigten Empfänger frei.</p>
+            <p class="field-hint" th:unless="${attendanceMailEnabled}">Der E-Mail-Versand ist deaktiviert. Ausdrücklich bestätigte Nachrichten werden vorgemerkt und nach Aktivierung versandt, sofern sie noch zutreffen.</p>
+            <p class="attendance-saved" th:if="${attendance.savedAt != null}">Zuletzt gespeichert von <strong th:text="${attendance.reviewedBy}"></strong> · <span th:text="${attendance.savedAt}"></span>. Du kannst die Auswahl unten korrigieren.</p>
+            <div class="notice notice-error" th:if="${attendance.expired}">Die AaA-Frist ist abgelaufen. Nach der Adminbestätigung erhalten unentschuldigte Abwesende automatisch einen Strich. Für dieses Event können keine AaAs mehr eingereicht werden. Rechtzeitige Anträge halten den Strich bis zur Entscheidung zurück.</div>
             <form th:action="@{/events/{id}/attendance(id=${attendance.id})}" method="post">
                 <input type="hidden" name="version" th:value="${attendance.version}">
                 <div class="attendance-members">
                     <label class="attendance-member" th:each="member : ${attendance.members}">
                         <input type="checkbox" name="attendeeIds" th:value="${member.id}" th:checked="${member.attended}">
-                        <span><strong th:text="${member.name}">Member</strong><small th:text="${member.excuse.isEmpty() ? 'No absence application or covering holiday' : member.excuse}"></small></span>
+                        <span><strong th:text="${member.name}">Mitglied</strong><small th:text="${member.excuse.isEmpty() ? 'Kein Abwesenheitsantrag oder abdeckender Urlaub' : member.excuse}"></small></span>
                         <span class="attendance-excused" th:if="${!member.excuse.isEmpty()}" th:text="${member.excuse}"></span>
                     </label>
                 </div>
-                <p class="field-hint" th:if="${attendance.members.isEmpty()}">No current members had joined before this event ended.</p>
-                <p class="field-hint attendance-deadline">AaA deadline: before <strong th:text="${attendance.deadline}"></strong>. A timely application holds the mark until an admin accepts or rejects it.</p>
-                <div class="attendance-submit"><button class="button" type="submit">Save attendance <span aria-hidden="true">✓</span></button><a class="event-cancel" th:href="@{/welcome}">Back to overview</a></div>
-                <p class="form-footnote">Every saved edit invalidates the previous confirmation. No new reminders or marks are released until an admin confirms again.</p>
+                <p class="field-hint" th:if="${attendance.members.isEmpty()}">Keines der aktuellen Mitglieder war vor Ende dieses Events beigetreten.</p>
+                <p class="field-hint attendance-deadline">AaA-Frist: vor <strong th:text="${attendance.deadline}"></strong>. Ein rechtzeitiger Antrag hält den Strich bis zur Annahme oder Ablehnung durch einen Admin zurück.</p>
+                <div class="attendance-submit"><button class="button" type="submit">Anwesenheit speichern <span aria-hidden="true">✓</span></button><a class="event-cancel" th:href="@{/welcome}">Zurück zur Übersicht</a></div>
+                <p class="form-footnote">Jede gespeicherte Änderung hebt die bisherige Bestätigung auf. Erst nach erneuter Adminbestätigung werden neue Erinnerungen oder Striche freigegeben.</p>
             </form>
         </section>
-        <div class="notice notice-success" role="status" th:if="${attendanceConfirmed == true}">Attendance confirmed. Applicable emails have been queued; due marks have been reconciled.</div>
+        <div class="notice notice-success" role="status" th:if="${attendanceConfirmed == true}">Anwesenheit bestätigt. Zutreffende E-Mails sind vorgemerkt; fällige Striche wurden abgeglichen.</div>
         <section class="form-card attendance-card" style="margin-top:24px" th:if="${attendance.savedAt != null}">
-            <h2>2. Review recipients and confirm</h2>
-            <p class="card-copy">This is the saved list. Save any checkbox changes above before confirming. Members already emailed for this event will not receive another reminder.</p>
+            <h2>2. Empfänger prüfen und bestätigen</h2>
+            <p class="card-copy">Dies ist die gespeicherte Liste. Speichere Änderungen an der Auswahl oben, bevor du bestätigst. Bereits benachrichtigte Mitglieder erhalten für dieses Event keine weitere Erinnerung.</p>
             <div class="attendance-members"><div class="attendance-member" th:each="member : ${attendance.members}"><span><strong th:text="${member.name}"></strong><small th:text="${member.notification}"></small><small th:if="${member.notifyByEmail}" th:text="${member.email}"></small></span></div></div>
-            <p th:if="${attendance.confirmed}" class="notice notice-success">This saved version has been confirmed by an admin.</p>
+            <p th:if="${attendance.confirmed}" class="notice notice-success">Diese gespeicherte Fassung wurde von einem Admin bestätigt.</p>
             <form th:if="${attendance.canConfirm and !attendance.confirmed}" th:action="@{/events/{id}/attendance/confirm(id=${attendance.id})}" method="post">
                 <input type="hidden" name="version" th:value="${attendance.version}">
                 <input th:each="recipientId : ${attendance.recipientIds}" type="hidden" name="recipientIds" th:value="${recipientId}">
-                <button class="button" type="submit" th:text="|Confirm saved attendance · ${attendance.recipientIds.size()} email recipients|"></button>
+                <button class="button" type="submit" th:text="|Gespeicherte Anwesenheit bestätigen · ${attendance.recipientIds.size()} E-Mail-Empfänger|"></button>
             </form>
-            <p th:if="${!attendance.canConfirm and !attendance.confirmed}" class="field-hint">An admin must explicitly confirm this list before reminders and automatic marks are released.</p>
+            <p th:if="${!attendance.canConfirm and !attendance.confirmed}" class="field-hint">Ein Admin muss diese Liste ausdrücklich bestätigen, bevor Erinnerungen und automatische Striche freigegeben werden.</p>
         </section>
-        <p class="field-hint">The member list is fixed when attendance is first saved. Members who joined after the event ended are not included.</p>
+        <p class="field-hint">Die Mitgliederliste wird beim ersten Speichern festgelegt. Mitglieder, die erst nach dem Event beigetreten sind, werden nicht berücksichtigt.</p>
     </main>
-    <footer class="site-footer dashboard-footer"><span>Project 11 · better together</span><span>All dates and times: Berlin</span></footer>
+    <footer class="site-footer dashboard-footer"><span>ZFG · gemeinsam ist es schöner</span></footer>
 </div></body></html>

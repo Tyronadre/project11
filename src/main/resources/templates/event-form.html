@@ -1,51 +1,38 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${editingId == null ? 'New event · Project 11' : 'Event bearbeiten · Project 11'}">Event</title>
+    <title th:text="${editingId == null ? 'Neues Event · ZFG' : 'Event bearbeiten · ZFG'}">Event</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body class="dashboard-body"><div class="page dashboard-page">
-    <header class="site-header dashboard-header">
-        <a class="brand" th:href="@{/}"><span class="brand-mark" aria-hidden="true">11</span> Project 11</a>
-        <nav class="page-nav" aria-label="Main navigation">
-            <a th:href="@{/welcome}">Overview</a>
-            <a th:href="@{/calendar}" aria-current="page">Calendar</a>
-            <a th:href="@{/amt}">Applications</a>
-            <a th:href="@{/costs}">Kosten</a><a th:href="@{/users/me}">My profile</a>
-        </nav>
-        <div class="header-account">
-            <form th:action="@{/logout}" method="post">
-                <button class="header-link" type="submit">Sign out <span aria-hidden="true">↗</span></button>
-            </form>
-        </div>
-    </header>
+    <header th:replace="~{fragments/navigation :: header}"></header>
     <main class="event-layout">
         <div class="event-intro">
-            <a class="event-back" th:href="@{/calendar}">← Back to calendar</a>
-            <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> Make time for each other</p>
-            <h1 th:if="${editingId == null}">A good plan<br>starts here.</h1><h1 th:if="${editingId != null}">Pläne ändern sich.</h1>
-            <p th:if="${editingId == null}">Dinner, a day out, or just catching up.<br>Put it on the calendar and make it happen.</p><p th:if="${editingId != null}">Passe Datum, Uhrzeit, Ort oder Beschreibung an. Jede gespeicherte Änderung wird der Gruppe per E-Mail mitgeteilt.</p>
-            <div class="event-note" th:if="${editingId == null}"><span class="event-note-icon" aria-hidden="true">✳</span><div><strong>One plan. The whole group.</strong><p>Your event will be visible to every member as soon as you create it.</p></div></div>
+            <a class="event-back" th:href="@{/calendar}">← Zurück zum Kalender</a>
+            <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> Nehmt euch Zeit füreinander</p>
+            <h1 th:if="${editingId == null}">Ein guter Plan<br>beginnt hier.</h1><h1 th:if="${editingId != null}">Pläne ändern sich.</h1>
+            <p th:if="${editingId == null}">Gemeinsam essen, einen Ausflug machen oder einfach reden.<br>Tragt es in den Kalender ein und macht es möglich.</p><p th:if="${editingId != null}">Passe Datum, Uhrzeit, Ort oder Beschreibung an. Jede gespeicherte Änderung wird der Gruppe per E-Mail mitgeteilt.</p>
+            <div class="event-note" th:if="${editingId == null}"><span class="event-note-icon" aria-hidden="true">✳</span><div><strong>Ein Plan. Die ganze Gruppe.</strong><p>Dein Event ist für alle Mitglieder sichtbar, sobald du es erstellst.</p></div></div>
         </div>
         <section class="form-card event-card" aria-labelledby="event-title">
-            <p class="eyebrow">Something to look forward to</p>
-            <h2 id="event-title" th:text="${editingId == null ? 'New event' : 'Event bearbeiten'}">Event</h2>
-            <p class="card-copy" th:if="${editingId == null}">Just a name and a date to get started.</p>
+            <p class="eyebrow">Vorfreude beginnt hier</p>
+            <h2 id="event-title" th:text="${editingId == null ? 'Neues Event' : 'Event bearbeiten'}">Event</h2>
+            <p class="card-copy" th:if="${editingId == null}">Zum Start reichen ein Name und ein Datum.</p>
             <p class="card-copy" th:if="${editingId != null}">Bei bereits erfassten Anwesenheiten oder eingereichten AaAs sind Datum und Uhrzeit geschützt. Ort, Name und Beschreibung bleiben bearbeitbar.</p>
             <p class="notice notice-error" th:if="${editingId != null and !eventMailEnabled}">Der E-Mail-Versand ist deaktiviert. Benachrichtigungen werden gespeichert und erst nach Aktivierung von SMTP versendet.</p>
             <form th:action="${editingId == null} ? @{/events} : @{/events/{id}/edit(id=${editingId})}" th:object="${eventForm}" method="post">
                 <input type="hidden" th:field="*{revision}">
-                <div class="notice notice-error" role="alert" th:if="${#fields.hasAnyErrors()}">Please check the highlighted details. Your entries are still here.</div>
+                <div class="notice notice-error" role="alert" th:if="${#fields.hasAnyErrors()}">Bitte prüfe die markierten Angaben. Deine Eingaben bleiben erhalten.</div>
                 <div class="field">
                     <label for="name">Name</label>
-                    <input id="name" type="text" th:field="*{name}" placeholder="Pizza night, a hike, anything together…" maxlength="120" required th:attr="aria-invalid=${#fields.hasErrors('name')}" aria-describedby="event-name-error">
+                    <input id="name" type="text" th:field="*{name}" placeholder="Pizzaabend, Wanderung oder einfach gemeinsam Zeit verbringen …" maxlength="120" required th:attr="aria-invalid=${#fields.hasErrors('name')}" aria-describedby="event-name-error">
                     <p class="field-error" id="event-name-error" th:errors="*{name}"></p>
                 </div>
                 <div class="field">
-                    <label for="description">Description <span class="field-optional">optional</span></label>
-                    <textarea id="description" th:field="*{description}" rows="4" maxlength="2000" placeholder="A meeting spot, what to bring, or a little more about the plan." th:attr="aria-invalid=${#fields.hasErrors('description')}" aria-describedby="event-description-error"></textarea>
+                    <label for="description">Beschreibung <span class="field-optional">optional</span></label>
+                    <textarea id="description" th:field="*{description}" rows="4" maxlength="2000" placeholder="Treffpunkt, Mitbringsel oder weitere Einzelheiten zum Plan." th:attr="aria-invalid=${#fields.hasErrors('description')}" aria-describedby="event-description-error"></textarea>
                     <p class="field-error" id="event-description-error" th:errors="*{description}"></p>
                 </div>
                 <div class="field">
@@ -54,7 +41,7 @@
                     <p class="field-error" id="event-location-error" th:errors="*{location}"></p>
                 </div>
                 <div class="field">
-                    <label for="date">Date</label>
+                    <label for="date">Datum</label>
                     <input id="date" type="date" th:field="*{date}" min="0001-01-01" max="9998-12-31" required th:attr="aria-invalid=${#fields.hasErrors('date') or #fields.hasErrors('dateInRange')}" aria-describedby="event-date-error event-range-error">
                     <p class="field-error" id="event-date-error" th:errors="*{date}"></p>
                     <p class="field-error" id="event-range-error" th:errors="*{dateInRange}"></p>
@@ -67,18 +54,17 @@
                 </div>
                 <div class="event-date-time">
                     <div class="field">
-                        <label for="time">Start time <span class="field-optional">optional</span></label>
+                        <label for="time">Beginn <span class="field-optional">optional</span></label>
                         <input id="time" type="time" th:field="*{time}" step="60" th:attr="aria-invalid=${#fields.hasErrors('time')}" aria-describedby="event-times-hint event-time-error">
                         <p class="field-error" id="event-time-error" th:errors="*{time}"></p>
                     </div>
                     <div class="field">
-                        <label for="endTime">End time <span class="field-optional">optional</span></label>
+                        <label for="endTime">Ende <span class="field-optional">optional</span></label>
                         <input id="endTime" type="time" th:field="*{endTime}" step="60" th:attr="aria-invalid=${#fields.hasErrors('endTime')}" aria-describedby="event-times-hint event-end-error">
                         <p class="field-error" id="event-end-error" th:errors="*{endTime}"></p>
                     </div>
                 </div>
-                <p class="field-hint event-times-hint" id="event-times-hint">Leave both times blank for an all-day event. Ohne Enddatum bedeutet eine frühere Endzeit den nächsten Tag. Ohne Endzeit endet das Event am Ende des gewählten Enddatums.</p>
-                <p class="event-timezone"><span aria-hidden="true">◷</span> All dates and times are in Berlin.</p>
+                <p class="field-hint event-times-hint" id="event-times-hint">Lass beide Uhrzeiten für ein ganztägiges Event leer. Ohne Enddatum bedeutet eine frühere Endzeit den nächsten Tag. Ohne Endzeit endet das Event am Ende des gewählten Enddatums.</p>
                 <div class="field" th:if="${editingId == null}">
                     <label for="costAmount">Kosten in Euro <span class="field-optional">optional</span></label>
                     <input type="text" th:field="*{costAmount}" inputmode="decimal" maxlength="20" placeholder="Zum Beispiel 60,00" th:attr="aria-invalid=${#fields.hasErrors('costAmount')}" aria-describedby="event-cost-hint event-cost-error">
@@ -89,14 +75,14 @@
             <legend>Kosten aufteilen auf</legend>
             <label><input type="radio" th:field="*{costSelectedOnly}" value="false"> Alle bestätigten Teilnehmenden</label>
             <label><input type="radio" th:field="*{costSelectedOnly}" value="true"> Nur ausgewählte Personen</label>
-            <p class="field-hint" id="costSelectedUserIds-hint">Die folgende Auswahl gilt nur bei „Nur ausgewählte Personen“. Wähle mindestens eine Person. Abgerechnet werden ausschließlich ausgewählte Personen, deren Anwesenheit bestätigt ist.</p>
+            <p class="field-hint" id="costSelectedUserIds-hint">Die folgende Auswahl gilt nur bei „Nur ausgewählte Personen“. Wähle mindestens eine Person. Alle ausgewählten Personen tragen ihren Anteil – unabhängig davon, ob sie teilgenommen haben.</p>
             <div class="cost-selection-members"><label th:each="member : ${costMembers}"><input type="checkbox" th:field="*{costSelectedUserIds}" th:value="${member.id}" aria-describedby="costSelectedUserIds-hint costSelectedUserIds-error"><span th:text="${member.name}"></span></label></div>
             <p class="field-error" id="costSelectedUserIds-error" th:errors="*{costSelectedUserIds}"></p>
         </fieldset>
-                <button class="button" type="submit" th:text="${editingId == null ? 'Create event ↗' : 'Speichern und Gruppe informieren ↗'}">Speichern</button>
+                <button class="button" type="submit" th:text="${editingId == null ? 'Event erstellen ↗' : 'Speichern und Gruppe informieren ↗'}">Speichern</button>
                 <a class="event-cancel" th:href="${editingId == null} ? @{/calendar} : @{/events/{id}(id=${editingId})}">Abbrechen</a>
             </form>
         </section>
     </main>
-    <footer class="site-footer dashboard-footer"><span>Project 11 · better together</span><span>More time together. Less planning.</span></footer>
+    <footer class="site-footer dashboard-footer"><span>ZFG · gemeinsam ist es schöner</span><span>Mehr Zeit miteinander. Weniger Planungsaufwand.</span></footer>
 </div></body></html>

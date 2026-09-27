@@ -15,3 +15,13 @@ Quill 2.0.3 is bundled locally in `static/js/vendor` and `static/css/vendor`, wi
 Hibernate's existing schema-update process creates `user_profiles`, `profile_answers`, `blog_entries`, and `blog_blocks`. Profile rows are created on first save, so old accounts need no data backfill. The nullable `blog_blocks.inline_content` column stores selection formatting on first edit. New functionality does not rewrite the existing user, holiday, travel-report, or attendance data.
 
 `ProfileIntegrationTests` covers access rules, CSRF, validation, payment reveal, timeline associations, blog persistence, escaped output, and malformed block collections. Run the normal Gradle `test` task. Browser verification can use a separate in-memory H2 database to avoid altering real group data.
+
+## Direkt lesbares Journal
+
+Das moderne Profil stellt vergangene Urlaube mit den eingereichten AaB-Angaben und dem zugehörigen Reisebericht direkt im chronologischen Journal dar. Berichtstexte und bereits eingereichte Fotos sind ohne Wechsel ins Amt lesbar. Noch nicht eingereichte Fotodrafts werden nicht angezeigt. Die vorhandenen Archivlinks bleiben ergänzend verfügbar.
+
+Eingereichte AaAs werden vollständig beim zugehörigen Event angezeigt, auch wenn dieses noch bevorsteht oder inzwischen abgesagt wurde. Es erscheinen nur die Anträge des Profilinhabers. Die tatsächliche Teilnahme bleibt unabhängig vom Antrag sichtbar; aus einem AaA wird keine Abwesenheit abgeleitet. Events ohne Antrag behalten ihre kompakte Teilnahmeübersicht, während Reisegeschichten, Anträge und eigene Blogbeiträge größere Lesebereiche erhalten.
+
+Alle angemeldeten Mitglieder können diese Inhalte lesen. Texte werden als Text ausgegeben und HTML-escaped; Zahlungsdaten werden weiterhin ausschließlich nach ausdrücklichem Abruf angezeigt.
+
+Anträge und Reiseberichte sind im Profil standardmäßig eingeklappt. Titel und Eingangsdatum bleiben sichtbar; per Klick oder Tastatur lässt sich der vollständige Beitrag inklusive Fotos öffnen. Der gespeicherte AGB-Volltext wird im Profil durch „Akzeptiert.“ ersetzt. Die Originaldokumente im Amt bleiben unverändert. Eigene Blogbeiträge und die Teilnahmeübersicht werden weiterhin direkt angezeigt.

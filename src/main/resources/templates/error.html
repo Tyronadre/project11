@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Let’s try again · Project 11</title>
+    <title>Noch einmal versuchen · ZFG</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
 <div class="page">
-    <header class="site-header"><a class="brand" th:href="@{/}"><span class="brand-mark" aria-hidden="true">11</span> Project 11</a></header>
+    <header th:replace="~{fragments/navigation :: header}"></header>
     <main class="message-layout">
         <section class="form-card message-card">
-            <span class="eyebrow">Something needs another try</span>
-            <h1>Let’s start again.</h1>
-            <p th:if="${status == 403}">This request could not be accepted. Your form may have expired. Open a fresh form and try again.</p>
-            <p th:unless="${status == 403}">We couldn’t complete this request. Please return home and try again.</p>
-            <a class="button" th:href="@{/}">Back home <span aria-hidden="true">↗</span></a>
+            <span class="eyebrow">Das hat noch nicht geklappt</span>
+            <h1>Versuchen wir es noch einmal.</h1>
+            <p th:if="${status == 403}">Die Anfrage konnte nicht angenommen werden. Vielleicht ist dein Formular abgelaufen. Öffne ein neues Formular und versuche es erneut.</p>
+            <p th:unless="${status == 403}">Die Anfrage konnte nicht abgeschlossen werden. Bitte kehre zur Startseite zurück und versuche es erneut.</p>
+            <a class="button" th:href="@{/}">Zur Startseite <span aria-hidden="true">↗</span></a>
         </section>
     </main>
 </div>
