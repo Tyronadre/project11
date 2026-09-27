@@ -90,7 +90,7 @@ class RegistrationIntegrationTests {
             "'', alex@example.com, river-stone-morning, river-stone-morning, displayName",
             "Alex, not-an-email, river-stone-morning, river-stone-morning, email",
             "Alex, '', river-stone-morning, river-stone-morning, email",
-            "Alex, alex@example.com, short, short, password",
+            "Alex, alex@example.com, abc, abc, password",
             "Alex, alex@example.com, river-stone-morning, different-password, passwordsMatching",
             "Alex, alex@example.com, river-stone-morning, '', confirmPassword"
     })

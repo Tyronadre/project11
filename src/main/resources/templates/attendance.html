@@ -8,7 +8,7 @@
         <div class="attendance-heading"><p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> Anwesenheit beim Event</p><h1 th:text="${attendance.title}">Event</h1><p>Beendet <span th:text="${attendance.ended}"></span></p></div>
         <div class="notice notice-success" role="status" th:if="${attendanceSaved == true}">Die Anwesenheitsliste wurde als Entwurf gespeichert. Ein Admin muss die Liste und die E-Mail-Empfänger unten bestätigen. Es wurde keine neue E-Mail versandt.</div>
         <section class="form-card attendance-card" aria-labelledby="attendance-form-title">
-            <h2 id="attendance-form-title">Wer war dabei?</h2>
+            <h2 id="attendance-form-title">Wer war dabei?</h2><p>Freiwillige AFeAs sind in einer neuen Liste vorausgewählt. Bitte prüfe alle Angaben; auch ohne AFeA können Personen als anwesend erfasst werden. Bereits gespeicherte Listen werden durch AFeAs nicht geändert.</p>
             <p class="card-copy">Wähle alle Anwesenden aus, gegebenenfalls auch dich selbst. Speichere zuerst die Liste und lasse sie anschließend von einem Admin prüfen und bestätigen.</p>
             <p class="field-hint" th:if="${attendanceMailEnabled}">Beim Speichern werden keine E-Mails versandt. Erst die gesonderte Adminbestätigung unten gibt den Versand an die angezeigten Empfänger frei.</p>
             <p class="field-hint" th:unless="${attendanceMailEnabled}">Der E-Mail-Versand ist deaktiviert. Ausdrücklich bestätigte Nachrichten werden vorgemerkt und nach Aktivierung versandt, sofern sie noch zutreffen.</p>
@@ -19,7 +19,7 @@
                 <div class="attendance-members">
                     <label class="attendance-member" th:each="member : ${attendance.members}">
                         <input type="checkbox" name="attendeeIds" th:value="${member.id}" th:checked="${member.attended}">
-                        <span><strong th:text="${member.name}">Mitglied</strong><small th:text="${member.excuse.isEmpty() ? 'Kein Abwesenheitsantrag oder abdeckender Urlaub' : member.excuse}"></small></span>
+                        <span><strong th:text="${member.name}">Mitglied</strong><small th:if="${!member.selfReport.isEmpty()}" th:text="|Freiwilliger AFeA: ${member.selfReport}|"></small><small th:text="${member.excuse.isEmpty() ? 'Kein Abwesenheitsantrag oder abdeckender Urlaub' : member.excuse}"></small></span>
                         <span class="attendance-excused" th:if="${!member.excuse.isEmpty()}" th:text="${member.excuse}"></span>
                     </label>
                 </div>

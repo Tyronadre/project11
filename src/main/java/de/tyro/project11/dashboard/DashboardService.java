@@ -19,7 +19,9 @@ public class DashboardService {
     @jakarta.persistence.PersistenceContext
     private jakarta.persistence.EntityManager entityManager;
 
-    public DashboardService(UserRepository users) {
+    private final de.tyro.project11.tallies.TallyHistoryService history;
+    public DashboardService(UserRepository users, de.tyro.project11.tallies.TallyHistoryService history) {
+        this.history = history;
         this.users = users;
     }
 
@@ -42,7 +44,7 @@ public class DashboardService {
 
     @Transactional
     public void changeTally(String editorEmail, long userId, TallyChange change, Integer exactValue) {
-        requireAdmin(editorEmail);
+        var editor = requireAdmin(editorEmail);
         AppUser user = findLockedUser(userId);
         int current = user.getTallyCount();
         int next = switch (change) {
@@ -52,7 +54,14 @@ public class DashboardService {
             case RESET -> 0;
             case SET -> validateExactValue(exactValue);
         };
-        user.setTallyCount(next);
+        String reason = switch (change) {
+            case DECREMENT -> "Manuell einen Strich entfernt";
+            case INCREMENT -> "Manuell einen Strich hinzugefügt";
+            case ADD_FIVE -> "Manuell bis zu fünf Striche hinzugefügt";
+            case RESET -> "Strichzahl zurückgesetzt";
+            case SET -> "Strichzahl manuell festgelegt";
+        };
+        history.change(user, next, editor.getDisplayName(), reason, "MANUAL", null);
     }
 
     @Transactional

@@ -32,6 +32,7 @@
     <h2><a th:href="@{${item.url}}" th:text="${item.title}"></a></h2>
     <span class="attendance-label" th:classappend="${item.status == 'Teilgenommen'} ? 'attendance-yes' : ''" th:text="${item.status}"></span>
 </div>
+<p class="profile-tally-badge" th:if="${item.kind == 'event' and eventMarks.containsKey(item.id)}"><a href="#tally-history" th:text="${eventMarks.get(item.id)}"></a></p>
 <th:block th:if="${item.kind == 'event' and item.absence != null}">
     <p class="timeline-description" th:if="${!item.description.isBlank()}" th:text="${item.description}"></p>
     <section th:replace="~{profile/fragments :: story(${item.absence}, 'Mein Antrag auf Abwesenheit · AaA')}"></section>
@@ -52,5 +53,11 @@
 </article>
 </section>
 </div>
+<section id="tally-history" class="profile-card" aria-labelledby="tally-history-title">
+<p class="section-kicker">Nachvollziehbar</p><h2 id="tally-history-title">Änderungsverlauf der Striche</h2>
+<p class="profile-muted">Neue Änderungen werden mit Ursache, Bearbeiter und dem damaligen Gesamtstand aufgezeichnet. Frühere manuelle Änderungen sind nicht rekonstruierbar. Eventkennzeichnungen zeigen automatische Zuordnungen; spätere manuelle Korrekturen stehen hier im Verlauf.</p>
+<p th:if="${tallyHistory.empty}">Noch keine aufgezeichneten Änderungen.</p>
+<ol class="profile-tally-history"><li th:each="entry : ${tallyHistory.content}"><strong th:text="|${entry.delta} Striche · ${entry.before} → ${entry.after}|"></strong><p th:text="${entry.reason}"></p><small th:text="|${entry.at} Uhr (Berlin) · ${entry.actor}|"></small> <a th:if="${entry.url != null}" th:href="@{${entry.url}}">Zum Anlass →</a></li></ol>
+<nav class="timeline-links" aria-label="Seiten des Strichverlaufs"><a th:if="${tallyHistory.hasPrevious()}" th:href="@{/users/{id}(id=${profile.id},historyPage=${tallyHistory.number - 1})} + '#tally-history'">Neuere Änderungen</a><a th:if="${tallyHistory.hasNext()}" th:href="@{/users/{id}(id=${profile.id},historyPage=${tallyHistory.number + 1})} + '#tally-history'">Ältere Änderungen</a></nav></section>
 </main><footer class="site-footer"><span>ZFG · Geschichten aus unserem Kreis</span></footer>
 </div><script defer th:src="@{/js/profile.js}"></script></body></html>

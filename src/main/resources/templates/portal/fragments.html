@@ -31,6 +31,7 @@
         <a class="amt-tree-child" th:href="@{/amt/aaa}">└ AaA / Abwesenheit</a>
         <a class="amt-tree-child" th:href="@{/amt/aab}">└ AaB / Beurlaubung</a>
         <a class="amt-tree-child" th:href="@{/amt/eer}">└ EeR / Reisebericht</a>
+        <a class="amt-tree-child" th:href="@{/amt/bub}">└ BüB / Folgenlose Beschwerden</a>
         <strong>− Registratur</strong>
         <a class="amt-tree-child" th:href="@{/amt/mitglieder/{id}(id=${citizen.id})}">└ Meine Teilnehmerakte</a>
         <a class="amt-tree-child" th:href="@{/amt/akten}">└ Alle Anträge lesen</a>
@@ -40,7 +41,7 @@
     <div class="amt-sticky">WICHTIG!<br>Das Ausfüllen eines Formulars ersetzt nicht das Ausfüllen dieses Formulars.</div>
 </aside>
 
-<footer class="amt-footer" th:fragment="footer"><p>AGATA · Referat EDV und sonstige Zumutungen · Stand der Benutzerführung: April 2007</p><p>*Freizeitverwaltung des Freundeskreises. Keine echte Behörde. Alle Uhrzeiten: Europe/Berlin.</p><span class="amt-web-badge">HTML<br>VERWALTET</span> <span class="amt-web-badge">KEINE<br>ABKÜRZUNGEN</span> <span class="amt-web-badge">BESTÄTIGUNG<br>ERFORDERLICH</span></footer>
+<footer class="amt-footer" th:fragment="footer"><aside class="amt-atmosphere" th:with="mood=${@officeAtmosphere.current()}" aria-label="Unverbindliche Amtsunterhaltung"><strong>Dienstmeldung · reine Dekoration</strong><p th:text="${mood.message}"></p><span class="amt-rubber-stamp" th:text="${mood.seal}"></span><p>Wechselt stündlich. Kein Einfluss auf tatsächliche Bearbeitung, Entscheidungen oder Fristen.</p></aside><p>AGATA · Referat EDV und sonstige Zumutungen · Stand der Benutzerführung: April 2007</p><p>*Freizeitverwaltung des Freundeskreises. Keine echte Behörde. Alle Uhrzeiten: Europe/Berlin.</p><span class="amt-web-badge">HTML<br>VERWALTET</span> <span class="amt-web-badge">KEINE<br>ABKÜRZUNGEN</span> <span class="amt-web-badge">BESTÄTIGUNG<br>ERFORDERLICH</span></footer>
 
 <div th:fragment="applicationTable(records)" class="amt-table-scroll">
     <table class="amt-register"><thead><tr><th scope="col">Aktenzeichen</th><th scope="col">Antragstellende Person</th><th scope="col">Aktivität / Reise</th><th scope="col">Eingangsstempel</th><th scope="col">Bearbeitungsstand</th></tr></thead>

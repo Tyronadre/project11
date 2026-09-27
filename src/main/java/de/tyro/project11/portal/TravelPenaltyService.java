@@ -20,8 +20,10 @@ public class TravelPenaltyService {
     private final AttendanceRules attendanceRules;
     private final Clock clock;
     @PersistenceContext private EntityManager entityManager;
+    private final de.tyro.project11.tallies.TallyHistoryService history;
     public TravelPenaltyService(TravelApplicationRepository applications, TravelDayPenaltyRepository days, UserRepository users,
-                                AttendancePenaltyRepository eventPenalties, ActivityRepository activities, AttendanceRules attendanceRules, Clock clock) {
+                                AttendancePenaltyRepository eventPenalties, ActivityRepository activities, AttendanceRules attendanceRules, Clock clock, de.tyro.project11.tallies.TallyHistoryService history) {
+        this.history = history;
         this.applications = applications; this.days = days; this.users = users; this.eventPenalties = eventPenalties;
         this.activities = activities; this.attendanceRules = attendanceRules; this.clock = clock;
     }
@@ -31,7 +33,6 @@ public class TravelPenaltyService {
         if (user == null) return;
         entityManager.refresh(user, LockModeType.PESSIMISTIC_WRITE);
         var chargedDates = days.findByUserId(userId).stream().map(TravelDayPenalty::getVacationDate).collect(Collectors.toSet());
-        int added = 0;
         boolean invalidated = false;
         for (var leave : applications.findByApplicantIdAndKind(userId, TravelKind.LEAVE).stream()
                 .sorted(Comparator.comparing(TravelApplication::getId)).toList()) {
@@ -43,14 +44,16 @@ public class TravelPenaltyService {
             if (!holiday.isInvalidated() && timelyReport) continue; // Pending admin review preserves the receipt.
             holiday.invalidate(OffsetDateTime.now(clock));
             invalidated = true;
+            int added = 0;
             for (var date = holiday.getStartsOn(); !date.isAfter(holiday.getEndsOn()); date = date.plusDays(1)) {
                 if (chargedDates.add(date)) {
                     days.save(new TravelDayPenalty(userId, date, holiday.getId(), clock.instant()));
                     added = Math.addExact(added, 1);
                 }
             }
+            history.change(user, Math.addExact(user.getTallyCount(), added), "Automatische Fristenprüfung",
+                    "Fehlender, verspäteter oder abgelehnter Reisebericht: " + holiday.getTitle(), "TRAVEL", leave.getId());
         }
-        int removed = 0;
         if (invalidated) {
             // Do not lock events here: event settlement locks event -> users. The user
             // lock serializes penalty-row changes without introducing a reverse lock order.
@@ -58,10 +61,10 @@ public class TravelPenaltyService {
                 var activity = activities.findById(penalty.getActivityId()).orElse(null);
                 if (activity != null && attendanceRules.holidayMembers(activity).contains(userId)) {
                     penalty.setApplied(false, clock.instant());
-                    removed++;
+                    history.change(user, Math.max(0, user.getTallyCount() - 1), "Automatische Fristenprüfung",
+                            "Event-Strich durch Urlaubsregelung ersetzt: " + activity.getTitle(), "EVENT", activity.getId());
                 }
             }
         }
-        user.setTallyCount(Math.max(0, Math.addExact(user.getTallyCount(), added) - removed));
     }
 }

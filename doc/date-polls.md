@@ -29,3 +29,13 @@ Event ausgewählt werden. Sind alle Vorschläge vergangen, sind keine weiteren
 Stimmen möglich; die Übersicht kennzeichnet die Abstimmung entsprechend.
 Zeiträume über einen Sommer-/Winterzeitwechsel werden bei der Erstellung
 abgewiesen, damit die angegebene Dauer der tatsächlichen Eventdauer entspricht.
+
+## Ohne Ergebnis schließen
+
+Ersteller und Admins können eine offene Abstimmung endgültig ohne Event schließen,
+auch wenn sämtliche Vorschläge vergangen sind. Die Begründung ist freiwillig und
+auf 500 Zeichen begrenzt. Stimmen bleiben als Ergebnis lesbar; weitere Stimmen
+und das Erstellen eines Events aus dieser Abstimmung sind danach gesperrt.
+Ein erneuter Schließversuch ist wirkungslos. Abschluss mit Event und Abschluss
+ohne Event sperren dieselbe Datenbankzeile, sodass bei gleichzeitigen Anfragen
+nur einer der beiden Abschlüsse wirksam wird.

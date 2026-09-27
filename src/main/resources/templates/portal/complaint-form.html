@@ -1,0 +1,7 @@
+<!DOCTYPE html><html lang="de" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{portal/fragments :: head('Beschwerde einreichen')}"></head><body class="amt-body"><div class="amt-wrapper"><header th:replace="~{portal/fragments :: header}"></header><div class="amt-shell"><aside th:replace="~{portal/fragments :: sidebar}"></aside><main class="amt-main"><a th:href="@{/amt/bub}">← Zum Beschwerdewesen</a><h2>Amtliche Unzufriedenheitsanzeige</h2><p>Dieser Vorgang dient ausschließlich der Unterhaltung und ist für angemeldete Mitglieder lesbar.</p>
+<form class="amt-box" th:action="@{/amt/bub}" th:object="${complaintForm}" method="post"><div class="amt-box-content">
+<ul role="alert" th:if="${#fields.hasAnyErrors()}"><li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li></ul>
+<input type="hidden" th:field="*{parentId}"><p th:if="${complaintForm.parentId != null}">Diese Beschwerde bezieht sich auf deine zuvor gewählte Beschwerde.</p>
+<div class="field"><label for="subject">Gegenstand der Unzufriedenheit</label><input id="subject" th:field="*{subject}" maxlength="120" required></div>
+<div class="field"><label for="text">Ausführungen zur Lage der Geduld</label><textarea id="text" th:field="*{text}" maxlength="2000" rows="7" required></textarea></div>
+<button class="amt-button amt-primary" type="submit">Beschwerde folgenlos einreichen</button></div></form></main></div><footer th:replace="~{portal/fragments :: footer}"></footer></div></body></html>

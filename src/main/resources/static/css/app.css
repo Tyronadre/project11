@@ -561,3 +561,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid #91ae72; outline-offs
 .rsvp-groups li { font-size: 13px; padding: 7px 0; overflow-wrap: anywhere; }
 .rsvp-groups small { display: block; color: var(--muted); line-height: 1.7; margin-top: 4px; }
 @media (max-width: 500px) { .rsvp-groups { grid-template-columns: 1fr; } }
+
+#afea { scroll-margin-top: 24px; }
+#afea p { line-height: 1.7; }
+#afea select { max-width: 100%; width: 100%; padding: 12px; font: inherit; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--ink); }

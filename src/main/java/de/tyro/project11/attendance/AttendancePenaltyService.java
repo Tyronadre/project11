@@ -20,8 +20,10 @@ public class AttendancePenaltyService {
     private final AttendanceRules rules;
     private final Clock clock;
     @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager entityManager;
+    private final de.tyro.project11.tallies.TallyHistoryService history;
     public AttendancePenaltyService(ActivityRepository activities, AttendanceRepository sheets, AttendancePenaltyRepository penalties,
-                                    AbsenceApplicationRepository applications, UserRepository users, AttendanceRules rules, Clock clock) {
+                                    AbsenceApplicationRepository applications, UserRepository users, AttendanceRules rules, Clock clock, de.tyro.project11.tallies.TallyHistoryService history) {
+        this.history = history;
         this.activities = activities; this.sheets = sheets; this.penalties = penalties;
         this.applications = applications; this.users = users; this.rules = rules; this.clock = clock;
     }
@@ -34,7 +36,7 @@ public class AttendancePenaltyService {
             for (var penalty : applied) {
                 var user = users.findLockedById(penalty.getUserId()).orElseThrow();
                 entityManager.refresh(user, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
-                user.setTallyCount(Math.max(0, user.getTallyCount() - 1));
+                history.change(user, Math.max(0, user.getTallyCount() - 1), "Automatik", "Event abgesagt: " + activity.getTitle(), "EVENT", activityId);
                 penalty.setApplied(false, clock.instant());
             }
             return;
@@ -65,7 +67,8 @@ public class AttendancePenaltyService {
             if (penalty == null && !shouldApply) continue;
             if (penalty != null && penalty.isApplied() == shouldApply) continue;
             var user = member;
-            user.setTallyCount(shouldApply ? Math.addExact(user.getTallyCount(), 1) : Math.max(0, user.getTallyCount() - 1));
+            history.change(user, shouldApply ? Math.addExact(user.getTallyCount(), 1) : Math.max(0, user.getTallyCount() - 1),
+                    "Automatik", (shouldApply ? "Unentschuldigte Abwesenheit: " : "Event-Strich zurückgenommen: ") + activity.getTitle(), "EVENT", activityId);
             if (penalty == null) penalty = new AttendancePenalty(activityId, member.getId());
             penalty.setApplied(shouldApply, clock.instant());
             penalties.save(penalty);

@@ -158,4 +158,39 @@ class PollIntegrationTests {
                 .andExpect(content().string(containsString("lang=\"de\"")))
                 .andExpect(content().string(containsString("darf nicht leer sein")));
     }
+    @Test void closeWithoutEventPreservesVotesAndBlocksFurtherChanges() throws Exception {
+        long id = polls.create(form(), owner);
+        polls.vote(id, Set.of(0), member);
+        long before = activities.count();
+        mvc.perform(post("/polls/" + id + "/close").with(user(owner))).andExpect(status().isForbidden());
+        mvc.perform(post("/polls/" + id + "/close").with(user(member)).with(csrf())).andExpect(status().isForbidden());
+        mvc.perform(post("/polls/" + id + "/close").with(user(owner)).with(csrf()).param("reason", "Kein Termin passt"))
+                .andExpect(status().is3xxRedirection());
+        polls.close(id, "Wiederholung", owner);
+        var view = polls.load(id, member);
+        assertThat(view.closedWithoutEvent()).isTrue();
+        assertThat(view.votingOpen()).isFalse();
+        assertThat(view.closeReason()).isEqualTo("Kein Termin passt");
+        assertThat(view.slots().getFirst().votes()).isEqualTo(1);
+        assertThat(activities.count()).isEqualTo(before);
+        mvc.perform(get("/polls/" + id).with(user(member))).andExpect(status().isOk())
+                .andExpect(content().string(containsString("Ohne Ergebnis geschlossen")));
+        mvc.perform(post("/polls/" + id + "/finish").with(user(owner)).with(csrf()).param("slot", "0")).andExpect(status().isConflict());
+        mvc.perform(post("/polls/" + id + "/vote").with(user(member)).with(csrf()).param("slots", "1")).andExpect(status().isConflict());
+    }
+    @Test void concurrentCloseAndFinishHaveOnlyOneOutcome() throws Exception {
+        long id = polls.create(form(), owner);
+        long before = activities.count();
+        var start = new java.util.concurrent.CountDownLatch(1);
+        try (var executor = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+            var close = executor.submit(() -> { start.await(); try { polls.close(id, "Kein Treffen", owner); return true; }
+                catch (org.springframework.web.server.ResponseStatusException e) { assertThat(e.getStatusCode().value()).isEqualTo(409); return false; } });
+            var finish = executor.submit(() -> { start.await(); try { polls.finish(id, 0, owner); return true; }
+                catch (org.springframework.web.server.ResponseStatusException e) { assertThat(e.getStatusCode().value()).isEqualTo(409); return false; } });
+            start.countDown();
+            assertThat(close.get(10, java.util.concurrent.TimeUnit.SECONDS)).isNotEqualTo(finish.get(10, java.util.concurrent.TimeUnit.SECONDS));
+        }
+        var view = polls.load(id, owner);
+        assertThat(activities.count() - before).isEqualTo(view.closedWithoutEvent() ? 0 : 1);
+    }
 }

@@ -158,3 +158,13 @@
 .profile-story[open] .story-collapse { display: inline; }
 .profile-story[open] > summary { margin-bottom: 24px; }
 @media (max-width: 480px) { .profile-story > summary { padding-right: 0; } .profile-story-heading .story-toggle { position: static; margin-top: 12px; } }
+
+/* Strichverlauf und automatische Zuordnung zum Event. */
+.profile-tally-badge { margin: 14px 0; font-size: 13px; color: #77572e; }
+.profile-tally-badge a { color: inherit; text-underline-offset: 3px; }
+#tally-history { margin-top: 32px; scroll-margin-top: 24px; }
+.profile-tally-history { list-style: none; padding: 0; margin: 24px 0 0; }
+.profile-tally-history li { padding: 18px 0; border-top: 1px solid var(--line); line-height: 1.6; }
+.profile-tally-history p { margin: 6px 0; }
+.profile-tally-history small { color: var(--muted); }
+.profile-tally-history a { font-size: 13px; text-underline-offset: 3px; }

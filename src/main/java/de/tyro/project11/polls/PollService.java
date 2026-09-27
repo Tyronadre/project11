@@ -25,7 +25,7 @@ public class PollService {
     }
     public record Slot(int index, String label, int votes, boolean selected, boolean leading, boolean expired, boolean chosen) {}
     public record View(long id, String title, String location, String description, String owner,
-                       int duration, int responses, int members, boolean answered, boolean editor, boolean votingOpen, int unavailable, Long eventId, List<Slot> slots) {}
+                       int duration, int responses, int members, boolean answered, boolean editor, boolean votingOpen, int unavailable, Long eventId, List<Slot> slots, boolean closedWithoutEvent, String closeReason) {}
     @Transactional(readOnly = true)
     public List<View> list(String email) {
         var viewer = user(email);
@@ -58,7 +58,7 @@ public class PollService {
     public void vote(long id, Set<Integer> selected, String email) {
         var member = user(email);
         var poll = locked(id);
-        if (poll.getEventId() != null) throw new ResponseStatusException(HttpStatus.CONFLICT, "Die Abstimmung ist abgeschlossen.");
+        if (poll.getEventId() != null || poll.isClosedWithoutEvent()) throw new ResponseStatusException(HttpStatus.CONFLICT, "Die Abstimmung ist abgeschlossen.");
         if (poll.getSlots().stream().noneMatch(this::future))
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Alle vorgeschlagenen Termine sind bereits vergangen.");
         if (selected.stream().anyMatch(i -> i == null || i < 0 || i >= poll.getSlots().size()))
@@ -71,6 +71,7 @@ public class PollService {
         var poll = locked(id);
         if (!member.isAdmin() && !poll.getOwner().getId().equals(member.getId())) throw new AccessDeniedException("Nur Ersteller und Admins können den Termin festlegen.");
         if (poll.getEventId() != null) return poll.getEventId();
+        if (poll.isClosedWithoutEvent()) throw new ResponseStatusException(HttpStatus.CONFLICT, "Diese Abstimmung wurde ohne Ergebnis geschlossen.");
         if (slot < 0 || slot >= poll.getSlots().size()) throw invalid("Ungültiger Terminvorschlag.");
         var start = poll.getSlots().get(slot);
         if (!start.atZone(CalendarTime.BERLIN).toInstant().isAfter(clock.instant())) throw invalid("Dieser Termin liegt bereits in der Vergangenheit.");
@@ -82,6 +83,17 @@ public class PollService {
         long event = events.create(form, poll.getOwner().getEmail());
         poll.finish(event, slot);
         return event;
+    }
+    @Transactional
+    public void close(long id, String reason, String email) {
+        var member = user(email);
+        var poll = locked(id);
+        if (!member.isAdmin() && !poll.getOwner().getId().equals(member.getId())) throw new AccessDeniedException("Nur Ersteller und Admins dürfen Abstimmungen schließen.");
+        if (poll.getEventId() != null) throw new ResponseStatusException(HttpStatus.CONFLICT, "Aus dieser Abstimmung wurde bereits ein Event erstellt.");
+        if (poll.isClosedWithoutEvent()) return;
+        reason = reason == null ? "" : reason.strip();
+        if (reason.length() > 500) throw invalid("Die Begründung darf höchstens 500 Zeichen enthalten.");
+        poll.close(clock.instant(), member.getId(), reason);
     }
     private View view(DatePoll poll, AppUser viewer, int members) {
         var own = choices(poll.getBallots().get(viewer.getId()));
@@ -95,8 +107,8 @@ public class PollService {
         return new View(poll.getId(), poll.getTitle(), poll.getLocation(), poll.getDescription(), poll.getOwner().getDisplayName(),
                 poll.getDurationMinutes(), poll.getBallots().size(), members, poll.getBallots().containsKey(viewer.getId()),
                 viewer.isAdmin() || viewer.getId().equals(poll.getOwner().getId()),
-                poll.getEventId() == null && poll.getSlots().stream().anyMatch(this::future),
-                (int) poll.getBallots().values().stream().filter(String::isBlank).count(), poll.getEventId(), slots);
+                poll.getEventId() == null && !poll.isClosedWithoutEvent() && poll.getSlots().stream().anyMatch(this::future),
+                (int) poll.getBallots().values().stream().filter(String::isBlank).count(), poll.getEventId(), slots, poll.isClosedWithoutEvent(), poll.getCloseReason());
     }
     private boolean future(LocalDateTime slot) { return slot.atZone(CalendarTime.BERLIN).toInstant().isAfter(clock.instant()); }
     private Set<Integer> choices(String value) {

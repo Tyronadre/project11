@@ -2,14 +2,15 @@
 <html lang="de" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{polls/fragments :: head}"></head>
 <body class="dashboard-body"><div class="page dashboard-page"><header th:replace="~{fragments/navigation :: header}"></header>
 <main class="account-layout"><a class="event-back" th:href="@{/polls}">← Alle Abstimmungen</a>
-<div class="calendar-intro"><div><p class="eyebrow" th:text="${poll.eventId == null ? 'Gemeinsam einen Termin finden' : 'Abstimmung abgeschlossen'}"></p><h1 th:text="${poll.title}"></h1>
+<div class="calendar-intro"><div><p class="eyebrow" th:text="${poll.eventId == null and !poll.closedWithoutEvent ? 'Gemeinsam einen Termin finden' : 'Abstimmung abgeschlossen'}"></p><h1 th:text="${poll.title}"></h1>
 <p th:text="|Von ${poll.owner} · ${poll.duration} Minuten|"></p><p th:if="${!poll.location.isBlank()}" th:text="${poll.location}"></p><p class="poll-description" th:text="${poll.description}"></p></div></div>
 <p class="notice notice-success" role="status" th:if="${param.saved != null}">Deine Auswahl wurde gespeichert.</p>
 <a class="button" th:if="${poll.eventId != null}" th:href="@{/events/{id}(id=${poll.eventId})}">Geplantes Event öffnen →</a>
+<div class="notice" th:if="${poll.closedWithoutEvent}"><strong>Ohne Ergebnis geschlossen.</strong><p th:text="${poll.closeReason}"></p><p>Es wurde kein Event erstellt. Die bisherigen Stimmen bleiben sichtbar.</p></div>
 <section class="form-card poll-ballot">
-<h2 th:text="${poll.eventId == null ? 'Welche Termine passen dir?' : 'Abstimmungsergebnis'}"></h2><p class="card-copy" th:text="|${poll.responses} von ${poll.members} Mitgliedern haben abgestimmt.|"></p>
+<h2 th:text="${poll.eventId == null and !poll.closedWithoutEvent ? 'Welche Termine passen dir?' : 'Abstimmungsergebnis'}"></h2><p class="card-copy" th:text="|${poll.responses} von ${poll.members} Mitgliedern haben abgestimmt.|"></p>
 <p class="card-copy" th:text="|${poll.unavailable} Mitgliedern passt keiner der Termine · ${poll.members - poll.responses} Antworten stehen aus.|"></p>
-<p class="notice" th:if="${poll.eventId == null and !poll.votingOpen}">Alle Vorschläge sind vergangen. Bitte starte eine neue Abstimmung.</p>
+<p class="notice" th:if="${poll.eventId == null and !poll.closedWithoutEvent and !poll.votingOpen}">Alle Vorschläge sind vergangen. Bitte starte eine neue Abstimmung.</p>
 <p th:if="${poll.votingOpen}" class="card-copy">Markiere alle passenden Termine. Keine Auswahl bedeutet: Keiner passt. Du kannst deine Stimme bis zum Abschluss ändern.</p>
 <form th:action="@{/polls/{id}/vote(id=${poll.id})}" method="post">
 <label class="poll-slot" th:each="slot : ${poll.slots}" th:classappend="${slot.leading ? 'poll-leading' : ''}">
@@ -22,4 +23,7 @@
 <form th:action="@{/polls/{id}/finish(id=${poll.id})}" method="post">
 <label for="chosen-slot">Endgültiger Termin</label><select id="chosen-slot" name="slot" required><option value="">Bitte auswählen</option><option th:each="slot : ${poll.slots}" th:value="${slot.index}" th:disabled="${slot.expired}" th:text="|${slot.label} · ${slot.votes} Zusagen|"></option></select>
 <button class="button" type="submit">Abschließen &amp; Event erstellen →</button></form></section>
+<section class="form-card poll-ballot" th:if="${poll.editor and poll.eventId == null and !poll.closedWithoutEvent}">
+<h2>Ohne Ergebnis schließen</h2><p>Wenn kein Termin passt oder das Treffen ausfällt, kannst du die Abstimmung endgültig schließen. Die Stimmen bleiben erhalten.</p>
+<form th:action="@{/polls/{id}/close(id=${poll.id})}" method="post"><label for="close-reason">Begründung (optional)</label><textarea id="close-reason" name="reason" maxlength="500" rows="3"></textarea><button class="calendar-control" type="submit">Endgültig ohne Event schließen</button></form></section>
 </main></div></body></html>

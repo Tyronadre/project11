@@ -20,6 +20,12 @@ public class DatePoll {
     // One ballot per member. Empty string explicitly means "none of these dates".
     @ElementCollection @MapKeyColumn(name = "member_id") @Column(name = "choices", length = 40)
     private Map<Long, String> ballots = new HashMap<>();
+    private java.time.Instant closedAt;
+    @Column(length = 500) private String closeReason;
+    private Long closedBy;
+    public boolean isClosedWithoutEvent() { return closedAt != null; }
+    public String getCloseReason() { return closeReason == null ? "" : closeReason; }
+    public void close(java.time.Instant at, long userId, String reason) { closedAt = at; closedBy = userId; closeReason = reason; }
     private Long eventId;
     private Integer chosenSlot;
     protected DatePoll() {}

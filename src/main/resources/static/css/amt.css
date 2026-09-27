@@ -296,3 +296,8 @@
 .amt-case-history p { margin: 5px 0; }
 .amt-case-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 .amt-case-decision { border-top: 2px double #888; padding-top: 12px; }
+
+.amt-atmosphere { padding: 14px; border: 1px dashed #777; margin-bottom: 16px; }
+.amt-atmosphere .amt-rubber-stamp { display: inline-block; max-width: 100%; overflow-wrap: anywhere; }
+.amt-main .field { display: grid; gap: 6px; margin: 16px 0; }
+.amt-main .field input, .amt-main .field textarea { width: 100%; min-width: 0; box-sizing: border-box; padding: 8px; font: inherit; }

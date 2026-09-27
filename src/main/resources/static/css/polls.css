@@ -12,6 +12,7 @@
 .poll-count { margin-left: auto; white-space: nowrap; font-size: 12px; color: var(--green); }
 .poll-ballot select { width: 100%; padding: 14px; border: 1px solid var(--line); border-radius: 8px; font: inherit; color: var(--ink); background: white; margin-bottom: 18px; }
 .poll-ballot .button { margin-top: 20px; }
+.poll-ballot textarea { display: block; width: 100%; box-sizing: border-box; padding: 14px; margin: 8px 0 18px; border: 1px solid var(--line); border-radius: 8px; font: inherit; color: var(--ink); background: white; resize: vertical; }
 @media(max-width: 760px) { .poll-grid { grid-template-columns: 1fr; } .poll-slot { flex-wrap: wrap; gap: 10px; padding: 12px; } .poll-count { margin-left: 32px; } }
 
 .poll-slot .poll-chosen { font-weight: 700; color: var(--ink); }

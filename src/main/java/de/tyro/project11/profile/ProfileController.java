@@ -13,7 +13,8 @@ import java.security.Principal;
 @Controller
 public class ProfileController {
     private final ProfileService profiles;
-    public ProfileController(ProfileService profiles) { this.profiles = profiles; }
+    private final de.tyro.project11.tallies.TallyHistoryService history;
+    public ProfileController(ProfileService profiles, de.tyro.project11.tallies.TallyHistoryService history) { this.profiles = profiles; this.history = history; }
     @InitBinder("profileForm")
     void profileBinder(WebDataBinder binder) { binder.setAllowedFields("color", "birthday", "paypal", "iban", "answers[*]"); }
     @InitBinder("blogForm")
@@ -28,8 +29,10 @@ public class ProfileController {
     @GetMapping("/users/me")
     String me(Principal principal) { return "redirect:/users/" + profiles.myId(principal.getName()); }
     @GetMapping("/users/{id}")
-    String show(@PathVariable long id, Principal principal, Model model) {
+    String show(@PathVariable long id, @RequestParam(defaultValue = "0") int historyPage, Principal principal, Model model) {
         model.addAttribute("profile", profiles.load(id, principal.getName()));
+        model.addAttribute("tallyHistory", history.page(id, historyPage));
+        model.addAttribute("eventMarks", history.eventMarks(id));
         return "profile/show";
     }
     @GetMapping("/users/{id}/edit")

@@ -15,6 +15,7 @@ import java.time.LocalDate;
 
 @Controller
 public class EventController {
+    private final de.tyro.project11.attendance.AfeaService afea;
     private final EventService events;
     private final Clock clock;
 
@@ -23,13 +24,15 @@ public class EventController {
     private final de.tyro.project11.rsvp.RsvpService rsvp;
     private final de.tyro.project11.attendance.AttendanceMailSettings mail;
 
-    public EventController(EventService events, Clock clock, EventDetailsService details, CostService costs, de.tyro.project11.attendance.AttendanceMailSettings mail, de.tyro.project11.rsvp.RsvpService rsvp) {
+    public EventController(EventService events, Clock clock, EventDetailsService details, CostService costs, de.tyro.project11.attendance.AttendanceMailSettings mail, de.tyro.project11.rsvp.RsvpService rsvp, de.tyro.project11.attendance.AfeaService afea) {
+        this.afea = afea;
         this.events = events; this.clock = clock; this.details = details; this.costs = costs; this.mail = mail; this.rsvp = rsvp;
     }
 
     @GetMapping("/events/{id}")
     public String details(@PathVariable long id, Principal principal, Model model) {
         model.addAttribute("event", details.load(id, principal.getName()));
+        model.addAttribute("afea", afea.load(id, principal.getName()));
         model.addAttribute("rsvp", rsvp.load(id, principal.getName()));
         model.addAttribute("eventCosts", costs.event(id, principal.getName()));
         return "event-details";

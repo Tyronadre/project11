@@ -47,6 +47,10 @@ public class PollController {
     String vote(@PathVariable long id, @RequestParam(required = false) Set<Integer> slots, Principal principal) {
         polls.vote(id, slots == null ? Set.of() : slots, principal.getName()); return "redirect:/polls/" + id + "?saved";
     }
+    @PostMapping("/polls/{id}/close")
+    String close(@PathVariable long id, @RequestParam(defaultValue = "") String reason, Principal principal) {
+        polls.close(id, reason, principal.getName()); return "redirect:/polls/" + id;
+    }
     @PostMapping("/polls/{id}/finish")
     String finish(@PathVariable long id, @RequestParam int slot, Principal principal) {
         return "redirect:/events/" + polls.finish(id, slot, principal.getName());

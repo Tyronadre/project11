@@ -60,7 +60,14 @@
             </div>
         </section>
         <section th:replace="~{costs/fragments :: summary(${eventCosts})}"></section>
+    <section id="afea" class="event-attendance-card" th:if="${afea.available or afea.submitted}">
+<p class="section-kicker">Freiwilliges Anwesenheitswesen</p><h2>Antrag auf Feststellung der eigenen Anwesenheit · AFeA</h2>
+<p>Du warst dabei und möchtest das amtlich unverbindlich mitteilen? Dein AFeA dient nur als Vorauswahl für die erste Anwesenheitserfassung. Auch ohne Antrag kannst du ganz normal als anwesend erfasst werden. Bestätigung, Striche und Kosten ändern sich dadurch nicht.</p>
+<p class="notice notice-success" role="status" th:if="${afeaMessage != null}" th:text="${afeaMessage}"></p>
+<p th:if="${afea.alreadyRecorded}">Die Liste wurde bereits gespeichert. Dein Hinweis bleibt sichtbar, ändert aber keine gesetzten Häkchen. Bei Abweichungen wende dich an den Eventersteller.</p>
+<div th:if="${afea.submitted}"><strong th:text="${afea.reference}"></strong><p th:text="${afea.evidence}"></p><form th:action="@{/events/{id}/afea/withdraw(id=${event.id})}" method="post"><button class="calendar-control" type="submit">AFeA zurückziehen</button></form></div>
+<form th:if="${afea.available and !afea.submitted}" th:action="@{/events/{id}/afea(id=${event.id})}" method="post"><div class="field"><label for="afea-evidence">Beweismittel von zweifelhafter Tragweite</label><select id="afea-evidence" name="evidence" required><option th:each="choice, iter : ${afea.choices}" th:value="${iter.index}" th:text="${choice}"></option></select></div><button class="calendar-control" type="submit">Anwesenheit unverbindlich zu Protokoll geben</button></form></section>
         <a class="event-cancel" th:href="@{/welcome}">Zurück zur Übersicht</a>
-    </main>
+</main>
     <footer class="site-footer dashboard-footer"><span>ZFG · gemeinsam ist es schöner</span><span>Gute Pläne. Gute Gesellschaft.</span></footer>
 </div></body></html>

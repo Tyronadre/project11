@@ -22,6 +22,7 @@ public class AttendanceService {
     private final AttendanceRepository sheets;
     private final UserRepository users;
     private final AbsenceApplicationRepository absences;
+    private final AfeaRepository declarations;
     private final Clock clock;
     private final AttendanceMailQueue mailQueue;
     private final AttendanceEmailRepository emails;
@@ -32,12 +33,13 @@ public class AttendanceService {
     public AttendanceService(ActivityRepository activities, AttendanceRepository sheets, UserRepository users,
                              AbsenceApplicationRepository absences, Clock clock, AttendanceMailQueue mailQueue,
                              AttendanceEmailRepository emails, AttendanceRules rules, AttendancePenaltyService penalties,
-                             AttendancePenaltyRepository penaltyRows) {
+                             AttendancePenaltyRepository penaltyRows, AfeaRepository declarations) {
+        this.declarations = declarations;
         this.activities = activities; this.sheets = sheets; this.users = users; this.absences = absences;
         this.clock = clock; this.mailQueue = mailQueue; this.emails = emails; this.rules = rules;
         this.penalties = penalties; this.penaltyRows = penaltyRows;
     }
-    public record Member(long id, String name, String email, boolean attended, String excuse, boolean notifyByEmail, String notification) {}
+    public record Member(long id, String name, String email, boolean attended, String excuse, boolean notifyByEmail, String notification, String selfReport) {}
     public record Page(long id, String title, String ended, String month, String deadline, boolean expired,
                        long version, List<Member> members, String savedAt, String reviewedBy, boolean canConfirm, boolean confirmed) {
         public List<Long> recipientIds() { return members.stream().filter(Member::notifyByEmail).map(Member::id).toList(); }
@@ -54,7 +56,8 @@ public class AttendanceService {
         requireEnded(activity);
         var sheet = sheets.findById(id).orElse(null);
         var roster = sheet == null ? eligibleMembers(activity) : sheet.getRoster();
-        var attended = sheet == null ? Set.<Long>of() : ids(sheet.getAttendees());
+        var suggestions = declarations.findByActivityId(id).stream().collect(Collectors.toMap(AfeaDeclaration::getUserId, AfeaDeclaration::getEvidence));
+        var attended = sheet == null ? suggestions.keySet() : ids(sheet.getAttendees());
         var excuses = excuses(activity);
         var sent = emails.findByActivityId(id).stream().filter(e -> e.getStatus() == AttendanceEmail.Status.SENT)
                 .map(AttendanceEmail::getUserId).collect(Collectors.toSet());
@@ -67,7 +70,7 @@ public class AttendanceService {
                             : sent.contains(member.getId()) ? "Bereits benachrichtigt · keine erneute E-Mail"
                             : expired ? "Frist abgelaufen · keine Erinnerung" : "Erhält eine AaA-Erinnerung";
                     boolean notify = !attended.contains(member.getId()) && excuse.isEmpty() && !sent.contains(member.getId()) && !expired;
-                    return new Member(member.getId(), member.getDisplayName(), member.getEmail(), attended.contains(member.getId()), excuse, notify, notification);
+                    return new Member(member.getId(), member.getDisplayName(), member.getEmail(), attended.contains(member.getId()), excuse, notify, notification, suggestions.getOrDefault(member.getId(), ""));
                 }).toList();
         return new Page(id, activity.getTitle(), stamp(activity.getEndsAt()), month(activity), AttendanceRules.deadline(activity).format(STAMP),
                 expired, sheet == null ? -1 : sheet.getVersion(), members,

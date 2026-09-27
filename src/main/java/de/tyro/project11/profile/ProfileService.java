@@ -27,12 +27,14 @@ public class ProfileService {
     private final TravelApplicationRepository travel;
     private final AbsenceApplicationRepository absences;
     private final TravelPhotoRepository photos;
+    private final de.tyro.project11.attendance.AttendancePenaltyRepository penaltyRows;
     private final Clock clock;
     private final Validator validator;
 
     public ProfileService(UserRepository users, UserProfileRepository profiles, BlogEntryRepository blogs,
                           HolidayRepository holidays, ActivityRepository activities, AttendanceRepository attendance,
-                          TravelApplicationRepository travel, Clock clock, Validator validator, AbsenceApplicationRepository absences, TravelPhotoRepository photos) {
+                          TravelApplicationRepository travel, Clock clock, Validator validator, AbsenceApplicationRepository absences, TravelPhotoRepository photos, de.tyro.project11.attendance.AttendancePenaltyRepository penaltyRows) {
+        this.penaltyRows = penaltyRows;
         this.users = users; this.profiles = profiles; this.blogs = blogs; this.holidays = holidays;
         this.activities = activities; this.attendance = attendance; this.travel = travel;
         this.clock = clock; this.validator = validator; this.absences = absences; this.photos = photos;
@@ -75,9 +77,10 @@ public class ProfileService {
         var eventItems = new LinkedHashMap<Long, Activity>();
         activities.findByEndsAtLessThanEqualOrderByEndsAtDescIdDesc(OffsetDateTime.now(clock)).forEach(e -> eventItems.put(e.getId(), e));
         filedAbsences.values().forEach(a -> eventItems.put(a.getActivity().getId(), a.getActivity()));
+        var markedEvents = penaltyRows.findByUserId(id).stream().map(de.tyro.project11.attendance.AttendancePenalty::getActivityId).collect(Collectors.toSet());
         for (var event : eventItems.values()) {
             var absence = filedAbsences.get(event.getId());
-            if (event.isCancelled() && absence == null) continue;
+            if (event.isCancelled() && absence == null && !markedEvents.contains(event.getId())) continue;
             var sheet = sheets.get(event.getId());
             String status;
             if (event.isCancelled()) status = "Event abgesagt";

@@ -5,6 +5,8 @@ The examples are local and self-contained; reference links are optional reading 
 
 ## Find what you need
 
+- **Strichverlauf, freiwilliger AFeA und folgenlose Beschwerden:** [Optionale Amtsverfahren](optional-office.md).
+
 - **Find a date together and create an event:** [Terminabstimmungen](date-polls.md).
 
 - **Change login details or configure password recovery:** [Kontoeinstellungen und Reset-Mails](account-settings.md).

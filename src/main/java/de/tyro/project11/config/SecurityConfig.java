@@ -35,16 +35,18 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/register", "/forgot-password", "/reset-password").permitAll()
                 .requestMatchers(HttpMethod.GET, "/account").authenticated()
                 .requestMatchers(HttpMethod.GET, "/polls", "/polls/new", "/polls/*").authenticated()
-                .requestMatchers(HttpMethod.POST, "/polls", "/polls/*/vote", "/polls/*/finish").authenticated()
+                .requestMatchers(HttpMethod.POST, "/polls", "/polls/*/vote", "/polls/*/finish", "/polls/*/close").authenticated()
                 .requestMatchers(HttpMethod.POST, "/welcome/decisions/*/*/read").authenticated()
                 .requestMatchers(HttpMethod.POST, "/account/name", "/account/email", "/account/password").authenticated()
                 .requestMatchers(HttpMethod.GET, "/welcome", "/calendar", "/js/calendar.js", "/events/new", "/events/*/edit", "/events/*", "/events/*/attendance").authenticated()
                 .requestMatchers(HttpMethod.GET, "/admin/aaa", "/admin/aaa/*", "/admin/travel", "/admin/travel/*").authenticated()
                 .requestMatchers(HttpMethod.POST, "/admin/aaa/*", "/admin/travel/*", "/events/*/attendance/confirm").authenticated()
-                .requestMatchers(HttpMethod.POST, "/events", "/events/*/edit", "/events/*/cancel", "/events/*/rsvp", "/events/*/attendance").authenticated()
+                .requestMatchers(HttpMethod.POST, "/events", "/events/*/edit", "/events/*/cancel", "/events/*/rsvp", "/events/*/afea", "/events/*/afea/withdraw", "/events/*/attendance").authenticated()
                 .requestMatchers(HttpMethod.GET, "/costs", "/costs/new", "/events/*/costs", "/events/*/costs/new", "/events/*/costs/*/edit").authenticated()
                 .requestMatchers(HttpMethod.POST, "/events/*/costs", "/events/*/costs/*", "/events/*/costs/*/reopen",
                         "/events/*/costs/*/shares/*/paid", "/events/*/costs/*/shares/*/unpaid").authenticated()
+                .requestMatchers(HttpMethod.GET, "/amt/bub", "/amt/bub/neu", "/amt/bub/*").authenticated()
+                .requestMatchers(HttpMethod.POST, "/amt/bub", "/amt/bub/*/close", "/amt/bub/*/rate").authenticated()
                 .requestMatchers(HttpMethod.GET, "/amt", "/amt/", "/amt/akten", "/amt/mitglieder/*", "/amt/antraege/*",
                         "/amt/antraege/*/bescheid", "/amt/reisen/*/bescheid", "/js/amt-print.js",
                         "/amt/aaa", "/amt/aaa/pruefung", "/amt/aaa/freigabe", "/js/amt.js", "/js/amt-steps.js",
