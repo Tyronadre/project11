@@ -22,7 +22,9 @@ separate database do not need to be installed on the Pi host.
 
 ## 1. Check the connection before setting up mail
 
-These commands assume **Raspberry Pi OS Lite 64-bit, Debian Bookworm or Trixie**.
+These commands support **Ubuntu 22.04, 24.04, or 26.04 on ARM64** on the Pi.
+Keep your Ubuntu installation; the installer detects it and uses Docker's Ubuntu
+repository. It also supports 64-bit Raspberry Pi OS based on Debian Bookworm or Trixie.
 A Pi 4 or 5 with **4 GB RAM or more** is a sensible starting point for building
 and running this app; measure resource use on your device. Allow several GB of
 free disk space for images, builds, and photo uploads. An SSD is preferable for
@@ -52,6 +54,7 @@ On the Pi:
 ```bash
 uname -m
 dpkg --print-architecture
+cat /etc/os-release
 sudo apt-get update
 sudo apt-get install -y ca-certificates curl openssl dnsutils netcat-openbsd
 mail_test_host="$(dig +short MX gmail.com | sort -n | head -n 1 | awk '{print $2}')"
@@ -87,8 +90,9 @@ tar -xzf ~/project11-deploy.tar.gz
 bash deploy/install-docker.sh
 ```
 
-The installer uses [Docker's Debian repository](https://docs.docker.com/engine/install/debian/),
-which Docker recommends for [64-bit Raspberry Pi OS](https://docs.docker.com/engine/install/raspberry-pi-os/).
+On Ubuntu the installer uses [Docker's Ubuntu repository](https://docs.docker.com/engine/install/ubuntu/)
+with your Ubuntu release codename. On Debian-based Raspberry Pi OS it uses
+[Docker's Debian repository](https://docs.docker.com/engine/install/debian/).
 It targets a fresh OS and keeps an existing Docker installation. If conflicting
 distribution Docker packages are already installed, follow Docker's migration
 instructions rather than removing an installation with existing workloads.
