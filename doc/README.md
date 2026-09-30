@@ -31,7 +31,8 @@ The examples are local and self-contained; reference links are optional reading 
 - **Call a JSON endpoint:** [Optional JavaScript](frontend-cheatsheet.md#optional-javascript-and-json).
 - **Open the database and practise SQL:** [SQL shell](sql-cheatsheet.md#open-a-local-sql-shell).
 - **Find SQL syntax:** [CRUD](sql-cheatsheet.md#read-create-update-delete), [joins](sql-cheatsheet.md#relationships-and-joins), [transactions](sql-cheatsheet.md#transactions).
-- **Run on the Raspberry Pi:** [Deployment guide](raspberry-pi.md).
+- **Run on the Raspberry Pi with Docker, HTTPS, and direct email:** [Docker setup commands](raspberry-pi-docker.md).
+- **Run a standalone JAR on the Raspberry Pi or prepare offline:** [Manual deployment guide](raspberry-pi.md).
 
 
 - [Aktenzeichen, Bearbeitungsverlauf und druckbare Bescheide](case-notices.md)

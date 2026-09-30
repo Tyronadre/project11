@@ -1,5 +1,9 @@
 # Offline preparation and Raspberry Pi deployment
 
+For Docker Compose with automatic HTTPS and a local Postfix server sending
+directly to recipients, use the [Docker setup guide](raspberry-pi-docker.md).
+The instructions below cover the alternative standalone JAR/systemd setup.
+
 The Pi runs one JAR containing the backend, templates, stylesheet, and embedded database engine.
 Build on your development machine; copy the JAR to the Pi. Node.js, Gradle, and a separate database server are not needed on the Pi to run it.
 

@@ -47,6 +47,10 @@ daily penalties apply.
 
 ## Enable delivery
 
+For a local Postfix server on your Raspberry Pi that delivers directly without
+an external relay, use the [Docker deployment guide](raspberry-pi-docker.md).
+Its Compose configuration sets the application SMTP connection automatically.
+
 Email is disabled by default. Set these environment variables on the machine
 running the application, using your SMTP provider’s credentials, then restart:
 

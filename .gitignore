@@ -4,6 +4,9 @@ data/
 *.mv.db
 *.trace.db
 .env
+.gradle-deployment/
+/project11-deploy.tar.gz
+backups/
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/

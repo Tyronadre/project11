@@ -6,6 +6,10 @@ There is no Node.js build, separate frontend server, CDN, or external database t
 
 ## Run locally
 
+For a Raspberry Pi deployment with Docker, automatic HTTPS, and a local SMTP
+server that sends directly (no external relay), follow the
+[Docker and direct email setup commands](doc/raspberry-pi-docker.md).
+
 Use **JDK 25** (the version already selected in this project) and the included Gradle wrapper.
 
 Windows PowerShell, from the project directory:
@@ -55,7 +59,7 @@ Start at `/signin`, or create an account at `/register`. Registration success li
 Email verification, password reset, and user management are future work.
 Every signed-in member can create events from **New event** in the calendar or by selecting a day. The simple `/events/new` form needs only a name and date; description, Berlin start time, and end time are optional. Events without either time are all-day; an earlier end time means the next day. Holidays are submitted through the AaB in the applications portal. The calendar already reads persisted `Activity` and `Holiday` records; it shows an empty state until records exist and does not add sample data to your database.
 AaA filing requires an existing activity within its submission deadline. The form can be viewed without activities, but cannot be submitted until one is available. AaB filing creates an inclusive holiday period; an EeR with at least three photos is due by the end of the seventh day after that period ends (Berlin). Admins decide AaBs and reports at `/admin/travel`. An accepted holiday without a timely confirmed report becomes invalid after the deadline and adds one mark per vacation day; covered events add no further marks. Timely reports awaiting review hold the daily marks. See [the application portal guide](doc/application-portal.md) for the workflow and implemented rules.
-For public deployment, add HTTPS and registration abuse controls; see the [Pi guide](doc/raspberry-pi.md).
+For public deployment, use the [Docker Pi guide](doc/raspberry-pi-docker.md) for HTTPS and email. Registration remains open; the deployment does not add registration abuse controls.
 
 ## Test and package
 

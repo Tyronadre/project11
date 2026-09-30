@@ -1,0 +1,15 @@
+# First run only. Start explicitly with "up -d --build app" so Caddy stays off.
+# Reach this loopback port using an SSH tunnel, create the first admin, then
+# use "down" (without -v) and start the normal compose.yaml.
+services:
+  app:
+    ports:
+      - "127.0.0.1:8080:8080"
+    networks:
+      - backend
+      - outbound
+    environment:
+      SERVER_SERVLET_SESSION_COOKIE_SECURE: "false"
+      SERVER_FORWARD_HEADERS_STRATEGY: none
+      ATTENDANCE_MAIL_ENABLED: "false"
+      PASSWORD_RESET_MAIL_ENABLED: "false"

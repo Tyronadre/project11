@@ -1,0 +1,10 @@
+# Allowlist: credentials, the local database, IDE files and Git never enter the build context.
+**
+!Dockerfile
+!gradlew
+!build.gradle
+!settings.gradle
+!gradle/
+!gradle/**
+!src/
+!src/**

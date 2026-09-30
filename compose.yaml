@@ -1,0 +1,104 @@
+name: project11
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  app:
+    build: .
+    image: project11-app:local
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 60s
+    mem_limit: 1g
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    environment:
+      TZ: Europe/Berlin
+      DB_URL: jdbc:h2:file:/app/data/project11;DB_CLOSE_ON_EXIT=FALSE
+      DB_USERNAME: ${DB_USERNAME:-project11}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env before first startup}
+      PUBLIC_URL: https://${SITE_DOMAIN:?Set SITE_DOMAIN in .env}
+      SERVER_FORWARD_HEADERS_STRATEGY: framework
+      SERVER_SERVLET_SESSION_COOKIE_SECURE: "true"
+      ATTENDANCE_MAIL_ENABLED: "true"
+      PASSWORD_RESET_MAIL_ENABLED: "true"
+      MAIL_FROM: ${MAIL_FROM:?Set MAIL_FROM to your verified sender address}
+      SMTP_HOST: smtp
+      SMTP_PORT: "587"
+      # This hop stays inside the private Docker network on the Pi.
+      SMTP_AUTH: "false"
+      SMTP_STARTTLS: "false"
+      SMTP_SSL: "false"
+    volumes:
+      - app_data:/app/data
+    networks:
+      - backend
+    depends_on:
+      smtp:
+        condition: service_healthy
+    logging: *logging
+
+  smtp:
+    image: boky/postfix:v5.1.0
+    restart: unless-stopped
+    stop_grace_period: 60s
+    environment:
+      TZ: Europe/Berlin
+      ALLOWED_SENDER_DOMAINS: ${MAIL_DOMAIN:?Set MAIL_DOMAIN to the domain part of MAIL_FROM}
+      POSTFIX_myhostname: ${MAIL_HOSTNAME:?Set MAIL_HOSTNAME to the hostname in your public IP PTR record}
+      # Empty relayhost means direct delivery to each recipient domain's MX.
+      RELAYHOST: ""
+      POSTFIX_inet_protocols: ipv4
+      # Standard opportunistic STARTTLS for server-to-server delivery.
+      POSTFIX_smtp_tls_security_level: may
+      POSTFIX_smtp_tls_CAfile: /etc/ssl/certs/ca-certificates.crt
+      POSTFIX_message_size_limit: "10485760"
+      DKIM_AUTOGENERATE: "true"
+      DKIM_SELECTOR: project11
+    volumes:
+      - smtp_queue:/var/spool/postfix
+      - dkim_keys:/etc/opendkim/keys
+    networks:
+      - backend
+      - outbound
+    # Deliberately no published SMTP port: only containers can submit email.
+    logging: *logging
+
+  caddy:
+    image: caddy:2.11.4-alpine
+    restart: unless-stopped
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?Set SITE_DOMAIN in .env}
+      ACME_EMAIL: ${ACME_EMAIL:?Set ACME_EMAIL to your contact email address}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - backend
+      - outbound
+    depends_on:
+      app:
+        condition: service_healthy
+    logging: *logging
+
+networks:
+  backend:
+    internal: true
+  outbound:
+
+volumes:
+  app_data:
+  smtp_queue:
+  dkim_keys:
+  caddy_data:
+  caddy_config:
